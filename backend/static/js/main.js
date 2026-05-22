@@ -1,4 +1,4 @@
-/* Landry Net — Main JS v2 */
+/* Landry Net — Main JavaScript */
 
 const API_BASE = '/api';
 
@@ -18,8 +18,8 @@ function toggleTheme() {
 }
 
 function updateThemeIcons(theme) {
-  document.querySelectorAll('.theme-icon-light').forEach(el => el.style.display = theme === 'dark' ? 'none' : 'block');
-  document.querySelectorAll('.theme-icon-dark').forEach(el => el.style.display = theme === 'dark' ? 'block' : 'none');
+  document.querySelectorAll('.theme-icon-light').forEach(el => el.style.display = theme === 'dark' ? 'block' : 'none');
+  document.querySelectorAll('.theme-icon-dark').forEach(el => el.style.display = theme === 'light' ? 'block' : 'none');
 }
 
 /* ========= NAVBAR ========= */
@@ -27,36 +27,38 @@ function initNavbar() {
   const navbar = document.querySelector('.navbar');
   const hamburger = document.querySelector('.hamburger');
   const mobileMenu = document.querySelector('.mobile-menu');
-  const hamburgerIcon = document.getElementById('hamburgerIcon');
 
   if (navbar) {
-    const onScroll = () => navbar.classList.toggle('scrolled', window.scrollY > 10);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+    if (window.scrollY > 20) navbar.classList.add('scrolled');
   }
 
   if (hamburger && mobileMenu) {
-    hamburger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = mobileMenu.classList.toggle('open');
-      if (hamburgerIcon) {
-        hamburgerIcon.className = isOpen ? 'bi bi-x-lg' : 'bi bi-list';
-        hamburgerIcon.style.fontSize = isOpen ? '1.1rem' : '1.3rem';
-      }
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+      const icon = hamburger.querySelector('.hamburger-icon');
+      if (icon) icon.textContent = mobileMenu.classList.contains('open') ? '✕' : '☰';
     });
     document.addEventListener('click', (e) => {
       if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
         mobileMenu.classList.remove('open');
-        if (hamburgerIcon) { hamburgerIcon.className = 'bi bi-list'; hamburgerIcon.style.fontSize = '1.3rem'; }
+        const icon = hamburger.querySelector('.hamburger-icon');
+        if (icon) icon.textContent = '☰';
       }
     });
   }
 
+  // Active nav links
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-links a, .mobile-menu a').forEach(link => {
     const href = link.getAttribute('href');
-    if (href === '/' && currentPath === '/') link.classList.add('active');
-    else if (href !== '/' && currentPath.startsWith(href)) link.classList.add('active');
+    if (href === '/' && currentPath === '/') {
+      link.classList.add('active');
+    } else if (href !== '/' && currentPath.startsWith(href)) {
+      link.classList.add('active');
+    }
   });
 }
 
@@ -64,7 +66,9 @@ function initNavbar() {
 function initScrollToTop() {
   const fab = document.querySelector('.fab-scroll');
   if (!fab) return;
-  window.addEventListener('scroll', () => fab.classList.toggle('visible', window.scrollY > 400), { passive: true });
+  window.addEventListener('scroll', () => {
+    fab.classList.toggle('visible', window.scrollY > 400);
+  });
   fab.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
 
@@ -73,7 +77,10 @@ let searchDebounce = null;
 
 function openSearch() {
   const overlay = document.getElementById('searchOverlay');
-  if (overlay) { overlay.classList.add('open'); setTimeout(() => overlay.querySelector('input')?.focus(), 80); }
+  if (overlay) {
+    overlay.classList.add('open');
+    setTimeout(() => overlay.querySelector('input')?.focus(), 100);
+  }
 }
 
 function closeSearch() {
@@ -106,23 +113,24 @@ function initSearch() {
         const res = await fetch(`${API_BASE}/search/?q=${encodeURIComponent(q)}`);
         const data = await res.json();
         renderSearchResults(data.results || [], results);
-      } catch { results.innerHTML = '<div class="search-empty">Une erreur est survenue.</div>'; }
-    }, 280);
+      } catch {
+        results.innerHTML = '<div class="search-empty">Une erreur est survenue.</div>';
+      }
+    }, 300);
   });
 }
 
 function renderSearchResults(results, container) {
-  const typeMap = {
-    article: { icon: 'bi-journal-text', path: '/articles' },
-    project: { icon: 'bi-code-square', path: '/projets' },
-    tip: { icon: 'bi-lightbulb-fill', path: '/astuces' }
-  };
+  const typeMap = { article: { icon: '📝', path: '/articles' }, project: { icon: '🛠️', path: '/projets' }, tip: { icon: '💡', path: '/astuces' } };
   const typeLabel = { article: 'Article', project: 'Projet', tip: 'Astuce' };
-  if (results.length === 0) { container.innerHTML = '<div class="search-empty">Aucun résultat trouvé.</div>'; return; }
+  if (results.length === 0) {
+    container.innerHTML = '<div class="search-empty">Aucun résultat trouvé.</div>';
+    return;
+  }
   container.innerHTML = results.map(r => {
-    const info = typeMap[r.type] || { icon: 'bi-file-text', path: '/' };
+    const info = typeMap[r.type] || { icon: '📄', path: '/' };
     return `<a href="${info.path}/${r.slug}/" class="search-result-item" onclick="closeSearch()">
-      <div class="search-result-icon"><i class="bi ${info.icon}"></i></div>
+      <div class="search-result-icon">${info.icon}</div>
       <div>
         <div class="search-result-title">${escapeHtml(r.title)}</div>
         <div class="search-result-type">${typeLabel[r.type] || r.type}</div>
@@ -135,7 +143,9 @@ function renderSearchResults(results, container) {
 function initReactions() {
   const container = document.getElementById('reactionsContainer');
   if (!container) return;
-  loadReactions(container.dataset.contentType, container.dataset.objectId, container);
+  const contentType = container.dataset.contentType;
+  const objectId = container.dataset.objectId;
+  loadReactions(contentType, objectId, container);
 }
 
 async function loadReactions(contentType, objectId, container) {
@@ -147,23 +157,27 @@ async function loadReactions(contentType, objectId, container) {
 }
 
 function renderReactions(data, contentType, objectId, container) {
-  const reactions = [
-    { type: 'like', icon: 'bi-hand-thumbs-up-fill', label: "J'aime" },
-    { type: 'love', icon: 'bi-heart-fill', label: "J'adore" },
-    { type: 'wow', icon: 'bi-emoji-astonished-fill', label: 'Wow' },
-    { type: 'clap', icon: 'bi-hand-clapping-fill', label: 'Bravo' },
-    { type: 'fire', icon: 'bi-fire', label: 'Feu' },
-    { type: 'bookmark', icon: 'bi-bookmark-fill', label: 'Sauvegarder' }
-  ];
+  const emojis = { like: '👍', love: '❤️', wow: '😮', clap: '👏', fire: '🔥', bookmark: '🔖' };
+  const labels = { like: 'J\'aime', love: 'J\'adore', wow: 'Wow', clap: 'Bravo', fire: 'Feu', bookmark: 'Sauvegarder' };
   const counts = {};
-  const arr = Array.isArray(data) ? data : (data.results || []);
-  arr.forEach(r => { counts[r.reaction_type] = (counts[r.reaction_type] || 0) + 1; });
-  const saved = new Set(JSON.parse(localStorage.getItem(`reactions_${contentType}_${objectId}`) || '[]'));
+  const userReacted = new Set();
+  if (Array.isArray(data)) {
+    data.forEach(r => {
+      counts[r.reaction_type] = (counts[r.reaction_type] || 0) + 1;
+    });
+  } else if (data.results) {
+    data.results.forEach(r => {
+      counts[r.reaction_type] = (counts[r.reaction_type] || 0) + 1;
+    });
+  }
+  const savedReactions = JSON.parse(localStorage.getItem(`reactions_${contentType}_${objectId}`) || '[]');
+  savedReactions.forEach(t => userReacted.add(t));
 
-  container.innerHTML = reactions.map(({ type, icon, label }) => {
+  container.innerHTML = Object.entries(emojis).map(([type, emoji]) => {
     const count = counts[type] || 0;
-    return `<button class="reaction-btn ${saved.has(type) ? 'active' : ''}" onclick="toggleReaction('${contentType}',${objectId},'${type}',this)" title="${label}">
-      <i class="bi ${icon}"></i>
+    const active = userReacted.has(type) ? 'active' : '';
+    return `<button class="reaction-btn ${active}" onclick="toggleReaction('${contentType}', ${objectId}, '${type}', this)" title="${labels[type]}">
+      <span>${emoji}</span>
       <span class="reaction-count">${count > 0 ? count : ''}</span>
     </button>`;
   }).join('');
@@ -173,16 +187,25 @@ async function toggleReaction(contentType, objectId, reactionType, btn) {
   const saved = JSON.parse(localStorage.getItem(`reactions_${contentType}_${objectId}`) || '[]');
   const hasReacted = saved.includes(reactionType);
   try {
+    const csrfToken = getCsrfToken();
     const res = await fetch(`${API_BASE}/reactions/toggle/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
       body: JSON.stringify({ content_type: contentType, object_id: objectId, reaction_type: reactionType })
     });
     if (res.ok) {
       const countEl = btn.querySelector('.reaction-count');
       let count = parseInt(countEl.textContent) || 0;
-      if (hasReacted) { btn.classList.remove('active'); saved.splice(saved.indexOf(reactionType), 1); count = Math.max(0, count - 1); }
-      else { btn.classList.add('active'); saved.push(reactionType); count += 1; }
+      if (hasReacted) {
+        btn.classList.remove('active');
+        const idx = saved.indexOf(reactionType);
+        saved.splice(idx, 1);
+        count = Math.max(0, count - 1);
+      } else {
+        btn.classList.add('active');
+        saved.push(reactionType);
+        count += 1;
+      }
       countEl.textContent = count > 0 ? count : '';
       localStorage.setItem(`reactions_${contentType}_${objectId}`, JSON.stringify(saved));
     }
@@ -192,43 +215,59 @@ async function toggleReaction(contentType, objectId, reactionType, btn) {
 /* ========= COMMENTS ========= */
 function initComments() {
   const form = document.getElementById('commentForm');
-  if (form) form.addEventListener('submit', submitComment);
+  if (!form) return;
+  form.addEventListener('submit', submitComment);
 }
 
 async function submitComment(e) {
   e.preventDefault();
   const form = e.target;
   const btn = form.querySelector('button[type="submit"]');
+  const contentType = form.dataset.contentType;
+  const objectId = form.dataset.objectId;
+  const parentId = form.querySelector('[name="parent"]')?.value || null;
   const data = {
-    content_type: form.dataset.contentType,
-    object_id: parseInt(form.dataset.objectId),
+    content_type: contentType,
+    object_id: parseInt(objectId),
     author_name: form.querySelector('[name="author_name"]').value,
     author_email: form.querySelector('[name="author_email"]').value,
     author_website: form.querySelector('[name="author_website"]')?.value || '',
     content: form.querySelector('[name="content"]').value,
   };
-  const parentId = form.querySelector('[name="parent"]')?.value;
   if (parentId) data.parent = parseInt(parentId);
-  btn.disabled = true; btn.textContent = 'Envoi…';
+
+  btn.disabled = true;
+  btn.textContent = 'Envoi…';
   try {
     const res = await fetch(`${API_BASE}/comments/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
       body: JSON.stringify(data)
     });
-    if (res.ok || res.status === 201) { form.reset(); showToast('Commentaire envoyé ! Visible après modération.', 'success'); cancelReply(); }
-    else throw new Error('Error');
-  } catch { showToast("Erreur lors de l'envoi. Réessayez.", 'error'); }
-  finally { btn.disabled = false; btn.textContent = 'Publier le commentaire'; }
+    if (res.ok || res.status === 201) {
+      form.reset();
+      showToast('Commentaire envoyé ! Il sera visible après modération.', 'success');
+    } else {
+      throw new Error('Server error');
+    }
+  } catch {
+    showToast('Erreur lors de l\'envoi. Réessayez.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Publier le commentaire';
+  }
 }
 
 function setReplyTo(parentId, parentName) {
   const form = document.getElementById('commentForm');
   if (!form) return;
-  const pi = form.querySelector('[name="parent"]');
-  if (pi) pi.value = parentId;
-  const ind = document.getElementById('replyIndicator');
-  if (ind) { ind.textContent = `Réponse à ${parentName}`; ind.style.display = 'inline-flex'; }
+  const parentInput = form.querySelector('[name="parent"]');
+  if (parentInput) parentInput.value = parentId;
+  const indicator = document.getElementById('replyIndicator');
+  if (indicator) {
+    indicator.textContent = `Réponse à ${parentName}`;
+    indicator.style.display = 'inline-flex';
+  }
   form.querySelector('[name="content"]').focus();
   form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -236,8 +275,8 @@ function setReplyTo(parentId, parentName) {
 function cancelReply() {
   const form = document.getElementById('commentForm');
   if (form) { const p = form.querySelector('[name="parent"]'); if (p) p.value = ''; }
-  const ind = document.getElementById('replyIndicator');
-  if (ind) ind.style.display = 'none';
+  const indicator = document.getElementById('replyIndicator');
+  if (indicator) indicator.style.display = 'none';
 }
 
 /* ========= NEWSLETTER ========= */
@@ -248,17 +287,23 @@ function initNewsletter() {
     e.preventDefault();
     const email = form.querySelector('[name="email"]').value;
     const btn = form.querySelector('button[type="submit"]');
-    btn.disabled = true; btn.textContent = 'Inscription…';
+    btn.disabled = true;
+    btn.textContent = 'Inscription…';
     try {
       const res = await fetch(`${API_BASE}/newsletter/subscribe/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
         body: JSON.stringify({ email })
       });
-      if (res.ok) { showToast('Inscription réussie ! Merci de votre abonnement.', 'success'); form.reset(); }
-      else { const d = await res.json(); showToast(d.message || 'Erreur. Réessayez.', 'error'); }
+      if (res.ok) {
+        showToast('🎉 Inscription réussie ! Merci de votre abonnement.', 'success');
+        form.reset();
+      } else {
+        const d = await res.json();
+        showToast(d.message || 'Erreur. Réessayez.', 'error');
+      }
     } catch { showToast('Erreur réseau. Réessayez.', 'error'); }
-    finally { btn.disabled = false; btn.textContent = "S'abonner"; }
+    finally { btn.disabled = false; btn.textContent = 'S\'abonner'; }
   });
 }
 
@@ -269,7 +314,9 @@ function initContact() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
-    btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Envoi…';
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Envoi en cours…';
     const data = {
       name: form.querySelector('[name="name"]').value,
       email: form.querySelector('[name="email"]').value,
@@ -284,15 +331,17 @@ function initContact() {
       });
       if (res.ok) {
         form.style.display = 'none';
-        const s = document.getElementById('contactSuccess');
-        if (s) s.style.display = 'block';
-      } else { const d = await res.json(); showToast(d.message || 'Erreur. Réessayez.', 'error'); }
+        document.getElementById('contactSuccess').style.display = 'block';
+      } else {
+        const d = await res.json();
+        showToast(d.message || 'Erreur. Réessayez.', 'error');
+      }
     } catch { showToast('Erreur réseau. Réessayez.', 'error'); }
-    finally { btn.disabled = false; btn.textContent = orig; }
+    finally { btn.disabled = false; btn.textContent = originalText; }
   });
 }
 
-/* ========= LIST FILTER ========= */
+/* ========= FILTER / SEARCH (list pages) ========= */
 function initListFilter() {
   const searchInput = document.getElementById('listSearch');
   const form = document.getElementById('filterForm');
@@ -311,41 +360,25 @@ function initSkillBars() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.style.width = entry.target.dataset.level + '%';
-        observer.unobserve(entry.target);
+        const el = entry.target;
+        el.style.width = el.dataset.level + '%';
+        observer.unobserve(el);
       }
     });
   }, { threshold: 0.2 });
-  fills.forEach(el => { el.style.width = '0%'; observer.observe(el); });
+  fills.forEach(el => {
+    el.style.width = '0%';
+    observer.observe(el);
+  });
 }
 
 /* ========= SHARE ========= */
 function shareContent(title, url) {
-  if (navigator.share) navigator.share({ title, url });
-  else navigator.clipboard.writeText(url).then(() => showToast('Lien copié !', 'success'));
-}
-
-/* ========= STATS COUNTER ========= */
-function initCounters() {
-  const counters = document.querySelectorAll('.stat-number[data-count]');
-  if (!counters.length) return;
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const el = entry.target;
-      const target = parseInt(el.dataset.count);
-      if (target === 0) return;
-      let current = 0;
-      const step = Math.max(1, Math.ceil(target / 35));
-      const timer = setInterval(() => {
-        current = Math.min(current + step, target);
-        el.textContent = current;
-        if (current >= target) clearInterval(timer);
-      }, 35);
-      observer.unobserve(el);
-    });
-  }, { threshold: 0.5 });
-  counters.forEach(el => observer.observe(el));
+  if (navigator.share) {
+    navigator.share({ title, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => showToast('Lien copié !', 'success'));
+  }
 }
 
 /* ========= UTILS ========= */
@@ -358,17 +391,44 @@ function getCsrfToken() {
 
 function showToast(message, type = '') {
   let toast = document.getElementById('toast');
-  if (!toast) { toast = document.createElement('div'); toast.id = 'toast'; toast.className = 'toast'; document.body.appendChild(toast); }
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
   toast.textContent = message;
-  toast.className = `toast ${type} show`;
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => toast.classList.remove('show'), 3800);
+  toast.className = `toast ${type}`;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.appendChild(document.createTextNode(text));
   return div.innerHTML;
+}
+
+/* ========= STATS COUNTER ANIMATION ========= */
+function initCounters() {
+  const counters = document.querySelectorAll('.stat-number[data-count]');
+  if (!counters.length) return;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.count);
+      let current = 0;
+      const step = Math.ceil(target / 30);
+      const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        el.textContent = current;
+        if (current >= target) clearInterval(timer);
+      }, 40);
+      observer.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(el => observer.observe(el));
 }
 
 /* ========= INIT ========= */

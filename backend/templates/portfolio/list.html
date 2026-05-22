@@ -12,9 +12,7 @@
 <div style="max-width:1280px;margin:0 auto;padding:2.5rem 1.5rem;">
   <form method="get" id="filterForm" class="filter-bar">
     <div class="filter-chips">
-      <a href="/portfolio/" class="chip {% if not selected_cat %}active{% endif %}">
-        <i class="bi bi-grid-fill" style="font-size:0.75rem;"></i> Toutes
-      </a>
+      <a href="/portfolio/" class="chip {% if not selected_cat %}active{% endif %}">Toutes les catégories</a>
       {% for cat in categories %}
       <a href="?categorie={{ cat.slug }}" class="chip {% if selected_cat == cat.slug %}active{% endif %}">{{ cat.name }}</a>
       {% endfor %}
@@ -22,40 +20,38 @@
     {% if selected_cat %}<input type="hidden" name="categorie" value="{{ selected_cat }}">{% endif %}
   </form>
 
-  <p class="results-count">
-    <i class="bi bi-palette" style="margin-right:5px;"></i>
-    {{ total }} réalisation{{ total|pluralize:"s" }}
-  </p>
+  <p class="results-count">{{ total }} réalisation{{ total|pluralize:"s" }}</p>
 
   {% if page_obj.object_list %}
   <div class="cards-grid">
     {% for item in page_obj.object_list %}
-    <a href="/portfolio/{{ item.slug }}/" class="card portfolio-card">
-      <div class="card-cover">
+    <a href="/portfolio/{{ item.slug }}/" class="card">
+      <div class="card-cover" style="{% if item.cover_image %}{% else %}min-height:200px;{% endif %}">
         {% if item.cover_image %}
-          <img src="{{ item.cover_image.url }}" alt="{{ item.title }}" loading="lazy">
+          <img src="{{ item.cover_image.url }}" alt="{{ item.title }}" loading="lazy" style="height:220px;">
         {% else %}
-          <div class="card-cover-icon"><i class="bi bi-palette-fill"></i></div>
+          <div class="card-cover-placeholder">🎨</div>
         {% endif %}
       </div>
       <div class="card-body">
         <div class="card-meta-row">
           {% if item.category %}<span class="badge badge-primary">{{ item.category.name }}</span>{% endif %}
-          {% if item.is_featured %}<span class="badge badge-featured"><i class="bi bi-star-fill" style="font-size:0.6rem;"></i> Vedette</span>{% endif %}
+          {% if item.is_featured %}<span class="badge badge-amber">⭐ Vedette</span>{% endif %}
         </div>
         <h3 class="card-title">{{ item.title }}</h3>
-        {% if item.subtitle %}<p class="card-subtitle">{{ item.subtitle|truncatechars:75 }}</p>{% endif %}
-        <p class="card-excerpt">{{ item.description|default:""|truncatechars:120 }}</p>
+        {% if item.subtitle %}<p class="card-subtitle">{{ item.subtitle|truncatechars:80 }}</p>{% endif %}
+        <p class="card-excerpt">{{ item.description|default:""|truncatechars:130 }}</p>
         <div class="card-footer">
           {% if item.client %}
           <span class="card-footer-item">
-            <i class="bi bi-person-badge"></i>
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             {{ item.client }}
           </span>
           {% endif %}
           {% if item.url %}
-          <span class="card-footer-item" style="margin-left:auto;color:var(--primary);font-weight:600;font-size:0.78rem;">
-            Voir <i class="bi bi-box-arrow-up-right" style="font-size:0.7rem;"></i>
+          <span class="card-footer-item" style="margin-left:auto;color:var(--primary);">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Voir le projet
           </span>
           {% endif %}
         </div>
@@ -67,23 +63,27 @@
   {% if page_obj.has_other_pages %}
   <div class="pagination">
     {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}{% if selected_cat %}&categorie={{ selected_cat }}{% endif %}" class="page-btn"><i class="bi bi-chevron-left"></i></a>
+    <a href="?page={{ page_obj.previous_page_number }}{% if selected_cat %}&categorie={{ selected_cat }}{% endif %}" class="page-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
     {% endif %}
     {% for num in page_obj.paginator.page_range %}
-      {% if num == page_obj.number %}<span class="page-btn active">{{ num }}</span>
-      {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-      <a href="?page={{ num }}{% if selected_cat %}&categorie={{ selected_cat }}{% endif %}" class="page-btn">{{ num }}</a>
-      {% endif %}
+    {% if num == page_obj.number %}<span class="page-btn active">{{ num }}</span>
+    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+    <a href="?page={{ num }}{% if selected_cat %}&categorie={{ selected_cat }}{% endif %}" class="page-btn">{{ num }}</a>
+    {% endif %}
     {% endfor %}
     {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}{% if selected_cat %}&categorie={{ selected_cat }}{% endif %}" class="page-btn"><i class="bi bi-chevron-right"></i></a>
+    <a href="?page={{ page_obj.next_page_number }}{% if selected_cat %}&categorie={{ selected_cat }}{% endif %}" class="page-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
     {% endif %}
   </div>
   {% endif %}
 
   {% else %}
   <div class="empty-state">
-    <div class="empty-icon"><i class="bi bi-images"></i></div>
+    <div class="empty-icon">🎨</div>
     <h2 class="empty-title">Aucune réalisation pour le moment</h2>
     <p class="empty-desc">Le portfolio sera bientôt disponible. Revenez plus tard !</p>
     {% if selected_cat %}<a href="/portfolio/" class="btn btn-secondary">Voir tout le portfolio</a>{% endif %}

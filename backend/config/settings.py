@@ -155,8 +155,5 @@ TAGGIT_CASE_INSENSITIVE = True
 
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5000')
 
-# URL publique du site (pour le ping Google Sitemap)
-SITE_URL = os.environ.get('SITE_URL', FRONTEND_URL)
-
 # Admin customization
 ADMIN_SITE_HEADER = "Landry Net — Administration"
