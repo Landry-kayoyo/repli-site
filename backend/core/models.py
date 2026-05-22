@@ -36,6 +36,19 @@ class SiteSettings(models.Model):
     pwa_background_color = models.CharField(max_length=7, default='#ffffff')
     primary_color = models.CharField(max_length=7, default='#4F46E5')
     secondary_color = models.CharField(max_length=7, default='#7C3AED')
+    newsletter_send_on_publish = models.BooleanField(
+        default=False,
+        help_text='Envoyer automatiquement la newsletter aux abonnés à chaque nouvelle publication'
+    )
+    newsletter_intro_text = models.TextField(
+        blank=True,
+        default='Bonjour ! Voici une nouvelle publication sur le site.',
+        help_text='Texte d\'introduction des emails de newsletter'
+    )
+    newsletter_from_name = models.CharField(
+        max_length=100, blank=True, default='Landry Net',
+        help_text='Nom d\'expéditeur de la newsletter'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -109,3 +122,35 @@ class Education(models.Model):
 
     def __str__(self):
         return f"{self.degree} - {self.institution}"
+
+
+class PageView(models.Model):
+    content_type = models.CharField(max_length=50)
+    object_id = models.PositiveIntegerField()
+    object_title = models.CharField(max_length=300, blank=True)
+    object_slug = models.CharField(max_length=350, blank=True)
+    date = models.DateField(auto_now_add=True)
+    count = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        verbose_name = 'Vue de page'
+        verbose_name_plural = 'Vues de pages'
+        unique_together = ('content_type', 'object_id', 'date')
+        ordering = ['-date', '-count']
+
+    def __str__(self):
+        return f"{self.content_type} #{self.object_id} — {self.date}"
+
+    @classmethod
+    def record(cls, content_type, object_id, title='', slug=''):
+        from django.utils import timezone
+        today = timezone.now().date()
+        obj, created = cls.objects.get_or_create(
+            content_type=content_type,
+            object_id=object_id,
+            date=today,
+            defaults={'object_title': title, 'object_slug': slug, 'count': 1}
+        )
+        if not created:
+            cls.objects.filter(pk=obj.pk).update(count=models.F('count') + 1)
+        return obj

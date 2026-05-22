@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import SiteSettings, Skill, Experience, Education
+from django.db.models import Sum
+from django.utils import timezone
+from datetime import timedelta
+from .models import SiteSettings, Skill, Experience, Education, PageView
 
 
 @admin.register(SiteSettings)
@@ -18,6 +21,10 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         ('Configuration Email Gmail', {
             'fields': ('email_host', 'email_port', 'email_use_tls', 'email_host_user', 'email_host_password', 'contact_email'),
             'description': 'Pour Gmail: host=smtp.gmail.com, port=587, TLS=Oui. Utilisez un mot de passe d\'application Google.',
+        }),
+        ('Newsletter automatique', {
+            'fields': ('newsletter_send_on_publish', 'newsletter_from_name', 'newsletter_intro_text'),
+            'description': '⚡ Activez pour envoyer automatiquement un email aux abonnés à chaque nouvelle publication.',
         }),
         ('Page À propos', {
             'fields': ('about_title', 'about_content', 'about_cover')
@@ -58,3 +65,50 @@ class ExperienceAdmin(admin.ModelAdmin):
 class EducationAdmin(admin.ModelAdmin):
     list_display = ['degree', 'institution', 'start_date', 'end_date', 'is_current', 'order']
     list_editable = ['order']
+
+
+@admin.register(PageView)
+class PageViewAdmin(admin.ModelAdmin):
+    list_display = ['object_title', 'content_type', 'date', 'count', 'view_link']
+    list_filter = ['content_type', 'date']
+    search_fields = ['object_title', 'object_slug']
+    readonly_fields = ['content_type', 'object_id', 'object_title', 'object_slug', 'date', 'count']
+    ordering = ['-date', '-count']
+
+    def view_link(self, obj):
+        if obj.object_slug and obj.content_type:
+            url_map = {
+                'article': f'/articles/{obj.object_slug}',
+                'project': f'/projets/{obj.object_slug}',
+                'tip': f'/astuces/{obj.object_slug}',
+                'portfolio': f'/portfolio/{obj.object_slug}',
+            }
+            url = url_map.get(obj.content_type, '#')
+            return format_html('<a href="http://localhost:5000{}" target="_blank">Voir →</a>', url)
+        return '-'
+    view_link.short_description = 'Lien'
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        last_30 = timezone.now().date() - timedelta(days=30)
+        last_7 = timezone.now().date() - timedelta(days=7)
+
+        total_30 = PageView.objects.filter(date__gte=last_30).aggregate(t=Sum('count'))['t'] or 0
+        total_7 = PageView.objects.filter(date__gte=last_7).aggregate(t=Sum('count'))['t'] or 0
+        total_today = PageView.objects.filter(date=timezone.now().date()).aggregate(t=Sum('count'))['t'] or 0
+
+        top_pages = PageView.objects.filter(date__gte=last_30)\
+            .values('object_title', 'content_type', 'object_slug')\
+            .annotate(total=Sum('count'))\
+            .order_by('-total')[:10]
+
+        extra_context['stats_summary'] = {
+            'today': total_today,
+            'last_7': total_7,
+            'last_30': total_30,
+            'top_pages': list(top_pages),
+        }
+        return super().changelist_view(request, extra_context=extra_context)
+
+    def has_add_permission(self, request):
+        return False

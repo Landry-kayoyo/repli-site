@@ -13,14 +13,13 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
-      },
-      {
-        source: '/media/:path*',
-        destination: 'http://localhost:8000/media/:path*',
-      },
+      { source: '/api/:path*', destination: 'http://localhost:8000/api/:path*' },
+      { source: '/media/:path*', destination: 'http://localhost:8000/media/:path*' },
+      { source: '/admin', destination: 'http://localhost:8000/admin/' },
+      { source: '/admin/:path*', destination: 'http://localhost:8000/admin/:path*' },
+      { source: '/ckeditor/:path*', destination: 'http://localhost:8000/ckeditor/:path*' },
+      { source: '/rss/:path*', destination: 'http://localhost:8000/rss/:path*' },
+      { source: '/sitemap.xml', destination: 'http://localhost:8000/sitemap.xml' },
     ];
   },
 }

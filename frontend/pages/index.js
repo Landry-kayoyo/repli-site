@@ -6,24 +6,30 @@ import Newsletter from '../components/ui/Newsletter';
 import Link from 'next/link';
 import { FiArrowRight } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import { getSiteSettings, getStats, getFeaturedArticles, getProjects, getTips, getPortfolio } from '../lib/api';
+import { getSiteSettings, getStats, getFeaturedArticles, getArticles, getProjects, getTips, getPortfolio } from '../lib/api';
 
 export async function getServerSideProps() {
   try {
-    const [settingsRes, statsRes, articlesRes, projectsRes, tipsRes, portfolioRes] = await Promise.all([
+    const [settingsRes, statsRes, featuredRes, allArticlesRes, projectsRes, tipsRes, portfolioRes] = await Promise.all([
       getSiteSettings(), getStats(), getFeaturedArticles(),
-      getProjects({ page_size: 3, is_featured: true }),
-      getTips({ page_size: 3, is_featured: true }),
+      getArticles({ page_size: 3, ordering: '-published_at' }),
+      getProjects({ page_size: 3, ordering: '-published_at' }),
+      getTips({ page_size: 3, ordering: '-published_at' }),
       getPortfolio({ page_size: 3, is_featured: true }),
     ]);
+
+    const featuredArticles = (featuredRes.data.results || featuredRes.data || []);
+    const recentArticles = (allArticlesRes.data.results || allArticlesRes.data || []);
+    const displayArticles = featuredArticles.length > 0 ? featuredArticles : recentArticles;
+
     return {
       props: {
         settings: settingsRes.data,
         stats: statsRes.data,
-        featuredArticles: articlesRes.data.results || articlesRes.data || [],
-        featuredProjects: projectsRes.data.results || projectsRes.data || [],
-        featuredTips: tipsRes.data.results || tipsRes.data || [],
-        featuredPortfolio: portfolioRes.data.results || portfolioRes.data || [],
+        featuredArticles: displayArticles.slice(0, 3),
+        featuredProjects: (projectsRes.data.results || projectsRes.data || []).slice(0, 3),
+        featuredTips: (tipsRes.data.results || tipsRes.data || []).slice(0, 3),
+        featuredPortfolio: (portfolioRes.data.results || portfolioRes.data || []).slice(0, 3),
       }
     };
   } catch {

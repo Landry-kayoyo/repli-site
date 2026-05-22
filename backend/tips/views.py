@@ -36,5 +36,7 @@ class TipDetailView(generics.RetrieveAPIView):
         instance = self.get_object()
         instance.views_count += 1
         instance.save(update_fields=['views_count'])
+        from core.models import PageView
+        PageView.record('tip', instance.id, instance.title, instance.slug)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)

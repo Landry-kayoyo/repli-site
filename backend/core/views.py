@@ -57,10 +57,6 @@ class SearchView(APIView):
         if not q or len(q) < 2:
             return Response({'results': [], 'query': q})
 
-        from articles.serializers import ArticleListSerializer
-        from projects.serializers import ProjectListSerializer
-        from tips.serializers import TipListSerializer
-
         articles = Article.objects.filter(status='published', title__icontains=q)[:5]
         projects = Project.objects.filter(status='published', title__icontains=q)[:5]
         tips = Tip.objects.filter(status='published', title__icontains=q)[:5]
@@ -74,3 +70,64 @@ class SearchView(APIView):
             results.append({'type': 'tip', 'title': t.title, 'slug': t.slug, 'excerpt': t.excerpt[:100]})
 
         return Response({'results': results, 'query': q, 'total': len(results)})
+
+
+class MostViewedView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        from .models import PageView
+        from django.db.models import Sum
+        from django.utils import timezone
+        from datetime import timedelta
+
+        days = int(request.GET.get('days', 30))
+        limit = int(request.GET.get('limit', 10))
+        since = timezone.now().date() - timedelta(days=days)
+
+        top = PageView.objects.filter(date__gte=since)\
+            .values('content_type', 'object_id', 'object_title', 'object_slug')\
+            .annotate(total_views=Sum('count'))\
+            .order_by('-total_views')[:limit]
+
+        return Response({
+            'period_days': days,
+            'results': list(top),
+        })
+
+
+class SiteStatsView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        from .models import PageView
+        from django.db.models import Sum
+        from django.utils import timezone
+        from datetime import timedelta
+
+        today = timezone.now().date()
+        last_7 = today - timedelta(days=7)
+        last_30 = today - timedelta(days=30)
+
+        views_today = PageView.objects.filter(date=today).aggregate(t=Sum('count'))['t'] or 0
+        views_7 = PageView.objects.filter(date__gte=last_7).aggregate(t=Sum('count'))['t'] or 0
+        views_30 = PageView.objects.filter(date__gte=last_30).aggregate(t=Sum('count'))['t'] or 0
+
+        daily = list(
+            PageView.objects.filter(date__gte=last_30)
+            .values('date')
+            .annotate(views=Sum('count'))
+            .order_by('date')
+            .values('date', 'views')
+        )
+
+        return Response({
+            'views_today': views_today,
+            'views_last_7_days': views_7,
+            'views_last_30_days': views_30,
+            'articles_count': Article.objects.filter(status='published').count(),
+            'projects_count': Project.objects.filter(status='published').count(),
+            'tips_count': Tip.objects.filter(status='published').count(),
+            'portfolio_count': PortfolioItem.objects.count(),
+            'daily_views': daily,
+        })
