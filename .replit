@@ -17,23 +17,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Backend Django"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Start application"
-
-[[workflows.workflow]]
-name = "Backend Django"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python3 manage.py runserver 0.0.0.0:8000 --settings=config.settings --noreload"
-waitForPort = 8000
 
 [[workflows.workflow]]
 name = "Start application"
@@ -41,7 +25,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && npm run dev"
+args = "cd backend && python manage.py migrate --settings=config.settings && python manage.py collectstatic --noinput --settings=config.settings && python manage.py runserver 0.0.0.0:5000 --settings=config.settings --noreload"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
@@ -49,8 +33,4 @@ outputType = "webview"
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
-
-[[ports]]
-localPort = 8000
 externalPort = 80

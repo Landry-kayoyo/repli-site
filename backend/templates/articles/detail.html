@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block og_type %}article{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ article.title|escapejs }}",
+  "description": "{{ article.excerpt|default:""|escapejs }}",
+  {% if article.cover_image %}"image": "https://{{ request.get_host }}{{ article.cover_image.url }}",{% endif %}
+  "datePublished": "{{ article.published_at|date:"c" }}",
+  "dateModified": "{{ article.updated_at|date:"c" }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ article.author.get_full_name|default:article.author.username }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ settings.site_name|default:"Landry Net" }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- COVER -->
+{% if article.cover_image %}
+<div class="article-cover">
+  <img src="{{ article.cover_image.url }}" alt="{{ article.title }}">
+</div>
+{% endif %}
+
+<div class="article-main">
+  <!-- BACK -->
+  <a href="/articles/" class="back-link">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Retour aux articles
+  </a>
+
+  <!-- CATEGORY -->
+  {% if article.category %}
+  <span class="article-category" style="background:{{ article.category.color|default:"#4F46E5" }};">{{ article.category.name }}</span>
+  {% endif %}
+
+  <!-- TITLE -->
+  <h1 class="article-title">{{ article.title }}</h1>
+  {% if article.subtitle %}<p class="article-subtitle">{{ article.subtitle }}</p>{% endif %}
+
+  <!-- META -->
+  <div class="article-meta">
+    {% if article.author %}
+    <span class="article-author">{{ article.author.get_full_name|default:article.author.username }}</span>
+    {% endif %}
+    {% if article.published_at %}
+    <span class="article-meta-item">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      {{ article.published_at|date:"d F Y" }}
+    </span>
+    {% endif %}
+    {% if article.read_time %}
+    <span class="article-meta-item">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      {{ article.read_time }} min de lecture
+    </span>
+    {% endif %}
+    <span class="article-meta-item">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      {{ article.views_count }} vues
+    </span>
+    <button class="share-btn" onclick="shareContent('{{ article.title|escapejs }}', window.location.href)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Partager
+    </button>
+  </div>
+
+  <!-- EXCERPT -->
+  {% if article.excerpt %}
+  <p class="article-excerpt">{{ article.excerpt }}</p>
+  {% endif %}
+
+  <!-- CONTENT -->
+  <div class="prose">
+    {{ article.content|safe }}
+  </div>
+
+  <!-- TAGS -->
+  {% if tags %}
+  <div class="article-tags">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--text-muted);flex-shrink:0;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    {% for tag in tags %}
+    <a href="/articles/?tag={{ tag }}">{{ tag }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- REACTIONS -->
+  <div style="padding:2rem 0;border-top:1px solid var(--border);margin-top:2rem;">
+    <p class="reactions-title">Votre réaction :</p>
+    <div class="reactions-row" id="reactionsContainer" data-content-type="{{ content_type }}" data-object-id="{{ object_id }}">
+      <span style="color:var(--text-muted);font-size:0.875rem;">Chargement…</span>
+    </div>
+  </div>
+
+  <!-- RELATED ARTICLES -->
+  {% if related %}
+  <div class="related-section">
+    <h3 style="font-size:1.1rem;font-weight:700;margin:0 0 1rem;">Articles similaires</h3>
+    <div class="related-grid">
+      {% for rel in related %}
+      <a href="/articles/{{ rel.slug }}/" class="card" style="flex-direction:row;align-items:center;gap:1rem;padding:1rem;border-radius:14px;">
+        {% if rel.cover_image %}
+        <img src="{{ rel.cover_image.url }}" alt="{{ rel.title }}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;">
+        {% else %}
+        <div style="width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,rgba(79,70,229,0.1),rgba(124,58,237,0.1));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.5rem;">📝</div>
+        {% endif %}
+        <div>
+          <div style="font-size:0.875rem;font-weight:600;color:var(--text);line-height:1.4;">{{ rel.title|truncatechars:60 }}</div>
+          {% if rel.published_at %}<div style="font-size:0.75rem;color:var(--text-muted);margin-top:3px;">{{ rel.published_at|date:"d M Y" }}</div>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- COMMENTS -->
+  <div class="comments-section">
+    <h3 class="comments-heading">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Commentaires{% if comments %} ({{ comments|length }}){% endif %}
+    </h3>
+
+    <!-- Comments list -->
+    {% if comments %}
+    <div style="margin-bottom:2rem;">
+      {% for comment in comments %}
+      <div class="comment-item">
+        <div class="comment-avatar">{{ comment.author_name|first|upper }}</div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-author">{{ comment.author_name }}</span>
+            <span class="comment-date">{{ comment.created_at|date:"d F Y à H:i" }}</span>
+          </div>
+          <p class="comment-text">{{ comment.content }}</p>
+          <button class="comment-reply-btn" onclick="setReplyTo({{ comment.id }}, '{{ comment.author_name|escapejs }}')">
+            ↩ Répondre
+          </button>
+          {% if comment.replies.all %}
+          <div class="comment-replies">
+            {% for reply in comment.replies.all %}
+            {% if reply.is_approved %}
+            <div class="comment-item" style="margin-bottom:1rem;">
+              <div class="comment-avatar" style="width:32px;height:32px;font-size:0.75rem;">{{ reply.author_name|first|upper }}</div>
+              <div class="comment-body">
+                <div class="comment-header">
+                  <span class="comment-author">{{ reply.author_name }}</span>
+                  <span class="comment-date">{{ reply.created_at|date:"d M Y" }}</span>
+                </div>
+                <p class="comment-text">{{ reply.content }}</p>
+              </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted);margin-bottom:2rem;">Soyez le premier à commenter !</p>
+    {% endif %}
+
+    <!-- Comment form -->
+    <div class="comment-form">
+      <h4 style="margin:0 0 1.25rem;font-size:1rem;font-weight:700;">Laisser un commentaire</h4>
+      <span id="replyIndicator" style="display:none;background:rgba(79,70,229,0.1);color:var(--primary);padding:4px 12px;border-radius:100px;font-size:0.82rem;font-weight:600;margin-bottom:1rem;align-items:center;gap:8px;">
+        <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;color:var(--primary);font-size:1rem;">✕</button>
+      </span>
+      <form id="commentForm" data-content-type="{{ content_type }}" data-object-id="{{ object_id }}">
+        <input type="hidden" name="parent" value="">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">Nom *</label>
+            <input type="text" name="author_name" required placeholder="Votre nom" class="form-input">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Email *</label>
+            <input type="email" name="author_email" required placeholder="votre@email.com" class="form-input">
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Site web (optionnel)</label>
+          <input type="url" name="author_website" placeholder="https://…" class="form-input">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Commentaire *</label>
+          <textarea name="content" required placeholder="Votre commentaire…" class="form-textarea" rows="4"></textarea>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">Votre commentaire sera visible après modération.</p>
+        <button type="submit" class="btn btn-primary">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Publier le commentaire
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

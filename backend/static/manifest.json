@@ -1,0 +1,19 @@
+{
+  "name": "Landry Net",
+  "short_name": "LandryNet",
+  "description": "Site personnel de Landry — Articles, Projets, Astuces et Portfolio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%234F46E5'/><text y='140' x='28' font-size='120' fill='white' font-weight='900' font-family='sans-serif'>LN</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["blog", "education", "technology"],
+  "lang": "fr"
+}

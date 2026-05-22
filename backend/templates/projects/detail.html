@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "name": "{{ project.title|escapejs }}",
+  "description": "{{ project.description|default:""|escapejs }}",
+  {% if project.cover_image %}"image": "https://{{ request.get_host }}{{ project.cover_image.url }}",{% endif %}
+  "datePublished": "{{ project.published_at|date:"c" }}",
+  "author": {"@type": "Person", "name": "{{ settings.author_name|default:"Landry" }}"}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% if project.cover_image %}
+<div class="article-cover">
+  <img src="{{ project.cover_image.url }}" alt="{{ project.title }}">
+</div>
+{% endif %}
+
+<div class="article-main">
+  <a href="/projets/" class="back-link">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Retour aux projets
+  </a>
+
+  {% if project.category %}
+  <span class="article-category" style="background:{{ project.category.color|default:"#7C3AED" }};">{{ project.category.name }}</span>
+  {% endif %}
+
+  <h1 class="article-title">{{ project.title }}</h1>
+  {% if project.subtitle %}<p class="article-subtitle">{{ project.subtitle }}</p>{% endif %}
+
+  <div class="article-meta">
+    {% if project.published_at %}
+    <span class="article-meta-item">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      {{ project.published_at|date:"d F Y" }}
+    </span>
+    {% endif %}
+    <span class="article-meta-item">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      {{ project.views_count }} vues
+    </span>
+    <button class="share-btn" onclick="shareContent('{{ project.title|escapejs }}', window.location.href)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Partager
+    </button>
+  </div>
+
+  <!-- Technologies -->
+  {% if technologies %}
+  <div style="margin-bottom:2rem;">
+    <p style="font-size:0.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">Technologies utilisées</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      {% for tech in technologies %}
+      <span class="tech-tag">{{ tech }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Links -->
+  {% if project.github_url or project.demo_url %}
+  <div class="project-links">
+    {% if project.github_url %}
+    <a href="{{ project.github_url }}" target="_blank" rel="noopener" class="btn btn-secondary">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      Voir sur GitHub
+    </a>
+    {% endif %}
+    {% if project.demo_url %}
+    <a href="{{ project.demo_url }}" target="_blank" rel="noopener" class="btn btn-primary">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Voir la démo
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if project.description %}
+  <p class="article-excerpt">{{ project.description }}</p>
+  {% endif %}
+
+  <div class="prose">{{ project.content|safe }}</div>
+
+  {% if project.tutorial_steps %}
+  <div style="margin-top:2rem;padding:1.5rem;background:var(--bg-secondary);border-radius:16px;border:1px solid var(--border);">
+    <h3 style="margin:0 0 1rem;font-size:1.1rem;font-weight:700;">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:8px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Étapes du tutoriel
+    </h3>
+    <div class="prose">{{ project.tutorial_steps|safe }}</div>
+  </div>
+  {% endif %}
+
+  {% if tags %}
+  <div class="article-tags">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--text-muted);flex-shrink:0;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    {% for tag in tags %}<a href="/projets/?tag={{ tag }}">{{ tag }}</a>{% endfor %}
+  </div>
+  {% endif %}
+
+  <div style="padding:2rem 0;border-top:1px solid var(--border);margin-top:2rem;">
+    <p class="reactions-title">Votre réaction :</p>
+    <div class="reactions-row" id="reactionsContainer" data-content-type="{{ content_type }}" data-object-id="{{ object_id }}">
+      <span style="color:var(--text-muted);font-size:0.875rem;">Chargement…</span>
+    </div>
+  </div>
+
+  <div class="comments-section">
+    <h3 class="comments-heading">Commentaires{% if comments %} ({{ comments|length }}){% endif %}</h3>
+    {% if comments %}
+    <div style="margin-bottom:2rem;">
+      {% for comment in comments %}
+      <div class="comment-item">
+        <div class="comment-avatar">{{ comment.author_name|first|upper }}</div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-author">{{ comment.author_name }}</span>
+            <span class="comment-date">{{ comment.created_at|date:"d F Y" }}</span>
+          </div>
+          <p class="comment-text">{{ comment.content }}</p>
+          <button class="comment-reply-btn" onclick="setReplyTo({{ comment.id }}, '{{ comment.author_name|escapejs }}')">↩ Répondre</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted);margin-bottom:2rem;">Soyez le premier à commenter !</p>
+    {% endif %}
+    <div class="comment-form">
+      <h4 style="margin:0 0 1.25rem;font-size:1rem;font-weight:700;">Laisser un commentaire</h4>
+      <span id="replyIndicator" style="display:none;background:rgba(79,70,229,0.1);color:var(--primary);padding:4px 12px;border-radius:100px;font-size:0.82rem;font-weight:600;margin-bottom:1rem;">
+        <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;color:var(--primary);">✕</button>
+      </span>
+      <form id="commentForm" data-content-type="{{ content_type }}" data-object-id="{{ object_id }}">
+        <input type="hidden" name="parent" value="">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">Nom *</label>
+            <input type="text" name="author_name" required placeholder="Votre nom" class="form-input">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Email *</label>
+            <input type="email" name="author_email" required placeholder="votre@email.com" class="form-input">
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Commentaire *</label>
+          <textarea name="content" required placeholder="Votre commentaire…" class="form-textarea" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Publier le commentaire</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

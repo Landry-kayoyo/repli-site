@@ -14,15 +14,15 @@ sitemaps = {
     'static': StaticViewSitemap,
 }
 
+handler404 = 'web.views.handler404'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 
-    # JWT Auth
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # API routes
     path('api/', include('core.urls')),
     path('api/articles/', include('articles.urls')),
     path('api/portfolio/', include('portfolio.urls')),
@@ -33,9 +33,8 @@ urlpatterns = [
     path('api/comments/', include('comments.urls')),
     path('api/reactions/', include('reactions.urls')),
 
-    # Sitemap
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-
-    # RSS Feeds
     path('rss/', include('core.feeds_urls')),
+
+    path('', include('web.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

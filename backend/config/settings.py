@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'newsletter',
     'comments',
     'reactions',
+    'web',
 ]
 
 MIDDLEWARE = [

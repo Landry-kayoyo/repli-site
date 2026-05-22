@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- HERO -->
+<section class="about-hero">
+  <div class="about-hero-grid">
+    <!-- Text -->
+    <div class="fade-in">
+      <h1 style="font-size:clamp(2.2rem,4vw,3.5rem);font-weight:900;color:var(--text);margin:0 0 0.5rem;line-height:1.1;">
+        {{ settings.about_title|default:"À propos de moi" }}
+      </h1>
+      {% if settings.author_job_title %}
+      <p style="color:var(--primary);font-size:1.15rem;font-weight:600;margin:0 0 1rem;">{{ settings.author_job_title }}</p>
+      {% endif %}
+      {% if settings.author_location %}
+      <div style="display:flex;align-items:center;gap:8px;color:var(--text-muted);margin-bottom:0.75rem;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        {{ settings.author_location }}
+      </div>
+      {% endif %}
+      {% if settings.author_email %}
+      <div style="display:flex;align-items:center;gap:8px;color:var(--text-muted);margin-bottom:1.5rem;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <a href="mailto:{{ settings.author_email }}" style="color:inherit;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='inherit'">{{ settings.author_email }}</a>
+      </div>
+      {% endif %}
+      {% if settings.author_bio %}
+      <p style="color:var(--text-muted);font-size:1.05rem;line-height:1.8;margin-bottom:2rem;max-width:520px;">{{ settings.author_bio }}</p>
+      {% endif %}
+
+      <!-- Social links -->
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.5rem;">
+        {% if settings.github_url %}
+        <a href="{{ settings.github_url }}" target="_blank" rel="noopener" class="social-chip">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          GitHub
+        </a>
+        {% endif %}
+        {% if settings.linkedin_url %}
+        <a href="{{ settings.linkedin_url }}" target="_blank" rel="noopener" class="social-chip">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </a>
+        {% endif %}
+        {% if settings.twitter_url %}
+        <a href="{{ settings.twitter_url }}" target="_blank" rel="noopener" class="social-chip">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Twitter / X
+        </a>
+        {% endif %}
+        {% if settings.youtube_url %}
+        <a href="{{ settings.youtube_url }}" target="_blank" rel="noopener" class="social-chip">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          YouTube
+        </a>
+        {% endif %}
+      </div>
+
+      {% if settings.cv_file %}
+      <a href="{{ settings.cv_file.url }}" download class="btn btn-primary">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Télécharger mon CV
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- Photo -->
+    <div class="about-hero-photo fade-in fade-in-2" style="display:flex;justify-content:center;">
+      {% if settings.author_photo %}
+        <img src="{{ settings.author_photo.url }}" alt="{{ settings.author_name|default:"Landry" }}" class="about-photo">
+      {% else %}
+        <div class="about-photo-placeholder">{{ settings.author_name|default:"L"|first }}</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT CONTENT -->
+{% if settings.about_content %}
+<section style="padding:3rem 1.5rem;">
+  <div style="max-width:800px;margin:0 auto;">
+    <div class="prose">{{ settings.about_content|safe }}</div>
+  </div>
+</section>
+{% endif %}
+
+<!-- SKILLS -->
+{% if skills_by_category %}
+<section class="section section-alt">
+  <div class="section-inner">
+    <h2 class="section-title" style="text-align:center;margin-bottom:2.5rem;">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:8px;color:var(--primary);"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Compétences
+    </h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;">
+      {% for category, cat_skills in skills_by_category.items %}
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:1.5rem;box-shadow:var(--shadow);">
+        <h3 style="font-weight:700;color:var(--text);font-size:1.05rem;margin:0 0 1.5rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">{{ category }}</h3>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          {% for skill in cat_skills %}
+          <div class="skill-bar-wrap">
+            <div class="skill-bar-top">
+              <span class="skill-name">{% if skill.icon %}{{ skill.icon }} {% endif %}{{ skill.name }}</span>
+              <span class="skill-level">{{ skill.level }}%</span>
+            </div>
+            <div class="skill-track">
+              <div class="skill-fill" data-level="{{ skill.level }}" style="width:0%"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- EXPERIENCES -->
+{% if experiences %}
+<section class="section">
+  <div style="max-width:800px;margin:0 auto;padding:0 1.5rem;">
+    <h2 class="section-title" style="margin-bottom:2rem;">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:8px;color:var(--primary);"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Expériences professionnelles
+    </h2>
+    <div>
+      {% for exp in experiences %}
+      <div class="timeline-item fade-in">
+        <div class="timeline-icon" style="background:rgba(79,70,229,0.1);">💼</div>
+        <div class="timeline-body">
+          <h3 class="timeline-title">{{ exp.title }}</h3>
+          <p class="timeline-company">{{ exp.company }}{% if exp.location %} • {{ exp.location }}{% endif %}</p>
+          <p class="timeline-date">
+            {{ exp.start_date|date:"M Y" }} — {% if exp.is_current %}Présent{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}
+          </p>
+          <p class="timeline-desc">{{ exp.description }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- EDUCATION -->
+{% if educations %}
+<section class="section section-alt">
+  <div style="max-width:800px;margin:0 auto;padding:0 1.5rem;">
+    <h2 class="section-title" style="margin-bottom:2rem;">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:8px;color:#059669;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Formation
+    </h2>
+    <div>
+      {% for edu in educations %}
+      <div class="timeline-item fade-in">
+        <div class="timeline-icon" style="background:rgba(16,185,129,0.1);">🎓</div>
+        <div class="timeline-body">
+          <h3 class="timeline-title">{{ edu.degree }}</h3>
+          <p class="timeline-company" style="color:#059669;">{{ edu.institution }}{% if edu.location %} • {{ edu.location }}{% endif %}</p>
+          <p class="timeline-date">
+            {{ edu.start_date|date:"M Y" }} — {% if edu.is_current %}Présent{% else %}{{ edu.end_date|date:"M Y" }}{% endif %}
+          </p>
+          {% if edu.description %}<p class="timeline-desc">{{ edu.description }}</p>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
