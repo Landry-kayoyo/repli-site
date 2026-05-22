@@ -12,6 +12,20 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+REPLIT_DEV_DOMAIN = os.environ.get('REPLIT_DEV_DOMAIN', '')
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.replit.dev',
+    'https://*.replit.app',
+    'https://*.spock.replit.dev',
+    'https://*.kirk.replit.dev',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
+]
+if REPLIT_DEV_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{REPLIT_DEV_DOMAIN}')
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
