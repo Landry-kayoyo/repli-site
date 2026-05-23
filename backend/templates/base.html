@@ -44,7 +44,7 @@
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" title="{{ settings.site_name|default:"Landry Net" }} — Articles" href="/rss/articles/">
 
-  <!-- Fonts: preconnect first, then load -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -106,13 +106,13 @@
 
     <!-- Desktop Nav -->
     <ul class="nav-links">
-      <li><a href="/">Accueil</a></li>
-      <li><a href="/articles/">Articles</a></li>
-      <li><a href="/projets/">Projets</a></li>
-      <li><a href="/astuces/">Astuces</a></li>
-      <li><a href="/portfolio/">Portfolio</a></li>
-      <li><a href="/a-propos/">À propos</a></li>
-      <li><a href="/contact/">Contact</a></li>
+      <li><a href="/"><i class="bi bi-house-fill nav-link-icon"></i>Accueil</a></li>
+      <li><a href="/articles/"><i class="bi bi-journal-text nav-link-icon"></i>Articles</a></li>
+      <li><a href="/projets/"><i class="bi bi-code-square nav-link-icon"></i>Projets</a></li>
+      <li><a href="/astuces/"><i class="bi bi-lightbulb-fill nav-link-icon"></i>Astuces</a></li>
+      <li><a href="/portfolio/"><i class="bi bi-palette nav-link-icon"></i>Portfolio</a></li>
+      <li><a href="/a-propos/"><i class="bi bi-person-fill nav-link-icon"></i>À propos</a></li>
+      <li><a href="/contact/"><i class="bi bi-envelope-fill nav-link-icon"></i>Contact</a></li>
     </ul>
 
     <!-- Actions -->
@@ -132,13 +132,13 @@
 
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="/">Accueil</a>
-    <a href="/articles/">Articles</a>
-    <a href="/projets/">Projets</a>
-    <a href="/astuces/">Astuces</a>
-    <a href="/portfolio/">Portfolio</a>
-    <a href="/a-propos/">À propos</a>
-    <a href="/contact/">Contact</a>
+    <a href="/"><i class="bi bi-house-fill"></i>Accueil</a>
+    <a href="/articles/"><i class="bi bi-journal-text"></i>Articles</a>
+    <a href="/projets/"><i class="bi bi-code-square"></i>Projets</a>
+    <a href="/astuces/"><i class="bi bi-lightbulb-fill"></i>Astuces</a>
+    <a href="/portfolio/"><i class="bi bi-palette"></i>Portfolio</a>
+    <a href="/a-propos/"><i class="bi bi-person-fill"></i>À propos</a>
+    <a href="/contact/"><i class="bi bi-envelope-fill"></i>Contact</a>
   </div>
 </nav>
 
@@ -158,7 +158,7 @@
     <p class="newsletter-subtitle">Abonnez-vous pour recevoir les derniers articles, projets et astuces directement dans votre boîte mail.</p>
     <form class="newsletter-form" id="newsletterForm">
       <input type="email" name="email" placeholder="votre@email.com" required class="newsletter-input" autocomplete="email">
-      <button type="submit" class="newsletter-btn">S'abonner</button>
+      <button type="submit" class="newsletter-btn"><i class="bi bi-send-fill" style="margin-right:6px;"></i>S'abonner</button>
     </form>
   </div>
 </section>
@@ -185,6 +185,7 @@
         {% if settings.youtube_url %}<a href="{{ settings.youtube_url }}" target="_blank" rel="noopener" class="footer-social" title="YouTube"><i class="bi bi-youtube"></i></a>{% endif %}
         {% if settings.facebook_url %}<a href="{{ settings.facebook_url }}" target="_blank" rel="noopener" class="footer-social" title="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
         {% if settings.instagram_url %}<a href="{{ settings.instagram_url }}" target="_blank" rel="noopener" class="footer-social" title="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+        <a href="/rss/articles/" class="footer-social footer-social-rss" title="Flux RSS"><i class="bi bi-rss-fill"></i></a>
       </div>
     </div>
 
@@ -192,11 +193,11 @@
     <div>
       <h3 class="footer-heading">Navigation</h3>
       <ul class="footer-links">
-        <li><a href="/">Accueil</a></li>
-        <li><a href="/articles/">Articles</a></li>
-        <li><a href="/projets/">Projets</a></li>
-        <li><a href="/astuces/">Astuces</a></li>
-        <li><a href="/portfolio/">Portfolio</a></li>
+        <li><a href="/"><i class="bi bi-house-fill"></i>Accueil</a></li>
+        <li><a href="/articles/"><i class="bi bi-journal-text"></i>Articles</a></li>
+        <li><a href="/projets/"><i class="bi bi-code-square"></i>Projets</a></li>
+        <li><a href="/astuces/"><i class="bi bi-lightbulb-fill"></i>Astuces</a></li>
+        <li><a href="/portfolio/"><i class="bi bi-palette"></i>Portfolio</a></li>
       </ul>
     </div>
 
@@ -204,9 +205,10 @@
     <div>
       <h3 class="footer-heading">Autres</h3>
       <ul class="footer-links">
-        <li><a href="/a-propos/">À propos</a></li>
-        <li><a href="/contact/">Contact</a></li>
-        {% if settings.cv_file %}<li><a href="{{ settings.cv_file.url }}" download>Télécharger CV</a></li>{% endif %}
+        <li><a href="/a-propos/"><i class="bi bi-person-fill"></i>À propos</a></li>
+        <li><a href="/contact/"><i class="bi bi-envelope-fill"></i>Contact</a></li>
+        <li><a href="/rss/articles/"><i class="bi bi-rss-fill"></i>Flux RSS</a></li>
+        {% if settings.cv_file %}<li><a href="{{ settings.cv_file.url }}" download><i class="bi bi-download"></i>Télécharger CV</a></li>{% endif %}
       </ul>
     </div>
   </div>

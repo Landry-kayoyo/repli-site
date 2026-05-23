@@ -1,4 +1,4 @@
-/* Landry Net — Main JS v2 */
+/* Landry Net — Main JS v3 */
 
 const API_BASE = '/api';
 
@@ -131,7 +131,7 @@ function renderSearchResults(results, container) {
   }).join('');
 }
 
-/* ========= REACTIONS ========= */
+/* ========= REACTIONS — persistance par session serveur ========= */
 function initReactions() {
   const container = document.getElementById('reactionsContainer');
   if (!container) return;
@@ -140,7 +140,9 @@ function initReactions() {
 
 async function loadReactions(contentType, objectId, container) {
   try {
-    const res = await fetch(`${API_BASE}/reactions/?content_type=${contentType}&object_id=${objectId}`);
+    const res = await fetch(`${API_BASE}/reactions/?content_type=${contentType}&object_id=${objectId}`, {
+      credentials: 'same-origin'
+    });
     const data = await res.json();
     renderReactions(data, contentType, objectId, container);
   } catch (e) { console.error('Reactions error:', e); }
@@ -155,14 +157,15 @@ function renderReactions(data, contentType, objectId, container) {
     { type: 'fire', icon: 'bi-fire', label: 'Feu' },
     { type: 'bookmark', icon: 'bi-bookmark-fill', label: 'Sauvegarder' }
   ];
-  const counts = {};
-  const arr = Array.isArray(data) ? data : (data.results || []);
-  arr.forEach(r => { counts[r.reaction_type] = (counts[r.reaction_type] || 0) + 1; });
-  const saved = new Set(JSON.parse(localStorage.getItem(`reactions_${contentType}_${objectId}`) || '[]'));
 
+  // data is a dict: { "like": { count: 5, reacted: true }, ... }
   container.innerHTML = reactions.map(({ type, icon, label }) => {
-    const count = counts[type] || 0;
-    return `<button class="reaction-btn ${saved.has(type) ? 'active' : ''}" onclick="toggleReaction('${contentType}',${objectId},'${type}',this)" title="${label}">
+    const info = (data && data[type]) ? data[type] : { count: 0, reacted: false };
+    const count = info.count || 0;
+    const reacted = info.reacted || false;
+    return `<button class="reaction-btn ${reacted ? 'active' : ''}" 
+      onclick="toggleReaction('${contentType}',${objectId},'${type}',this)" 
+      title="${label}" data-type="${type}">
       <i class="bi ${icon}"></i>
       <span class="reaction-count">${count > 0 ? count : ''}</span>
     </button>`;
@@ -170,23 +173,38 @@ function renderReactions(data, contentType, objectId, container) {
 }
 
 async function toggleReaction(contentType, objectId, reactionType, btn) {
-  const saved = JSON.parse(localStorage.getItem(`reactions_${contentType}_${objectId}`) || '[]');
-  const hasReacted = saved.includes(reactionType);
+  const wasActive = btn.classList.contains('active');
+  const countEl = btn.querySelector('.reaction-count');
+  let count = parseInt(countEl.textContent) || 0;
+
+  // Optimistic update
+  if (wasActive) {
+    btn.classList.remove('active');
+    count = Math.max(0, count - 1);
+  } else {
+    btn.classList.add('active');
+    count += 1;
+  }
+  countEl.textContent = count > 0 ? count : '';
+
   try {
-    const res = await fetch(`${API_BASE}/reactions/toggle/`, {
+    const res = await fetch(`${API_BASE}/reactions/`, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
       body: JSON.stringify({ content_type: contentType, object_id: objectId, reaction_type: reactionType })
     });
-    if (res.ok) {
-      const countEl = btn.querySelector('.reaction-count');
-      let count = parseInt(countEl.textContent) || 0;
-      if (hasReacted) { btn.classList.remove('active'); saved.splice(saved.indexOf(reactionType), 1); count = Math.max(0, count - 1); }
-      else { btn.classList.add('active'); saved.push(reactionType); count += 1; }
-      countEl.textContent = count > 0 ? count : '';
-      localStorage.setItem(`reactions_${contentType}_${objectId}`, JSON.stringify(saved));
+    if (!res.ok) {
+      // Revert on error
+      if (wasActive) { btn.classList.add('active'); countEl.textContent = (count + 1) > 0 ? (count + 1) : ''; }
+      else { btn.classList.remove('active'); countEl.textContent = Math.max(0, count - 1) > 0 ? Math.max(0, count - 1) : ''; }
     }
-  } catch (e) { console.error('Reaction error:', e); }
+  } catch (e) {
+    console.error('Reaction error:', e);
+    // Revert
+    if (wasActive) { btn.classList.add('active'); } else { btn.classList.remove('active'); }
+    countEl.textContent = (wasActive ? count + 1 : Math.max(0, count - 1)) > 0 ? (wasActive ? count + 1 : Math.max(0, count - 1)) : '';
+  }
 }
 
 /* ========= COMMENTS ========= */
@@ -213,6 +231,7 @@ async function submitComment(e) {
   try {
     const res = await fetch(`${API_BASE}/comments/`, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
       body: JSON.stringify(data)
     });
@@ -252,6 +271,7 @@ function initNewsletter() {
     try {
       const res = await fetch(`${API_BASE}/newsletter/subscribe/`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
         body: JSON.stringify({ email })
       });
@@ -279,6 +299,7 @@ function initContact() {
     try {
       const res = await fetch(`${API_BASE}/contact/`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
         body: JSON.stringify(data)
       });
