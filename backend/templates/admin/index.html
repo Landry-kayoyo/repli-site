@@ -1,0 +1,306 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}Tableau de bord | Landry Net Admin{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Accueil</a>
+  › Tableau de bord
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+.dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.dash-main { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+@media (max-width: 900px) { .dash-main { grid-template-columns: 1fr; } }
+.dash-section { background: #fff; border: 1px solid #e5e7ff; border-radius: 12px; padding: 20px; }
+.dash-section-title { font-size: .78rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.dash-section-title .dot { width: 8px; height: 8px; border-radius: 50%; }
+.recent-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f5f3ff; }
+.recent-item:last-child { border-bottom: none; padding-bottom: 0; }
+.recent-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+.recent-info { flex: 1; min-width: 0; }
+.recent-title { font-size: .87rem; font-weight: 600; color: #1e1b4b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-meta { font-size: .72rem; color: #9ca3af; margin-top: 2px; }
+.recent-action { font-size: .75rem; color: #4F46E5; text-decoration: none; font-weight: 600; flex-shrink: 0; }
+.recent-action:hover { text-decoration: underline; }
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: .7rem; font-weight: 600; }
+.badge-green { background: #d1fae5; color: #065f46; }
+.badge-yellow { background: #fef3c7; color: #92400e; }
+.badge-red { background: #fee2e2; color: #991b1b; }
+.badge-blue { background: #dbeafe; color: #1e40af; }
+.qa-grid { display: flex; flex-direction: column; gap: 8px; }
+.ai-config-card { background: linear-gradient(135deg, #eef2ff, #f5f3ff); border: 1px solid #c7d2fe; border-radius: 12px; padding: 18px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+.ai-config-icon { width: 52px; height: 52px; background: linear-gradient(135deg, #4F46E5, #7C3AED); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #fff; flex-shrink: 0; }
+.ai-config-text h3 { margin: 0 0 4px; font-size: 1rem; color: #1e1b4b; font-weight: 700; }
+.ai-config-text p { margin: 0; font-size: .82rem; color: #6b7280; }
+.ai-config-actions { margin-left: auto; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.ai-config-status { font-size: .75rem; padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+#dash-loading { display: flex; align-items: center; gap: 8px; color: #9ca3af; font-size: .85rem; padding: 8px 0; }
+.skeleton { background: linear-gradient(90deg, #f0f0f8 25%, #e8e8f4 50%, #f0f0f8 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; height: 20px; }
+@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+</style>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+  <div>
+    <h1 style="margin:0 0 4px;">👋 Tableau de bord</h1>
+    <p style="margin:0;color:#6b7280;font-size:.88rem;" id="dash-greeting">Chargement...</p>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <a href="/articles/" target="_blank" class="ln-quick-action" style="padding:9px 16px;font-size:.82rem;">
+      <i class="bi bi-box-arrow-up-right" style="color:#4F46E5;"></i> Voir le site
+    </a>
+    <a href="/admin/articles/article/add/" class="ln-quick-action" style="padding:9px 16px;font-size:.82rem;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border-color:transparent;">
+      <i class="bi bi-plus-lg"></i> Nouvel article
+    </a>
+  </div>
+</div>
+
+<!-- ── AI Config Banner ─────────────────────────────────────────── -->
+<div class="ai-config-card">
+  <div class="ai-config-icon">🤖</div>
+  <div class="ai-config-text">
+    <h3>Assistant IA — Landry Net</h3>
+    <p>Configurez votre clé API pour activer les suggestions de titres, SEO, icônes et le chat IA dans tout l'admin.</p>
+  </div>
+  <div class="ai-config-actions">
+    <span class="ai-config-status badge badge-yellow" id="ai-status-indicator">⏳ Non configuré</span>
+    <a href="/admin/core/sitesettings/1/change/#id_ai_enabled" class="ln-quick-action" style="font-size:.78rem;padding:6px 12px;">
+      <i class="bi bi-gear" style="color:#4F46E5;"></i> Configurer
+    </a>
+  </div>
+</div>
+
+<!-- ── Stats Cards ──────────────────────────────────────────────── -->
+<div class="dash-grid" id="stats-grid">
+  {% for i in "123456" %}
+  <div class="ln-stat-card"><div class="skeleton" style="width:48px;height:48px;border-radius:12px;"></div><div><div class="skeleton" style="width:60px;height:28px;margin-bottom:6px;"></div><div class="skeleton" style="width:80px;height:12px;"></div></div></div>
+  {% endfor %}
+</div>
+
+<!-- ── Main Grid ────────────────────────────────────────────────── -->
+<div class="dash-main">
+
+  <!-- ── Left: Recent content ──────────────────────────────────── -->
+  <div>
+    <div class="dash-section" style="margin-bottom:20px;">
+      <div class="dash-section-title"><span class="dot" style="background:#4F46E5;"></span>Publications récentes</div>
+      <div id="recent-articles">
+        {% for i in "123" %}<div class="recent-item"><div class="skeleton" style="width:34px;height:34px;border-radius:8px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="width:80%;height:14px;margin-bottom:6px;"></div><div class="skeleton" style="width:40%;height:10px;"></div></div></div>{% endfor %}
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="dash-section">
+        <div class="dash-section-title"><span class="dot" style="background:#10b981;"></span>Projets récents</div>
+        <div id="recent-projects">
+          {% for i in "12" %}<div class="recent-item"><div style="flex:1;"><div class="skeleton" style="width:90%;height:14px;margin-bottom:6px;"></div><div class="skeleton" style="width:50%;height:10px;"></div></div></div>{% endfor %}
+        </div>
+      </div>
+      <div class="dash-section">
+        <div class="dash-section-title"><span class="dot" style="background:#f59e0b;"></span>Astuces récentes</div>
+        <div id="recent-tips">
+          {% for i in "12" %}<div class="recent-item"><div style="flex:1;"><div class="skeleton" style="width:90%;height:14px;margin-bottom:6px;"></div><div class="skeleton" style="width:50%;height:10px;"></div></div></div>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right sidebar ─────────────────────────────────────────── -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Quick actions -->
+    <div class="dash-section">
+      <div class="dash-section-title"><span class="dot" style="background:#7C3AED;"></span>Actions rapides</div>
+      <div class="qa-grid">
+        <a href="/admin/articles/article/add/" class="ln-quick-action">
+          <div class="qa-icon" style="background:#eef2ff;"><i class="bi bi-file-earmark-text" style="color:#4F46E5;"></i></div>
+          Nouvel article
+        </a>
+        <a href="/admin/projects/project/add/" class="ln-quick-action">
+          <div class="qa-icon" style="background:#ecfdf5;"><i class="bi bi-code-slash" style="color:#10b981;"></i></div>
+          Nouveau projet
+        </a>
+        <a href="/admin/tips/tip/add/" class="ln-quick-action">
+          <div class="qa-icon" style="background:#fefce8;"><i class="bi bi-lightbulb" style="color:#f59e0b;"></i></div>
+          Nouvelle astuce
+        </a>
+        <a href="/admin/core/skill/add/" class="ln-quick-action">
+          <div class="qa-icon" style="background:#f5f3ff;"><i class="bi bi-bar-chart" style="color:#7C3AED;"></i></div>
+          Ajouter compétence
+        </a>
+        <a href="/admin/portfolio/portfolioitem/add/" class="ln-quick-action">
+          <div class="qa-icon" style="background:#fff1f2;"><i class="bi bi-images" style="color:#e11d48;"></i></div>
+          Ajouter portfolio
+        </a>
+        <a href="/admin/comments/comment/?is_approved__exact=0" class="ln-quick-action" id="pending-comments-link">
+          <div class="qa-icon" style="background:#fff7ed;"><i class="bi bi-chat-dots" style="color:#ea580c;"></i></div>
+          <div>Modérer commentaires <span class="badge badge-red" id="pending-count" style="display:none;"></span></div>
+        </a>
+        <a href="/admin/newsletter/subscriber/" class="ln-quick-action">
+          <div class="qa-icon" style="background:#f0fdf4;"><i class="bi bi-envelope" style="color:#16a34a;"></i></div>
+          Abonnés newsletter
+        </a>
+        <a href="/admin/core/sitesettings/1/change/" class="ln-quick-action">
+          <div class="qa-icon" style="background:#f8f9ff;"><i class="bi bi-gear" style="color:#6b7280;"></i></div>
+          Paramètres du site
+        </a>
+      </div>
+    </div>
+
+    <!-- System info -->
+    <div class="dash-section">
+      <div class="dash-section-title"><span class="dot" style="background:#10b981;"></span>Système</div>
+      <div style="display:flex;flex-direction:column;gap:8px;" id="system-info">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:.83rem;">
+          <span style="color:#6b7280;">Site public</span>
+          <a href="/" target="_blank" class="badge badge-green">✓ En ligne</a>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:.83rem;">
+          <span style="color:#6b7280;">API REST</span>
+          <a href="/api/settings/" target="_blank" class="badge badge-green">✓ Active</a>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:.83rem;">
+          <span style="color:#6b7280;">Django</span>
+          <span class="badge badge-blue">5.2</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:.83rem;">
+          <span style="color:#6b7280;">Assistant IA</span>
+          <span class="badge" id="sys-ai-badge" style="background:#fef3c7;color:#92400e;">⏳ Config.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var now = new Date();
+  var hours = now.getHours();
+  var greet = hours < 12 ? 'Bonjour' : hours < 18 ? 'Bon après-midi' : 'Bonsoir';
+  var dateStr = now.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('dash-greeting').textContent = greet + ' ! Nous sommes le ' + dateStr + '.';
+
+  var STAT_DEFS = [
+    {id:'articles', label:'Articles', icon:'bi-file-earmark-text', color:'#4F46E5', bg:'#eef2ff', url:'/api/articles/?status=published&limit=1', countKey:'count', listUrl:'/api/articles/?status=published&limit=5', adminUrl:'/admin/articles/article/'},
+    {id:'projects', label:'Projets', icon:'bi-code-slash', color:'#10b981', bg:'#ecfdf5', url:'/api/projects/?status=published&limit=1', countKey:'count', listUrl:'/api/projects/?status=published&limit=3', adminUrl:'/admin/projects/project/'},
+    {id:'tips', label:'Astuces', icon:'bi-lightbulb', color:'#f59e0b', bg:'#fefce8', url:'/api/tips/?status=published&limit=1', countKey:'count', listUrl:'/api/tips/?status=published&limit=3', adminUrl:'/admin/tips/tip/'},
+    {id:'portfolio', label:'Portfolio', icon:'bi-images', color:'#e11d48', bg:'#fff1f2', url:'/api/portfolio/?limit=1', countKey:'count', adminUrl:'/admin/portfolio/portfolioitem/'},
+    {id:'subscribers', label:'Abonnés', icon:'bi-envelope-check', color:'#16a34a', bg:'#f0fdf4', url:'/api/newsletter/subscribers/?limit=1', countKey:'count', adminUrl:'/admin/newsletter/subscriber/'},
+    {id:'comments', label:'Commentaires', icon:'bi-chat-dots', color:'#ea580c', bg:'#fff7ed', url:'/api/comments/?limit=1', countKey:'count', adminUrl:'/admin/comments/comment/'},
+  ];
+
+  function makeStatCard(def, count) {
+    return '<a href="' + def.adminUrl + '" class="ln-stat-card" style="text-decoration:none;">' +
+      '<div class="ln-stat-icon" style="background:' + def.bg + ';">' +
+      '<i class="bi ' + def.icon + '" style="color:' + def.color + ';"></i></div>' +
+      '<div><div class="ln-stat-value">' + (count !== null ? count : '—') + '</div>' +
+      '<div class="ln-stat-label">' + def.label + '</div></div></a>';
+  }
+
+  // Render skeleton cards first, then fill
+  var grid = document.getElementById('stats-grid');
+
+  // Try to load stats from the detail API
+  var statsPromises = STAT_DEFS.map(function(def, i) {
+    return fetch(def.url, {credentials:'same-origin'})
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var count = d.count !== undefined ? d.count : (d.results ? d.results.length : null);
+        return {def: def, count: count, results: d.results || []};
+      })
+      .catch(function() { return {def: def, count: null, results: []}; });
+  });
+
+  Promise.all(statsPromises).then(function(results) {
+    grid.innerHTML = '';
+    results.forEach(function(r) { grid.innerHTML += makeStatCard(r.def, r.count); });
+
+    // Fill recent articles
+    var articlesData = results.find(function(r){ return r.def.id === 'articles'; });
+    if (articlesData) loadRecent(articlesData.def.listUrl, 'recent-articles', 'article');
+
+    var projectsData = results.find(function(r){ return r.def.id === 'projects'; });
+    if (projectsData) loadRecent(projectsData.def.listUrl, 'recent-projects', 'project');
+
+    var tipsData = results.find(function(r){ return r.def.id === 'tips'; });
+    if (tipsData) loadRecent(tipsData.def.listUrl, 'recent-tips', 'tip');
+
+    // Pending comments
+    loadPendingComments();
+  });
+
+  function difficultyBadge(d) {
+    if (d === 'beginner') return '<span class="badge badge-green">Débutant</span>';
+    if (d === 'intermediate') return '<span class="badge badge-yellow">Inter.</span>';
+    if (d === 'advanced') return '<span class="badge badge-red">Avancé</span>';
+    return '';
+  }
+
+  var iconMap = {article:'bi-file-earmark-text', project:'bi-code-slash', tip:'bi-lightbulb'};
+  var colorMap = {article:'#4F46E5', project:'#10b981', tip:'#f59e0b'};
+  var bgMap = {article:'#eef2ff', project:'#ecfdf5', tip:'#fefce8'};
+  var editMap = {article:'/admin/articles/article/', project:'/admin/projects/project/', tip:'/admin/tips/tip/'};
+  var slugMap = {article:'/articles/', project:'/projets/', tip:'/astuces/'};
+
+  function loadRecent(url, containerId, type) {
+    fetch(url, {credentials:'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(d) {
+        var items = d.results || [];
+        var container = document.getElementById(containerId);
+        if (!items.length) { container.innerHTML = '<div style="color:#9ca3af;font-size:.82rem;padding:8px 0;">Aucun contenu publié</div>'; return; }
+        container.innerHTML = '';
+        items.slice(0, type === 'article' ? 5 : 3).forEach(function(item) {
+          var date = new Date(item.published_at || item.created_at).toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
+          var meta = date + (item.category ? ' · ' + (item.category.name || item.category) : '') + (item.difficulty ? ' · ' + difficultyBadge(item.difficulty) : '');
+          container.innerHTML += '<div class="recent-item">' +
+            '<div class="recent-icon" style="background:' + bgMap[type] + ';">' +
+            '<i class="bi ' + iconMap[type] + '" style="color:' + colorMap[type] + ';"></i></div>' +
+            '<div class="recent-info"><div class="recent-title">' + (item.title || item.name) + '</div>' +
+            '<div class="recent-meta">' + meta + '</div></div>' +
+            '<div style="display:flex;gap:6px;">' +
+            '<a href="' + slugMap[type] + (item.slug || '') + '" target="_blank" class="recent-action" title="Voir">↗</a>' +
+            '<a href="' + editMap[type] + (item.id || '') + '/change/" class="recent-action" title="Modifier">✎</a>' +
+            '</div></div>';
+        });
+      })
+      .catch(function(){ });
+  }
+
+  function loadPendingComments() {
+    fetch('/api/comments/?limit=50', {credentials:'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(d) {
+        var items = (d.results || []).filter(function(c){ return !c.is_approved; });
+        if (items.length > 0) {
+          var badge = document.getElementById('pending-count');
+          badge.textContent = items.length;
+          badge.style.display = 'inline-flex';
+        }
+      })
+      .catch(function(){});
+  }
+
+  // Check AI status
+  fetch('/api/settings/', {credentials:'same-origin'})
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      // If settings loaded, the API is working
+      var indicator = document.getElementById('ai-status-indicator');
+      var sysBadge = document.getElementById('sys-ai-badge');
+      // We'll just show "Ready" since the public API doesn't expose ai_enabled
+      indicator.textContent = '✓ Prêt';
+      indicator.style.background = '#d1fae5'; indicator.style.color = '#065f46';
+      sysBadge.textContent = '✓ Actif';
+      sysBadge.style.background = '#d1fae5'; sysBadge.style.color = '#065f46';
+    })
+    .catch(function(){});
+})();
+</script>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

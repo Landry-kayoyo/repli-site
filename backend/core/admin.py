@@ -40,8 +40,21 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         ('SEO & Analytics', {
             'fields': ('meta_keywords', 'google_analytics_id')
         }),
-        ('PWA', {
+        ('📱 PWA', {
             'fields': ('pwa_theme_color', 'pwa_background_color')
+        }),
+        ('🤖 Configuration IA', {
+            'fields': ('ai_enabled', 'ai_api_key', 'ai_api_base_url', 'ai_model', 'ai_system_prompt'),
+            'description': (
+                '<div style="background:#eef2ff;border-left:4px solid #4F46E5;border-radius:6px;padding:14px;margin-bottom:10px;">'
+                '<b style="color:#4F46E5;">🤖 Guide de configuration de l\'assistant IA</b><br><br>'
+                '<b>1.</b> Cochez <em>Activer l\'assistant IA</em><br>'
+                '<b>2.</b> Clé API : votre clé ChatAnywhere ou OpenAI<br>'
+                '<b>3.</b> URL de base : <code>https://api.chatanywhere.tech/v1</code><br>'
+                '<b>4.</b> Modèle : <code>gpt-3.5-turbo</code> ou <code>gpt-4o-mini</code><br>'
+                '<b>5.</b> Sauvegardez — le bouton ✨ IA apparaît dans tout l\'admin !'
+                '</div>'
+            ),
         }),
     )
 
@@ -57,10 +70,21 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'level', 'order']
+    list_display = ['name', 'icon_preview', 'category', 'level', 'order']
     list_editable = ['order', 'level']
     list_filter = ['category']
     search_fields = ['name']
+
+    def icon_preview(self, obj):
+        if obj.icon:
+            if obj.icon.startswith('bi-'):
+                return format_html(
+                    '<i class="bi {}" style="font-size:1.3rem;color:#4F46E5;"></i> <small style="color:#6B7280;">{}</small>',
+                    obj.icon, obj.icon
+                )
+            return format_html('<span style="font-size:1.3rem;">{}</span>', obj.icon)
+        return '-'
+    icon_preview.short_description = 'Icône'
 
 
 @admin.register(Experience)

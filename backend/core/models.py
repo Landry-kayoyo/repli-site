@@ -49,6 +49,30 @@ class SiteSettings(models.Model):
         max_length=100, blank=True, default='Landry Net',
         help_text='Nom d\'expéditeur de la newsletter'
     )
+    # ── IA ──────────────────────────────────────────────────────────────
+    ai_enabled = models.BooleanField(
+        default=False, verbose_name="Activer l'assistant IA"
+    )
+    ai_api_key = models.CharField(
+        max_length=500, blank=True, verbose_name='Clé API IA',
+        help_text='Votre clé API (compatible OpenAI). Ex: sk-...'
+    )
+    ai_api_base_url = models.CharField(
+        max_length=300, blank=True,
+        default='https://api.chatanywhere.tech/v1',
+        verbose_name='URL de base API',
+        help_text='URL de base de votre API. ChatAnywhere: https://api.chatanywhere.tech/v1'
+    )
+    ai_model = models.CharField(
+        max_length=100, blank=True, default='gpt-3.5-turbo',
+        verbose_name='Modèle IA',
+        help_text='Nom du modèle. Ex: gpt-3.5-turbo, gpt-4, gpt-4o-mini'
+    )
+    ai_system_prompt = models.TextField(
+        blank=True,
+        verbose_name='Prompt système personnalisé',
+        help_text='Laissez vide pour utiliser le prompt par défaut.'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

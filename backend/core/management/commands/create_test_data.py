@@ -594,18 +594,117 @@ for article in articles:
         # ---- Newsletter test subscribers ----
         from newsletter.models import Subscriber
         test_subs = [
-            ('test1@example.com', 'Test Utilisateur 1'),
-            ('test2@example.com', 'Test Utilisateur 2'),
+            ('alice@example.com', 'Alice Dupont'),
+            ('bob@example.com', 'Bob Martin'),
+            ('claire@example.com', 'Claire Bernard'),
         ]
         created_subs = 0
         for email, name in test_subs:
-            _, created = Subscriber.objects.get_or_create(email=email, defaults={'name': name, 'status': 'active', 'confirmed': True})
+            _, created = Subscriber.objects.get_or_create(
+                email=email,
+                defaults={'name': name, 'status': 'active', 'confirmed': True}
+            )
             if created:
                 created_subs += 1
         self.stdout.write(self.style.SUCCESS(f'✅ {created_subs} abonnés test créés'))
 
-        self.stdout.write('\n' + self.style.SUCCESS('=' * 50))
-        self.stdout.write(self.style.SUCCESS('Données de test créées avec succès !'))
-        self.stdout.write(self.style.SUCCESS('Admin : http://localhost:8000/admin/'))
-        self.stdout.write(self.style.SUCCESS('Site  : http://localhost:5000/'))
-        self.stdout.write(self.style.SUCCESS('=' * 50))
+        # ---- Comments ----
+        from comments.models import Comment
+        from django.contrib.contenttypes.models import ContentType
+        from articles.models import Article
+
+        articles = list(Article.objects.filter(status='published')[:3])
+        article_ct = ContentType.objects.get_for_model(Article)
+        comments_data = [
+            ('Jean-Paul K.', 'jean@example.com', 'Excellent article ! Très bien expliqué, j\'ai pu appliquer ça directement dans mon projet.', True, False),
+            ('Marie L.', 'marie@example.com', 'Merci pour ce partage de qualité. Continuez comme ça !', True, False),
+            ('Koffi A.', 'koffi@example.com', 'Très utile. Est-ce que vous avez prévu un article sur GraphQL ?', True, False),
+            ('Sophie M.', 'sophie@example.com', 'Super contenu ! J\'attends la suite avec impatience.', False, False),
+            ('Pierre D.', 'pierre@example.com', 'Ce tutoriel m\'a sauvé la mise, merci !', True, False),
+        ]
+        created_comments = 0
+        for i, article in enumerate(articles):
+            for j, (name, email, content, approved, _) in enumerate(comments_data[:3]):
+                comment, created = Comment.objects.get_or_create(
+                    content_type=article_ct,
+                    object_id=article.pk,
+                    author_name=name,
+                    author_email=email,
+                    defaults={
+                        'content': content,
+                        'is_approved': approved,
+                        'is_author_reply': False,
+                    }
+                )
+                if created:
+                    created_comments += 1
+                    # Add author reply to first comment of first article
+                    if i == 0 and j == 0 and approved:
+                        Comment.objects.get_or_create(
+                            content_type=article_ct,
+                            object_id=article.pk,
+                            author_name='Landry',
+                            author_email='admin@landrynet.com',
+                            parent=comment,
+                            defaults={
+                                'content': 'Merci pour votre retour ! Je suis ravi que cet article vous ait été utile.',
+                                'is_approved': True,
+                                'is_author_reply': True,
+                            }
+                        )
+                        created_comments += 1
+        self.stdout.write(self.style.SUCCESS(f'✅ {created_comments} commentaires créés'))
+
+        # ---- Reactions ----
+        from reactions.models import Reaction
+        from django.contrib.contenttypes.models import ContentType
+
+        reaction_types = ['like', 'love', 'clap', 'fire', 'wow']
+        created_reactions = 0
+        session_base = 'test_session_seed_'
+        for i, article in enumerate(articles):
+            for k, rtype in enumerate(reaction_types):
+                for s in range(2 + (k % 3)):
+                    sess_key = f'{session_base}{rtype}_{i}_{s}'
+                    _, created = Reaction.objects.get_or_create(
+                        content_type=article_ct,
+                        object_id=article.pk,
+                        reaction_type=rtype,
+                        session_key=sess_key,
+                    )
+                    if created:
+                        created_reactions += 1
+        self.stdout.write(self.style.SUCCESS(f'✅ {created_reactions} réactions créées'))
+
+        # ---- Update views count ----
+        from core.models import PageView
+        for i, article in enumerate(articles):
+            PageView.objects.get_or_create(
+                content_type='article',
+                object_id=article.pk,
+                date=timezone.now().date(),
+                defaults={
+                    'object_title': article.title,
+                    'object_slug': article.slug,
+                    'count': 42 + i * 17,
+                }
+            )
+        self.stdout.write(self.style.SUCCESS('✅ Vues de pages simulées'))
+
+        # ---- AI settings (demo) ----
+        from core.models import SiteSettings
+        settings_obj = SiteSettings.objects.get(pk=1)
+        if not settings_obj.ai_api_base_url:
+            settings_obj.ai_api_base_url = 'https://api.chatanywhere.tech/v1'
+        if not settings_obj.ai_model:
+            settings_obj.ai_model = 'gpt-3.5-turbo'
+        settings_obj.save(update_fields=['ai_api_base_url', 'ai_model'])
+
+        self.stdout.write('\n' + self.style.SUCCESS('=' * 55))
+        self.stdout.write(self.style.SUCCESS('✅ Toutes les données de test créées avec succès !'))
+        self.stdout.write('')
+        self.stdout.write(self.style.SUCCESS('🌐 Site public   : http://localhost:5000/'))
+        self.stdout.write(self.style.SUCCESS('🔐 Admin Django  : http://localhost:5000/admin/'))
+        self.stdout.write(self.style.SUCCESS('   └─ Login : admin / Admin@LandryNet2024!'))
+        self.stdout.write(self.style.SUCCESS('🤖 Config IA     : Admin → Paramètres → Configuration IA'))
+        self.stdout.write(self.style.SUCCESS('=' * 55))
