@@ -7,6 +7,7 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
     favicon_url = serializers.SerializerMethodField()
     author_photo_url = serializers.SerializerMethodField()
     about_cover_url = serializers.SerializerMethodField()
+    email_configured = serializers.SerializerMethodField()
 
     class Meta:
         model = SiteSettings
@@ -35,6 +36,9 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
             request = self.context.get('request')
             return request.build_absolute_uri(obj.about_cover.url) if request else obj.about_cover.url
         return None
+
+    def get_email_configured(self, obj):
+        return bool(obj.email_host_user and obj.email_host_password)
 
 
 class SkillSerializer(serializers.ModelSerializer):
