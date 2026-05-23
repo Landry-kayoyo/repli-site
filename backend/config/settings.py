@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django_filters',
     'ckeditor',
     'ckeditor_uploader',
-    'core',
+    'core.apps.CoreConfig',
     'articles',
     'projects',
     'tips',
