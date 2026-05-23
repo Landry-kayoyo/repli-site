@@ -263,7 +263,7 @@ input:focus, textarea:focus, select:focus {
 .ln-quick-action:hover { background: #f0f4ff; border-color: #c7d2fe; transform: translateX(4px); color: #4F46E5; }
 .ln-quick-action .qa-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
 
-/* ── Responsive: hide sidebar on small screens ──── */
+/* ── Responsive ──────────────────────────────────── */
 @media (max-width: 767px) {
   #content { padding: 12px !important; }
   #content-main { width: 100% !important; }
@@ -276,11 +276,262 @@ input:focus, textarea:focus, select:focus {
   div#user-tools { font-size: .75rem; }
   .ln-stat-value { font-size: 1.5rem; }
 }
+
+/* ── Header toolbar (bell + dark) ─────────────────── */
+#ln-header-toolbar {
+  display: flex; align-items: center; gap: 6px; margin-right: 10px;
+}
+.ln-hbtn {
+  width: 34px; height: 34px; border-radius: 9px; border: none; cursor: pointer;
+  background: rgba(255,255,255,.13); color: rgba(255,255,255,.9);
+  display: flex; align-items: center; justify-content: center; font-size: .95rem;
+  transition: background .2s; position: relative; font-family: inherit;
+}
+.ln-hbtn:hover { background: rgba(255,255,255,.24); }
+.ln-bell-badge {
+  position: absolute; top: -4px; right: -4px; min-width: 17px; height: 17px;
+  background: #ef4444; border-radius: 50%; border: 2px solid #5b21b6;
+  font-size: 9px; font-weight: 700; color: #fff; line-height: 1;
+  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+}
+.ln-notif-wrap { position: relative; }
+.ln-notif-dropdown {
+  position: absolute; top: 44px; right: 0; z-index: 9999; width: 310px;
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.2), 0 4px 16px rgba(79,70,229,.1);
+  border: 1px solid #e5e7ff; overflow: hidden; display: none;
+}
+.ln-notif-dropdown.open { display: block; animation: ndropIn .2s ease; }
+@keyframes ndropIn { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:none } }
+.ln-notif-head {
+  background: linear-gradient(135deg,#4F46E5,#7C3AED);
+  padding: 13px 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.ln-notif-head h4 { color: #fff; font-size: .88rem; font-weight: 700; margin: 0; }
+.ln-notif-head span { font-size: .7rem; color: rgba(255,255,255,.75); }
+.ln-notif-list { max-height: 280px; overflow-y: auto; }
+.ln-notif-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px;
+  border-bottom: 1px solid #f0f0f8; text-decoration: none; color: inherit; transition: background .15s;
+}
+.ln-notif-item:hover { background: #f5f3ff; }
+.ln-notif-item:last-child { border-bottom: none; }
+.ln-notif-icon { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .85rem; }
+.ln-notif-title { font-size: .82rem; font-weight: 600; color: #1e1b4b; margin-bottom: 2px; }
+.ln-notif-sub { font-size: .7rem; color: #9ca3af; }
+.ln-notif-empty { padding: 22px 16px; text-align: center; color: #9ca3af; font-size: .82rem; }
+.ln-notif-footer { padding: 9px 16px; border-top: 1px solid #f0f0f8; text-align: center; }
+.ln-notif-footer a { font-size: .76rem; color: #4F46E5; text-decoration: none; font-weight: 600; }
+
+/* ── DARK MODE ────────────────────────────────────── */
+.dm body, .dm { background: #080a1a !important; color: #e2e8f0 !important; }
+.dm #content { background: #080a1a !important; }
+.dm #content-main { background: transparent !important; }
+.dm .colMS { background: transparent !important; }
+.dm .module { background: #12142e !important; border-color: #252760 !important; }
+.dm .module h2, .dm .module caption { background: linear-gradient(90deg,#3730a3,#5b21b6) !important; }
+.dm .form-row { background: transparent !important; border-color: #252760 !important; }
+.dm .aligned label { color: #a5b4fc !important; }
+.dm .help { color: #6b7eb8 !important; }
+.dm p.help { color: #6b7eb8 !important; }
+.dm input[type=text], .dm input[type=email], .dm input[type=url],
+.dm input[type=password], .dm input[type=number], .dm textarea, .dm select {
+  background: #181a40 !important; border-color: #2e3282 !important; color: #e2e8f0 !important;
+}
+.dm input:focus, .dm textarea:focus, .dm select:focus {
+  border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,.2) !important;
+}
+.dm #result_list { border-color: #252760 !important; }
+.dm #result_list tbody tr { background: #12142e !important; }
+.dm #result_list tbody tr:nth-child(even) { background: #181a40 !important; }
+.dm #result_list tbody tr:hover { background: #1e2060 !important; }
+.dm #result_list td { border-color: #252760 !important; color: #e2e8f0 !important; }
+.dm #result_list td a { color: #818cf8 !important; }
+.dm div.breadcrumbs { background: #10122c !important; border-color: #252760 !important; color: #818cf8 !important; }
+.dm div.breadcrumbs a { color: #a5b4fc !important; }
+.dm .submit-row { background: #10122c !important; border-color: #252760 !important; }
+.dm h1, .dm h2:not(.module h2):not(fieldset h2) { color: #e2e8f0 !important; }
+.dm fieldset { background: #12142e !important; border-color: #252760 !important; }
+.dm .inline-group { border-color: #252760 !important; background: #12142e !important; }
+.dm .tabular.inline-related thead th { background: #181a40 !important; color: #a5b4fc !important; }
+.dm .tabular.inline-related tbody tr.dynamic-form { background: #12142e !important; }
+.dm .stacked.inline-related { border-color: #252760 !important; background: #12142e !important; }
+.dm a { color: #818cf8 !important; }
+.dm a:hover { color: #a5b4fc !important; }
+/* Keep button colors in dark mode */
+.dm .button, .dm input[type=submit] { color: #fff !important; }
+.dm .addlink { color: #818cf8 !important; }
+/* Dashboard cards dark */
+.dm .db-card { background: #12142e !important; border-color: #252760 !important; }
+.dm .db-stat { background: #12142e !important; border-color: #252760 !important; }
+.dm .db-stat-value { color: #e2e8f0 !important; }
+.dm .db-stat-label { color: #6b7eb8 !important; }
+.dm .db-sec-title { color: #6b7eb8 !important; }
+.dm .db-qa { background: #12142e !important; border-color: #252760 !important; color: #e2e8f0 !important; }
+.dm .db-qa-label { color: #e2e8f0 !important; }
+.dm .db-qa:hover { background: #181a40 !important; border-color: #3730a3 !important; }
+.dm .db-kpi { background: linear-gradient(135deg,#181a40,#1e2060) !important; border-color: #252760 !important; }
+.dm .db-kpi-value { color: #818cf8 !important; }
+.dm .db-kpi-label { color: #6b7eb8 !important; }
+.dm .db-recent-title { color: #e2e8f0 !important; }
+.dm .db-recent-meta { color: #6b7eb8 !important; }
+.dm .db-recent-link { background: #181a40 !important; color: #a5b4fc !important; }
+.dm .db-recent-link:hover { background: #252760 !important; }
+.dm .db-top-title { color: #e2e8f0 !important; }
+.dm .db-top-title a { color: #818cf8 !important; }
+.dm .db-sys-label { color: #6b7eb8 !important; }
+.dm .db-sys-row { border-color: #1a1c50 !important; }
+.dm .db-period-tabs { background: #181a40 !important; }
+.dm .db-period-tab { color: #6b7eb8 !important; }
+.dm .db-period-tab.active { background: #252760 !important; color: #818cf8 !important; box-shadow: none !important; }
+.dm .db-ai-banner { background: linear-gradient(135deg,#16163a,#1a1b50) !important; border-color: #2e3282 !important; }
+.dm .db-ai-text h3 { color: #e2e8f0 !important; }
+.dm .db-ai-text p { color: #6b7eb8 !important; }
+.dm .db-chart-dates { color: #3d4484 !important; }
+/* Notif dropdown dark */
+.dm .ln-notif-dropdown { background: #12142e !important; border-color: #252760 !important; }
+.dm .ln-notif-item { border-color: #1e2060 !important; }
+.dm .ln-notif-item:hover { background: #181a40 !important; }
+.dm .ln-notif-title { color: #e2e8f0 !important; }
+.dm .ln-notif-footer { border-color: #1e2060 !important; background: #12142e !important; }
+/* AI panel dark */
+.dm #ln-ai-panel { background: #12142e !important; border-color: #252760 !important; }
+.dm .ai-messages { background: #080a1a !important; }
+.dm .ai-msg.ai { background: #181a40 !important; border-color: #252760 !important; color: #e2e8f0 !important; }
+.dm .ai-quick-btns { background: #12142e !important; border-color: #252760 !important; }
+.dm .ai-quick-btn { background: #181a40 !important; color: #818cf8 !important; border-color: #252760 !important; }
+.dm .ai-quick-btn:hover { background: #4F46E5 !important; color: #fff !important; }
+.dm .ai-input-row { background: #12142e !important; border-color: #252760 !important; }
+.dm .ai-input-row input { background: #181a40 !important; border-color: #2e3282 !important; color: #e2e8f0 !important; }
 </style>
 {% endblock %}
 
 {% block footer %}
 {{ block.super }}
+
+<!-- ══ DARK MODE + NOTIFICATIONS ══ -->
+<script>
+(function(){
+  /* ── Apply dark mode immediately (before paint) ── */
+  var isDark = localStorage.getItem('ln_admin_dark') === '1';
+  if (isDark) document.body.classList.add('dm');
+
+  /* ── Inject header toolbar ── */
+  function injectToolbar() {
+    var header = document.getElementById('header');
+    var userTools = document.getElementById('user-tools');
+    if (!header || !userTools || document.getElementById('ln-header-toolbar')) return;
+    var toolbar = document.createElement('div');
+    toolbar.id = 'ln-header-toolbar';
+    toolbar.innerHTML =
+      '<div class="ln-notif-wrap">' +
+        '<button class="ln-hbtn" id="ln-bell-btn" title="Notifications" onclick="lnToggleBell(event)">' +
+          '<i class="bi bi-bell-fill"></i>' +
+          '<span class="ln-bell-badge" id="ln-bell-badge" style="display:none;">0</span>' +
+        '</button>' +
+        '<div class="ln-notif-dropdown" id="ln-notif-dropdown">' +
+          '<div class="ln-notif-head">' +
+            '<h4><i class="bi bi-bell-fill" style="font-size:.8rem;margin-right:5px;"></i>Notifications</h4>' +
+            '<span id="ln-notif-count">…</span>' +
+          '</div>' +
+          '<div class="ln-notif-list" id="ln-notif-list"><div class="ln-notif-empty">Chargement…</div></div>' +
+          '<div class="ln-notif-footer"><a href="/admin/comments/comment/?is_approved__exact=0">Commentaires en attente →</a></div>' +
+        '</div>' +
+      '</div>' +
+      '<button class="ln-hbtn" id="ln-dark-toggle" title="Mode sombre / clair" onclick="lnToggleDark()">' +
+        '<i id="ln-dark-icon" class="bi bi-' + (isDark ? 'sun-fill' : 'moon-fill') + '"></i>' +
+      '</button>';
+    /* Insert between branding and user-tools */
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    userTools.parentNode.insertBefore(toolbar, userTools);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectToolbar);
+  } else {
+    injectToolbar();
+  }
+
+  /* ── Dark mode toggle ── */
+  window.lnToggleDark = function() {
+    isDark = !isDark;
+    document.body.classList.toggle('dm', isDark);
+    localStorage.setItem('ln_admin_dark', isDark ? '1' : '0');
+    var icon = document.getElementById('ln-dark-icon');
+    if (icon) icon.className = 'bi bi-' + (isDark ? 'sun-fill' : 'moon-fill');
+  };
+
+  /* ── Bell toggle ── */
+  window.lnToggleBell = function(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('ln-notif-dropdown');
+    if (!dd) return;
+    var isOpen = dd.classList.toggle('open');
+    if (isOpen) lnLoadNotif();
+  };
+
+  document.addEventListener('click', function(e) {
+    var dd = document.getElementById('ln-notif-dropdown');
+    var bell = document.getElementById('ln-bell-btn');
+    if (dd && dd.classList.contains('open') && !dd.contains(e.target) && (!bell || !bell.contains(e.target))) {
+      dd.classList.remove('open');
+    }
+  });
+
+  /* ── Load notifications ── */
+  function lnMakeItem(icon, bg, color, title, sub, href) {
+    return '<a href="' + href + '" class="ln-notif-item">' +
+      '<div class="ln-notif-icon" style="background:' + bg + ';"><i class="bi ' + icon + '" style="color:' + color + ';"></i></div>' +
+      '<div><div class="ln-notif-title">' + title + '</div><div class="ln-notif-sub">' + sub + '</div></div>' +
+      '</a>';
+  }
+
+  function lnUpdateBadge(n) {
+    var badge = document.getElementById('ln-bell-badge');
+    if (!badge) return;
+    badge.textContent = n > 9 ? '9+' : n;
+    badge.style.display = n > 0 ? 'flex' : 'none';
+    var countEl = document.getElementById('ln-notif-count');
+    if (countEl) countEl.textContent = n > 0 ? n + ' nouvelle(s)' : 'Aucune alerte';
+  }
+
+  window.lnLoadNotif = function() {
+    fetch('/api/comments/?limit=20', {credentials:'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(d) {
+        var pending = (d.results||[]).filter(function(c){ return !c.is_approved; });
+        var list = document.getElementById('ln-notif-list');
+        if (!list) return;
+        if (!pending.length) {
+          list.innerHTML = '<div class="ln-notif-empty">✅ Tout est à jour</div>';
+        } else {
+          list.innerHTML = pending.slice(0,6).map(function(c){
+            return lnMakeItem(
+              'bi-chat-dots', '#fff7ed', '#ea580c',
+              'Commentaire en attente',
+              (c.author_name||'Anonyme') + ' — ' + (c.content||'').substring(0,45) + '…',
+              '/admin/comments/comment/' + (c.id||'') + '/change/'
+            );
+          }).join('');
+        }
+        lnUpdateBadge(pending.length);
+      }).catch(function(){});
+  };
+
+  /* ── Poll every 30s ── */
+  function lnCheckBadge() {
+    fetch('/api/comments/?limit=50', {credentials:'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var n = (d.results||[]).filter(function(c){ return !c.is_approved; }).length;
+        lnUpdateBadge(n);
+      }).catch(function(){});
+  }
+  lnCheckBadge();
+  setInterval(lnCheckBadge, 30000);
+})();
+</script>
 
 <!-- ══ AI BUTTON ══ -->
 <button id="ln-ai-btn" title="Assistant IA — Landry Net">
