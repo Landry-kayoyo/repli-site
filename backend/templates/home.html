@@ -135,7 +135,7 @@
       <a href="/articles/{{ article.slug }}/" class="card">
         <div class="card-cover">
           {% if article.cover_image %}
-            <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" loading="lazy">
+            <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" loading="eager" decoding="async" onerror="this.style.display='none'">
           {% else %}
             <div class="card-cover-icon"><i class="bi bi-journal-text"></i></div>
           {% endif %}
@@ -197,7 +197,7 @@
       <a href="/projets/{{ project.slug }}/" class="card">
         <div class="card-cover">
           {% if project.cover_image %}
-            <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" loading="lazy">
+            <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" loading="eager" decoding="async" onerror="this.style.display='none'">
           {% else %}
             <div class="card-cover-icon"><i class="bi bi-code-square"></i></div>
           {% endif %}
@@ -253,7 +253,7 @@
       <a href="/astuces/{{ tip.slug }}/" class="card">
         <div class="card-cover">
           {% if tip.cover_image %}
-            <img src="{{ tip.cover_image.url }}" alt="{{ tip.title }}" loading="lazy">
+            <img src="{{ tip.cover_image.url }}" alt="{{ tip.title }}" loading="eager" decoding="async" onerror="this.style.display='none'">
           {% else %}
             <div class="card-cover-icon"><i class="bi bi-lightbulb-fill"></i></div>
           {% endif %}
