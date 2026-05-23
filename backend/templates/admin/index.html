@@ -407,6 +407,14 @@
         <span class="db-sys-label"><i class="bi bi-robot" style="color:#4F46E5;"></i>Assistant IA</span>
         <span class="badge" id="db-ai-status" style="background:#fef3c7;color:#92400e;">⏳ Config.</span>
       </div>
+      <div class="db-sys-row">
+        <span class="db-sys-label"><i class="bi bi-envelope-check" style="color:#10b981;"></i>Email Gmail</span>
+        <span class="badge badge-green" id="db-email-status">✓ Configuré</span>
+      </div>
+      <div class="db-sys-row" id="db-sitemap-row" style="display:none;">
+        <span class="db-sys-label"><i class="bi bi-diagram-3" style="color:#6366f1;"></i>Sitemap</span>
+        <a href="#" target="_blank" class="badge badge-purple" id="db-sitemap-link" style="text-decoration:none;">Voir ↗</a>
+      </div>
     </div>
   </div>
 </div><!-- end db-cols -->
@@ -493,12 +501,26 @@
     }).catch(function(){});
   }
 
-  /* ── AI status ── */
-  fetch('/api/settings/', {credentials:'same-origin'}).then(function(r){ return r.json(); }).then(function(){
+  /* ── AI status + Settings ── */
+  fetch('/api/settings/', {credentials:'same-origin'}).then(function(r){ return r.json(); }).then(function(d){
     ['ai-status-indicator','db-ai-status'].forEach(function(id){
       var el = document.getElementById(id);
       if (el) { el.textContent = '✓ Prêt'; el.className = 'badge badge-green'; }
     });
+    /* Sitemap URL */
+    var sitemapUrl = d.google_sitemap_url || '';
+    if (sitemapUrl) {
+      var row = document.getElementById('db-sitemap-row');
+      var link = document.getElementById('db-sitemap-link');
+      if (row) row.style.display = 'flex';
+      if (link) { link.href = sitemapUrl; link.title = sitemapUrl; }
+    }
+    /* Email check */
+    var emailSt = document.getElementById('db-email-status');
+    if (emailSt && !d.email_configured) {
+      emailSt.textContent = '⚠ À configurer';
+      emailSt.className = 'badge badge-yellow';
+    }
   }).catch(function(){});
 
   /* ── Analytics ── */
