@@ -9,7 +9,7 @@
   <div class="hero-inner">
     <div class="hero-grid">
       <!-- Text -->
-      <div class="fade-in">
+      <div>
         <div class="hero-eyebrow">
           <span class="dot"></span>
           Bienvenue sur {{ settings.site_name|default:"Landry Net" }}
@@ -60,19 +60,19 @@
         </div>
       </div>
       <!-- Photo -->
-      <div class="hero-photo fade-in fade-in-2">
-        <div class="hero-photo-wrap" style="position:relative;display:inline-block;animation:float 6s ease-in-out infinite;">
+      <div class="hero-photo">
+        <div class="hero-photo-wrap">
           <div class="hero-photo-glow"></div>
           <div class="hero-photo-ring">
             {% if settings.author_photo %}
-              <img src="{{ settings.author_photo.url }}" alt="{{ settings.author_name|default:"Landry" }}" class="hero-photo-img">
+              <img src="{{ settings.author_photo.url }}" alt="{{ settings.author_name|default:"Landry" }}" class="hero-photo-img" loading="eager">
             {% else %}
               <div class="hero-photo-placeholder">{{ settings.author_name|default:"L"|first }}</div>
             {% endif %}
           </div>
           <div class="hero-float-badge">
             <i class="bi bi-patch-check-fill"></i>
-            Développeur Web
+            {{ settings.author_job_title|default:"Développeur Web"|truncatechars:20 }}
           </div>
           <div class="hero-float-card">
             <div class="float-icon">
@@ -87,39 +87,31 @@
       </div>
     </div>
   </div>
-  <div class="scroll-indicator"><div class="scroll-dot"></div></div>
 </section>
 
 <!-- STATS -->
 <section class="stats-section">
   <div class="stats-grid">
-    <div class="stat-card fade-in" style="--stat-gradient: linear-gradient(90deg,#3B82F6,#06B6D4);">
+    <div class="stat-card" style="--stat-gradient: linear-gradient(90deg,#3B82F6,#06B6D4);">
       <div class="stat-icon" style="background:linear-gradient(135deg,#3B82F6,#06B6D4);">
         <i class="bi bi-journal-richtext"></i>
       </div>
-      <div class="stat-number" data-count="{{ stats.articles_count|default:0 }}">{{ stats.articles_count|default:0 }}</div>
+      <div class="stat-number">{{ stats.articles_count|default:0 }}</div>
       <div class="stat-label">Articles publiés</div>
     </div>
-    <div class="stat-card fade-in fade-in-1" style="--stat-gradient: linear-gradient(90deg,#8B5CF6,#EC4899);">
+    <div class="stat-card" style="--stat-gradient: linear-gradient(90deg,#8B5CF6,#EC4899);">
       <div class="stat-icon" style="background:linear-gradient(135deg,#8B5CF6,#EC4899);">
         <i class="bi bi-code-square"></i>
       </div>
-      <div class="stat-number" data-count="{{ stats.projects_count|default:0 }}">{{ stats.projects_count|default:0 }}</div>
+      <div class="stat-number">{{ stats.projects_count|default:0 }}</div>
       <div class="stat-label">Projets réalisés</div>
     </div>
-    <div class="stat-card fade-in fade-in-2" style="--stat-gradient: linear-gradient(90deg,#10B981,#059669);">
+    <div class="stat-card" style="--stat-gradient: linear-gradient(90deg,#10B981,#059669);">
       <div class="stat-icon" style="background:linear-gradient(135deg,#10B981,#059669);">
         <i class="bi bi-lightbulb-fill"></i>
       </div>
-      <div class="stat-number" data-count="{{ stats.tips_count|default:0 }}">{{ stats.tips_count|default:0 }}</div>
+      <div class="stat-number">{{ stats.tips_count|default:0 }}</div>
       <div class="stat-label">Astuces partagées</div>
-    </div>
-    <div class="stat-card fade-in fade-in-3" style="--stat-gradient: linear-gradient(90deg,#F59E0B,#EF4444);">
-      <div class="stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
-        <i class="bi bi-palette-fill"></i>
-      </div>
-      <div class="stat-number" data-count="{{ stats.portfolio_count|default:0 }}">{{ stats.portfolio_count|default:0 }}</div>
-      <div class="stat-label">Réalisations portfolio</div>
     </div>
   </div>
 </section>
@@ -298,48 +290,8 @@
 </section>
 {% endif %}
 
-<!-- PORTFOLIO -->
-{% if portfolio %}
-<section class="section section-alt">
-  <div class="section-inner">
-    <div class="section-header">
-      <div>
-        <h2 class="section-title">Portfolio</h2>
-        <p class="section-subtitle">Mes réalisations et travaux créatifs</p>
-      </div>
-      <a href="/portfolio/" class="section-link">
-        Voir tout
-        <i class="bi bi-arrow-right"></i>
-      </a>
-    </div>
-    <div class="cards-grid">
-      {% for item in portfolio %}
-      <a href="/portfolio/{{ item.slug }}/" class="card portfolio-card">
-        <div class="card-cover">
-          {% if item.cover_image %}
-            <img src="{{ item.cover_image.url }}" alt="{{ item.title }}" loading="lazy">
-          {% else %}
-            <div class="card-cover-icon"><i class="bi bi-palette-fill"></i></div>
-          {% endif %}
-        </div>
-        <div class="card-body">
-          <div class="card-meta-row">
-            {% if item.category %}<span class="badge badge-primary">{{ item.category.name }}</span>{% endif %}
-            {% if item.is_featured %}<span class="badge badge-featured"><i class="bi bi-star-fill" style="font-size:0.6rem;"></i> Vedette</span>{% endif %}
-          </div>
-          <h3 class="card-title">{{ item.title }}</h3>
-          {% if item.subtitle %}<p class="card-subtitle">{{ item.subtitle|truncatechars:75 }}</p>{% endif %}
-          <p class="card-excerpt">{{ item.description|default:""|truncatechars:110 }}</p>
-        </div>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
 <!-- EMPTY STATE -->
-{% if not articles and not projects and not tips and not portfolio %}
+{% if not articles and not projects and not tips %}
 <section class="section" style="text-align:center;">
   <div class="empty-state">
     <div class="empty-icon">

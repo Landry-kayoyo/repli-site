@@ -7,7 +7,7 @@
 
   <!-- SEO Primary -->
   <title>{% block title %}{% if page_title %}{{ page_title }} — {{ settings.site_name|default:"Landry Net" }}{% else %}{{ settings.site_name|default:"Landry Net" }} — {{ settings.tagline|default:"Partager, Apprendre, Innover" }}{% endif %}{% endblock %}</title>
-  <meta name="description" content="{% block description %}{{ page_description|default:settings.description|default:"Site personnel de Landry — Articles, Projets, Astuces et Portfolio" }}{% endblock %}">
+  <meta name="description" content="{% block description %}{{ page_description|default:settings.description|default:"Site personnel de Landry — Articles, Projets et Astuces" }}{% endblock %}">
   <meta name="keywords" content="{{ settings.meta_keywords|default:"développement, technologie, programmation, web, tutoriels" }}">
   <meta name="author" content="{{ settings.author_name|default:"Landry" }}">
   <meta name="robots" content="index, follow">
@@ -44,10 +44,10 @@
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" title="{{ settings.site_name|default:"Landry Net" }} — Articles" href="/rss/articles/">
 
-  <!-- Fonts -->
+  <!-- Fonts — preconnect for speed -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -97,7 +97,7 @@
     <!-- Logo -->
     <a href="/" class="nav-logo">
       {% if settings.logo %}
-        <img src="{{ settings.logo.url }}" alt="{{ settings.logo_text|default:"Landry Net" }}" style="height:36px;width:auto;border-radius:9px;">
+        <img src="{{ settings.logo.url }}" alt="{{ settings.logo_text|default:"Landry Net" }}" class="logo-img">
       {% else %}
         <div class="logo-icon">LN</div>
       {% endif %}
@@ -110,7 +110,6 @@
       <li><a href="/articles/"><i class="bi bi-journal-text nav-link-icon"></i>Articles</a></li>
       <li><a href="/projets/"><i class="bi bi-code-square nav-link-icon"></i>Projets</a></li>
       <li><a href="/astuces/"><i class="bi bi-lightbulb-fill nav-link-icon"></i>Astuces</a></li>
-      <li><a href="/portfolio/"><i class="bi bi-palette nav-link-icon"></i>Portfolio</a></li>
       <li><a href="/a-propos/"><i class="bi bi-person-fill nav-link-icon"></i>À propos</a></li>
       <li><a href="/contact/"><i class="bi bi-envelope-fill nav-link-icon"></i>Contact</a></li>
     </ul>
@@ -136,7 +135,6 @@
     <a href="/articles/"><i class="bi bi-journal-text"></i>Articles</a>
     <a href="/projets/"><i class="bi bi-code-square"></i>Projets</a>
     <a href="/astuces/"><i class="bi bi-lightbulb-fill"></i>Astuces</a>
-    <a href="/portfolio/"><i class="bi bi-palette"></i>Portfolio</a>
     <a href="/a-propos/"><i class="bi bi-person-fill"></i>À propos</a>
     <a href="/contact/"><i class="bi bi-envelope-fill"></i>Contact</a>
   </div>
@@ -171,7 +169,7 @@
     <div class="footer-brand">
       <a href="/" class="nav-logo" style="text-decoration:none;color:white;margin-bottom:0.75rem;display:inline-flex;">
         {% if settings.logo %}
-          <img src="{{ settings.logo.url }}" alt="{{ settings.logo_text|default:"Landry Net" }}" style="height:32px;width:auto;border-radius:8px;">
+          <img src="{{ settings.logo.url }}" alt="{{ settings.logo_text|default:"Landry Net" }}" style="height:42px;width:auto;border-radius:10px;">
         {% else %}
           <div class="logo-icon">LN</div>
         {% endif %}
@@ -197,7 +195,6 @@
         <li><a href="/articles/"><i class="bi bi-journal-text"></i>Articles</a></li>
         <li><a href="/projets/"><i class="bi bi-code-square"></i>Projets</a></li>
         <li><a href="/astuces/"><i class="bi bi-lightbulb-fill"></i>Astuces</a></li>
-        <li><a href="/portfolio/"><i class="bi bi-palette"></i>Portfolio</a></li>
       </ul>
     </div>
 
@@ -209,6 +206,7 @@
         <li><a href="/contact/"><i class="bi bi-envelope-fill"></i>Contact</a></li>
         <li><a href="/rss/articles/"><i class="bi bi-rss-fill"></i>Flux RSS</a></li>
         {% if settings.cv_file %}<li><a href="{{ settings.cv_file.url }}" download><i class="bi bi-download"></i>Télécharger CV</a></li>{% endif %}
+        {% if settings.google_sitemap_url %}<li><a href="{{ settings.google_sitemap_url }}" target="_blank"><i class="bi bi-diagram-3"></i>Sitemap</a></li>{% endif %}
       </ul>
     </div>
   </div>

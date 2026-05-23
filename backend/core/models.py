@@ -73,6 +73,11 @@ class SiteSettings(models.Model):
         verbose_name='Prompt système personnalisé',
         help_text='Laissez vide pour utiliser le prompt par défaut.'
     )
+    google_sitemap_url = models.URLField(
+        blank=True,
+        verbose_name='URL du Sitemap Google',
+        help_text='Lien de votre sitemap à soumettre à Google Search Console. Ex: https://votresite.com/sitemap.xml'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

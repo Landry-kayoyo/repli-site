@@ -10,7 +10,6 @@ from core.models import SiteSettings, Skill, Experience, Education
 from articles.models import Article, Category as ArticleCategory
 from projects.models import Project, ProjectCategory
 from tips.models import Tip, TipCategory
-from portfolio.models import PortfolioItem, PortfolioCategory
 from comments.models import Comment
 from django.contrib.contenttypes.models import ContentType
 
@@ -25,19 +24,16 @@ def home(request):
     articles = Article.objects.filter(status='published').select_related('category')[:3]
     projects = Project.objects.filter(status='published').select_related('category')[:3]
     tips = Tip.objects.filter(status='published').select_related('category')[:3]
-    portfolio = PortfolioItem.objects.all()[:3]
     stats = {
         'articles_count': Article.objects.filter(status='published').count(),
         'projects_count': Project.objects.filter(status='published').count(),
         'tips_count': Tip.objects.filter(status='published').count(),
-        'portfolio_count': PortfolioItem.objects.count(),
     }
     return render(request, 'home.html', {
         'settings': settings,
         'articles': articles,
         'projects': projects,
         'tips': tips,
-        'portfolio': portfolio,
         'stats': stats,
         'page_title': settings.site_name,
         'page_description': settings.description,
@@ -191,44 +187,6 @@ def tip_detail(request, slug):
         'page_title': tip.meta_title or tip.title,
         'page_description': tip.meta_description or tip.excerpt,
         'og_image': tip.cover_image.url if tip.cover_image else None,
-    })
-
-
-def portfolio_list(request):
-    settings = get_settings()
-    qs = PortfolioItem.objects.all().prefetch_related('images')
-    categories = PortfolioCategory.objects.all()
-    cat_slug = request.GET.get('categorie', '')
-    if cat_slug:
-        qs = qs.filter(category__slug=cat_slug)
-    paginator = Paginator(qs, 9)
-    page_obj = paginator.get_page(request.GET.get('page', 1))
-    return render(request, 'portfolio/list.html', {
-        'settings': settings,
-        'page_obj': page_obj,
-        'categories': categories,
-        'selected_cat': cat_slug,
-        'total': paginator.count,
-        'page_title': 'Portfolio',
-        'page_description': 'Mes réalisations et travaux.',
-    })
-
-
-def portfolio_detail(request, slug):
-    from core.models import PageView
-    settings = get_settings()
-    item = get_object_or_404(PortfolioItem, slug=slug)
-    PageView.record('portfolio', item.pk, title=item.title, slug=item.slug)
-    tags = list(item.tags.names())
-    images = item.images.all()
-    return render(request, 'portfolio/detail.html', {
-        'settings': settings,
-        'item': item,
-        'tags': tags,
-        'images': images,
-        'page_title': item.meta_title or item.title,
-        'page_description': item.meta_description or item.description,
-        'og_image': item.cover_image.url if item.cover_image else None,
     })
 
 

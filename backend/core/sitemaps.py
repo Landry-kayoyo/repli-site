@@ -1,8 +1,6 @@
 from django.contrib.sitemaps import Sitemap
-from django.urls import reverse
 from articles.models import Article
 from projects.models import Project
-from portfolio.models import PortfolioItem
 from tips.models import Tip
 
 
@@ -34,20 +32,6 @@ class ProjectSitemap(Sitemap):
         return obj.updated_at
 
 
-class PortfolioSitemap(Sitemap):
-    changefreq = 'monthly'
-    priority = 0.7
-
-    def items(self):
-        return PortfolioItem.objects.all()
-
-    def location(self, obj):
-        return f'/portfolio/{obj.slug}'
-
-    def lastmod(self, obj):
-        return obj.updated_at
-
-
 class TipSitemap(Sitemap):
     changefreq = 'weekly'
     priority = 0.8
@@ -67,7 +51,7 @@ class StaticViewSitemap(Sitemap):
     changefreq = 'monthly'
 
     def items(self):
-        return ['/', '/a-propos', '/articles', '/projets', '/portfolio', '/astuces', '/contact']
+        return ['/', '/a-propos', '/articles', '/projets', '/astuces', '/contact']
 
     def location(self, item):
         return item

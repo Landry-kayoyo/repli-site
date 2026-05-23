@@ -357,9 +357,9 @@
           <div class="db-qa-label">Nouvelle astuce</div>
           <i class="bi bi-arrow-right db-qa-arrow"></i>
         </a>
-        <a href="/admin/portfolio/portfolioitem/add/" class="db-qa">
-          <div class="db-qa-icon" style="background:#fff1f2;"><i class="bi bi-images" style="color:#e11d48;"></i></div>
-          <div class="db-qa-label">Portfolio</div>
+        <a href="/admin/core/sitesettings/1/change/" class="db-qa">
+          <div class="db-qa-icon" style="background:#fff1f2;"><i class="bi bi-sliders" style="color:#e11d48;"></i></div>
+          <div class="db-qa-label">Réglages SEO</div>
           <i class="bi bi-arrow-right db-qa-arrow"></i>
         </a>
         <a href="/admin/core/skill/add/" class="db-qa">
@@ -427,9 +427,9 @@
     {id:'articles', label:'Articles', icon:'bi-file-earmark-text', color:'#4F46E5', bg:'#eef2ff', url:'/api/articles/?status=published&limit=1', listUrl:'/api/articles/?status=published&limit=5', admin:'/admin/articles/article/'},
     {id:'projects', label:'Projets', icon:'bi-code-slash', color:'#10b981', bg:'#ecfdf5', url:'/api/projects/?status=published&limit=1', listUrl:'/api/projects/?status=published&limit=3', admin:'/admin/projects/project/'},
     {id:'tips', label:'Astuces', icon:'bi-lightbulb', color:'#f59e0b', bg:'#fefce8', url:'/api/tips/?status=published&limit=1', listUrl:'/api/tips/?status=published&limit=3', admin:'/admin/tips/tip/'},
-    {id:'portfolio', label:'Portfolio', icon:'bi-images', color:'#e11d48', bg:'#fff1f2', url:'/api/portfolio/?limit=1', admin:'/admin/portfolio/portfolioitem/'},
+    {id:'comments', label:'En attente', icon:'bi-chat-dots', color:'#ea580c', bg:'#fff7ed', url:'/api/comments/?limit=1', admin:'/admin/comments/comment/'},
     {id:'subscribers', label:'Abonnés', icon:'bi-envelope-check', color:'#16a34a', bg:'#f0fdf4', url:'/api/newsletter/subscribers/?limit=1', admin:'/admin/newsletter/subscriber/'},
-    {id:'comments', label:'Commentaires', icon:'bi-chat-dots', color:'#ea580c', bg:'#fff7ed', url:'/api/comments/?limit=1', admin:'/admin/comments/comment/'},
+    {id:'pageviews', label:'Pages vues', icon:'bi-graph-up', color:'#6366f1', bg:'#eef2ff', url:'/api/stats/', admin:'/admin/'},
   ];
 
   function makeStatCard(def, count) {

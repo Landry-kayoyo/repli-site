@@ -4,12 +4,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from core.sitemaps import ArticleSitemap, ProjectSitemap, PortfolioSitemap, TipSitemap, StaticViewSitemap
+from core.sitemaps import ArticleSitemap, ProjectSitemap, TipSitemap, StaticViewSitemap
 
 sitemaps = {
     'articles': ArticleSitemap,
     'projects': ProjectSitemap,
-    'portfolio': PortfolioSitemap,
     'tips': TipSitemap,
     'static': StaticViewSitemap,
 }
@@ -25,7 +24,6 @@ urlpatterns = [
 
     path('api/', include('core.urls')),
     path('api/articles/', include('articles.urls')),
-    path('api/portfolio/', include('portfolio.urls')),
     path('api/projects/', include('projects.urls')),
     path('api/tips/', include('tips.urls')),
     path('api/contact/', include('contact.urls')),

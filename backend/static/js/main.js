@@ -235,7 +235,7 @@ async function submitComment(e) {
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
       body: JSON.stringify(data)
     });
-    if (res.ok || res.status === 201) { form.reset(); showToast('Commentaire envoyé ! Visible après modération.', 'success'); cancelReply(); }
+    if (res.ok || res.status === 201) { form.reset(); showToast('Commentaire publié avec succès !', 'success'); cancelReply(); }
     else throw new Error('Error');
   } catch { showToast("Erreur lors de l'envoi. Réessayez.", 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Publier le commentaire'; }
@@ -328,16 +328,7 @@ function initListFilter() {
 /* ========= SKILL BARS ========= */
 function initSkillBars() {
   const fills = document.querySelectorAll('.skill-fill');
-  if (!fills.length) return;
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.width = entry.target.dataset.level + '%';
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.2 });
-  fills.forEach(el => { el.style.width = '0%'; observer.observe(el); });
+  fills.forEach(el => { el.style.width = (el.dataset.level || '0') + '%'; });
 }
 
 /* ========= SHARE ========= */
@@ -348,25 +339,9 @@ function shareContent(title, url) {
 
 /* ========= STATS COUNTER ========= */
 function initCounters() {
+  /* No scroll animations — display values immediately */
   const counters = document.querySelectorAll('.stat-number[data-count]');
-  if (!counters.length) return;
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const el = entry.target;
-      const target = parseInt(el.dataset.count);
-      if (target === 0) return;
-      let current = 0;
-      const step = Math.max(1, Math.ceil(target / 35));
-      const timer = setInterval(() => {
-        current = Math.min(current + step, target);
-        el.textContent = current;
-        if (current >= target) clearInterval(timer);
-      }, 35);
-      observer.unobserve(el);
-    });
-  }, { threshold: 0.5 });
-  counters.forEach(el => observer.observe(el));
+  counters.forEach(el => { el.textContent = el.dataset.count || '0'; });
 }
 
 /* ========= UTILS ========= */
