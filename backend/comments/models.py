@@ -10,9 +10,9 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     author_name = models.CharField(max_length=200, verbose_name='Nom')
     author_email = models.EmailField(verbose_name='Email')
-    author_website = models.URLField(blank=True)
     content = models.TextField(verbose_name='Commentaire')
     is_approved = models.BooleanField(default=False)
+    is_author_reply = models.BooleanField(default=False, verbose_name="Réponse de l'auteur")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

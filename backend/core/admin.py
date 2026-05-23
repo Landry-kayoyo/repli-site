@@ -1,13 +1,21 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.db.models import Sum
+from django.db.models import Sum, TextField
 from django.utils import timezone
 from datetime import timedelta
 from .models import SiteSettings, Skill, Experience, Education, PageView
+try:
+    from ckeditor.widgets import CKEditorWidget
+    CKEDITOR_AVAILABLE = True
+except ImportError:
+    CKEDITOR_AVAILABLE = False
 
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
+    formfield_overrides = (
+        {TextField: {'widget': CKEditorWidget()}} if CKEDITOR_AVAILABLE else {}
+    )
     fieldsets = (
         ('Identité du site', {
             'fields': ('site_name', 'tagline', 'description', 'logo', 'logo_text', 'favicon', 'primary_color', 'secondary_color')

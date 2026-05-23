@@ -76,7 +76,6 @@
             <span class="comment-date">{{ comment.created_at|date:"d F Y" }}</span>
           </div>
           <p class="comment-text">{{ comment.content }}</p>
-          <button class="comment-reply-btn" onclick="setReplyTo({{ comment.id }}, '{{ comment.author_name|escapejs }}')">↩ Répondre</button>
         </div>
       </div>
       {% endfor %}
@@ -86,11 +85,7 @@
     {% endif %}
     <div class="comment-form">
       <h4 style="margin:0 0 1.25rem;font-size:1rem;font-weight:700;">Laisser un commentaire</h4>
-      <span id="replyIndicator" style="display:none;background:rgba(79,70,229,0.1);color:var(--primary);padding:4px 12px;border-radius:100px;font-size:0.82rem;font-weight:600;margin-bottom:1rem;">
-        <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;color:var(--primary);">✕</button>
-      </span>
       <form id="commentForm" data-content-type="{{ content_type }}" data-object-id="{{ object_id }}">
-        <input type="hidden" name="parent" value="">
         <div class="form-row">
           <div class="form-field">
             <label class="form-label">Nom *</label>
