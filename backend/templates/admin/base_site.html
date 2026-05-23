@@ -171,11 +171,16 @@ input:focus, textarea:focus, select:focus {
 
 /* Mobile: full-width bottom sheet */
 @media (max-width: 640px) {
-  #ln-ai-btn { bottom: 16px; right: 16px; width: 48px; height: 48px; border-radius: 13px; font-size: 1.2rem; }
+  #ln-ai-btn {
+    bottom: 20px; right: 20px;
+    width: 50px; height: 50px; border-radius: 14px; font-size: 1.2rem;
+    transition: transform .2s, box-shadow .2s, opacity .2s;
+  }
+  #ln-ai-btn.panel-open { opacity: 0; pointer-events: none; transform: scale(0.7); }
   #ln-ai-panel {
     bottom: 0; right: 0; left: 0;
     width: 100%; border-radius: 20px 20px 0 0;
-    max-height: 80vh;
+    max-height: 82vh;
   }
 }
 
@@ -345,26 +350,31 @@ input:focus, textarea:focus, select:focus {
     return data;
   }
 
+  var aiBtn = document.getElementById('ln-ai-btn');
+
   window.toggleAI = function() {
     isOpen = !isOpen;
     var panel = document.getElementById('ln-ai-panel');
     if (isOpen) {
       panel.classList.add('open');
-      setTimeout(function(){ document.getElementById('ai-input').focus(); }, 100);
+      /* Hide the FAB on mobile so it doesn't overlap the bottom-sheet panel */
+      if (window.innerWidth <= 640) aiBtn.classList.add('panel-open');
+      setTimeout(function(){ document.getElementById('ai-input').focus(); }, 150);
     } else {
       panel.classList.remove('open');
+      aiBtn.classList.remove('panel-open');
     }
   };
 
-  document.getElementById('ln-ai-btn').addEventListener('click', toggleAI);
+  aiBtn.addEventListener('click', toggleAI);
 
-  // Close on mobile when tapping outside
+  /* Close on mobile when tapping outside the panel */
   document.addEventListener('click', function(e) {
-    if (isOpen && !document.getElementById('ln-ai-panel').contains(e.target) && e.target !== document.getElementById('ln-ai-btn') && !document.getElementById('ln-ai-btn').contains(e.target)) {
-      // Only close on mobile
+    if (isOpen && !document.getElementById('ln-ai-panel').contains(e.target) && !aiBtn.contains(e.target)) {
       if (window.innerWidth <= 640) {
         isOpen = false;
         document.getElementById('ln-ai-panel').classList.remove('open');
+        aiBtn.classList.remove('panel-open');
       }
     }
   });
