@@ -339,6 +339,27 @@
 
   <!-- Right: actions + system -->
   <div class="db-col-right">
+
+    <!-- ── Sitemap Google ── -->
+    <div class="db-card" style="border-top:3px solid #4F46E5;">
+      <div class="db-sec-title" style="--dot-color:#4F46E5;margin-bottom:10px;">
+        Sitemap · Google Search Console
+      </div>
+      <p style="font-size:.73rem;color:#9ca3af;margin:0 0 10px;line-height:1.5;">Soumettez cette URL à Google Search Console pour référencer votre site :</p>
+      <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:9px;padding:9px 12px;font-size:.72rem;font-family:'JetBrains Mono',monospace;color:#4F46E5;margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;" id="sm-url-display" onclick="copySitemapUrl()" title="Cliquer pour copier">Calcul…</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button onclick="copySitemapUrl()" id="sm-copy-btn" style="flex:1;min-width:80px;padding:8px 10px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border:none;border-radius:9px;font-size:.76rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:opacity .2s;">
+          <i class="bi bi-clipboard"></i>Copier
+        </button>
+        <a id="sm-view-btn" href="#" target="_blank" style="flex:1;min-width:80px;padding:8px 10px;background:#f0f4ff;border:1px solid #c7d2fe;border-radius:9px;font-size:.76rem;font-weight:600;color:#4F46E5;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;">
+          <i class="bi bi-eye"></i>Voir
+        </a>
+        <a href="https://search.google.com/search-console/sitemaps" target="_blank" style="flex:1;min-width:80px;padding:8px 10px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:9px;font-size:.76rem;font-weight:600;color:#059669;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;">
+          <i class="bi bi-google"></i>Google
+        </a>
+      </div>
+    </div>
+
     <div class="db-card">
       <div class="db-sec-title" style="--dot-color:#7C3AED;">Actions rapides</div>
       <div class="db-qa-grid">
@@ -507,13 +528,19 @@
       var el = document.getElementById(id);
       if (el) { el.textContent = '✓ Prêt'; el.className = 'badge badge-green'; }
     });
-    /* Sitemap URL */
-    var sitemapUrl = d.google_sitemap_url || '';
-    if (sitemapUrl) {
+    /* Sitemap URL — always show with origin/sitemap.xml */
+    var sitemapUrl = window.location.origin + '/sitemap.xml';
+    var smDisplay = document.getElementById('sm-url-display');
+    var smView = document.getElementById('sm-view-btn');
+    if (smDisplay) smDisplay.textContent = sitemapUrl;
+    if (smView) smView.href = sitemapUrl;
+    /* Legacy row */
+    var configuredUrl = d.google_sitemap_url || '';
+    if (configuredUrl) {
       var row = document.getElementById('db-sitemap-row');
       var link = document.getElementById('db-sitemap-link');
       if (row) row.style.display = 'flex';
-      if (link) { link.href = sitemapUrl; link.title = sitemapUrl; }
+      if (link) { link.href = configuredUrl; link.title = configuredUrl; }
     }
     /* Email check */
     var emailSt = document.getElementById('db-email-status');
@@ -607,6 +634,24 @@
   }
 
   loadAnalytics();
+
+  /* ── Sitemap copy ── */
+  window.copySitemapUrl = function() {
+    var url = window.location.origin + '/sitemap.xml';
+    var btn = document.getElementById('sm-copy-btn');
+    var display = document.getElementById('sm-url-display');
+    function feedback() {
+      if (btn) { var o = btn.innerHTML; btn.innerHTML = '<i class="bi bi-check-lg"></i>Copié !'; btn.style.background = '#10b981'; setTimeout(function(){ btn.innerHTML = o; btn.style.background = 'linear-gradient(135deg,#4F46E5,#7C3AED)'; }, 2200); }
+      if (display) { display.style.background = '#d1fae5'; display.style.borderColor = '#6ee7b7'; setTimeout(function(){ display.style.background = '#eef2ff'; display.style.borderColor = '#c7d2fe'; }, 2200); }
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(feedback).catch(function(){
+        var t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); feedback();
+      });
+    } else {
+      var t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); feedback();
+    }
+  };
 })();
 </script>
 {% endblock %}
