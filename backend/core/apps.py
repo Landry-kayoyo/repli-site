@@ -7,5 +7,8 @@ class CoreConfig(AppConfig):
     verbose_name = 'Configuration'
 
     def ready(self):
-        from core.signals import register_content_signals
-        register_content_signals()
+        try:
+            from core.signals import register_content_signals
+            register_content_signals()
+        except Exception:
+            pass
