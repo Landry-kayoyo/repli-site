@@ -73,9 +73,11 @@ def articles_list(request):
 
 
 def article_detail(request, slug):
+    from core.models import PageView
     settings = get_settings()
     article = get_object_or_404(Article, slug=slug, status='published')
     Article.objects.filter(pk=article.pk).update(views_count=article.views_count + 1)
+    PageView.record('article', article.pk, title=article.title, slug=article.slug)
     ct = ContentType.objects.get_for_model(Article)
     comments = Comment.objects.filter(content_type=ct, object_id=article.id, is_approved=True, parent=None).prefetch_related('replies')
     related = Article.objects.filter(status='published', category=article.category).exclude(pk=article.pk)[:3]
@@ -119,9 +121,11 @@ def projects_list(request):
 
 
 def project_detail(request, slug):
+    from core.models import PageView
     settings = get_settings()
     project = get_object_or_404(Project, slug=slug, status='published')
     Project.objects.filter(pk=project.pk).update(views_count=project.views_count + 1)
+    PageView.record('project', project.pk, title=project.title, slug=project.slug)
     ct = ContentType.objects.get_for_model(Project)
     comments = Comment.objects.filter(content_type=ct, object_id=project.id, is_approved=True, parent=None).prefetch_related('replies')
     tags = list(project.tags.names())
@@ -169,9 +173,11 @@ def tips_list(request):
 
 
 def tip_detail(request, slug):
+    from core.models import PageView
     settings = get_settings()
     tip = get_object_or_404(Tip, slug=slug, status='published')
     Tip.objects.filter(pk=tip.pk).update(views_count=tip.views_count + 1)
+    PageView.record('tip', tip.pk, title=tip.title, slug=tip.slug)
     ct = ContentType.objects.get_for_model(Tip)
     comments = Comment.objects.filter(content_type=ct, object_id=tip.id, is_approved=True, parent=None).prefetch_related('replies')
     tags = list(tip.tags.names())
@@ -209,8 +215,10 @@ def portfolio_list(request):
 
 
 def portfolio_detail(request, slug):
+    from core.models import PageView
     settings = get_settings()
     item = get_object_or_404(PortfolioItem, slug=slug)
+    PageView.record('portfolio', item.pk, title=item.title, slug=item.slug)
     tags = list(item.tags.names())
     images = item.images.all()
     return render(request, 'portfolio/detail.html', {

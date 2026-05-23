@@ -302,8 +302,11 @@ input:focus, textarea:focus, select:focus {
     <button class="ai-quick-btn" onclick="aiQuick('Crée un article complet sur les tendances du développement web en 2025')">✍️ Rédiger article</button>
     <button class="ai-quick-btn" onclick="aiQuick('Crée une astuce pratique sur la productivité en programmation')">💡 Nouvelle astuce</button>
     <button class="ai-quick-btn" onclick="aiQuick('Crée la description d\'un projet web avec toutes ses sections')">🚀 Nouveau projet</button>
-    <button class="ai-quick-btn" onclick="aiQuick('Quels sont les stats actuels de mon site ?')">📊 Stats site</button>
-    <button class="ai-quick-btn" onclick="aiQuick('Aide-moi à améliorer le SEO de mon site')">🔍 SEO</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Quels sont les stats actuels de mon site et les pages les plus visitées ?')">📊 Analytiques</button>
+    <button class="ai-quick-btn" onclick="runAnalysis('content_gaps')">🔍 Lacunes contenu</button>
+    <button class="ai-quick-btn" onclick="runAnalysis('seo_audit')">📈 Audit SEO</button>
+    <button class="ai-quick-btn" onclick="runAnalysis('growth_plan')">🚀 Plan croissance</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Aide-moi à améliorer le SEO de mon site')">🔗 SEO</button>
     <button class="ai-quick-btn" onclick="aiQuick('Quelles icônes Bootstrap Icons pour mon site tech ?')">🎨 Icônes</button>
     <button class="ai-quick-btn" onclick="aiQuick('Donne-moi 10 idées d\'articles pour mon blog tech')">🧠 Idées</button>
   </div>
@@ -423,6 +426,31 @@ input:focus, textarea:focus, select:focus {
     callAI(msg);
   };
 
+  window.runAnalysis = function(type) {
+    if (!isOpen) toggleAI();
+    var labels = {
+      'content_gaps': '🔍 Analyse les lacunes de contenu de mon site…',
+      'seo_audit': '📈 Lance un audit SEO de mon site…',
+      'growth_plan': '🚀 Crée un plan de croissance sur 30 jours…',
+    };
+    addMsg('user', labels[type] || 'Analyse en cours…');
+    isLoading = true;
+    showTyping();
+    fetch('/admin-ai/analyze/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': getCsrf()},
+      body: JSON.stringify({type: type})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      hideTyping(); isLoading = false;
+      var reply = data.reply || data.error || 'Erreur inconnue.';
+      addMsg('ai', reply);
+      if (data.ok) history.push({role:'assistant', content: reply});
+    })
+    .catch(function(e){ hideTyping(); isLoading = false; addMsg('ai', '❌ Erreur réseau: ' + e.message); });
+  };
+
   function callAI(msg) {
     isLoading = true;
     showTyping();
@@ -478,10 +506,15 @@ input:focus, textarea:focus, select:focus {
       'id_meta_title': {label:'✨ SEO IA', action:'seo'},
       'id_meta_description': {label:'✨ SEO IA', action:'seo'},
       'id_excerpt': {label:'✨ Description IA', action:'excerpt'},
+      'id_tags': {label:'✨ Tags IA', action:'tags'},
     };
     if (ctx.type === 'skill') {
       fieldMap['id_icon'] = {label:'✨ Icône IA', action:'icon'};
       fieldMap['id_name'] = {label:'✨ Icône IA', action:'icon'};
+    }
+    var contentField = document.getElementById('id_content');
+    if (contentField) {
+      fieldMap['id_title'] = {label:'✨ Titres IA', action:'title'};
     }
 
     Object.keys(fieldMap).forEach(function(fieldId){
@@ -499,10 +532,11 @@ input:focus, textarea:focus, select:focus {
         var titleEl = document.getElementById('id_title');
         var title = titleEl ? titleEl.value : val;
         var prompt = '';
-        if (info.action === 'title') prompt = 'Suggère 5 titres accrocheurs pour: "' + val + '"';
+        if (info.action === 'title') prompt = 'Suggère 5 titres accrocheurs SEO pour: "' + (val || 'ce contenu') + '"';
         else if (info.action === 'seo') prompt = 'Meta-title (60 chars) et meta-description (160 chars) pour: "' + title + '"';
-        else if (info.action === 'excerpt') prompt = 'Description courte (2-3 phrases) pour: "' + title + '"';
+        else if (info.action === 'excerpt') prompt = 'Description courte percutante (2-3 phrases max, 180 chars) pour: "' + title + '"';
         else if (info.action === 'icon') prompt = 'Icônes Bootstrap Icons (format bi-nom) pour la compétence: "' + val + '"';
+        else if (info.action === 'tags') prompt = 'Propose 8 tags pertinents (mots-clés) pour: "' + title + '". Un tag par ligne, en minuscules.';
         addMsg('user', prompt);
         history.push({role:'user', content: prompt});
         callAI(prompt);
@@ -516,6 +550,26 @@ input:focus, textarea:focus, select:focus {
         parent.appendChild(btn);
       }
     });
+
+    /* Structure button for content area */
+    var titleEl2 = document.getElementById('id_title');
+    if (titleEl2 && titleEl2.parentNode) {
+      var structBtn = document.createElement('button');
+      structBtn.type = 'button';
+      structBtn.className = 'ln-ai-suggest';
+      structBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+      structBtn.innerHTML = '🗂 Plan IA';
+      structBtn.title = 'Générer un plan de contenu';
+      structBtn.addEventListener('click', function(){
+        var t = titleEl2.value || '';
+        if (!isOpen) toggleAI();
+        var prompt = 'Génère un plan détaillé (H2/H3) pour un article/projet intitulé: "' + t + '"';
+        addMsg('user', prompt);
+        history.push({role:'user', content: prompt});
+        callAI(prompt);
+      });
+      titleEl2.parentNode.appendChild(structBtn);
+    }
   }
 
   if (document.readyState === 'loading') {

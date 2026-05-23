@@ -35,6 +35,7 @@ urlpatterns = [
 
     path('admin-ai/chat/', __import__('core.ai_views', fromlist=['ai_chat']).ai_chat, name='admin-ai-chat'),
     path('admin-ai/suggest/', __import__('core.ai_views', fromlist=['ai_suggest']).ai_suggest, name='admin-ai-suggest'),
+    path('admin-ai/analyze/', __import__('core.ai_views', fromlist=['ai_analyze']).ai_analyze, name='admin-ai-analyze'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('rss/', include('core.feeds_urls')),
 
