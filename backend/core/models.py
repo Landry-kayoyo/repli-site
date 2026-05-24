@@ -153,6 +153,32 @@ class Education(models.Model):
         return f"{self.degree} - {self.institution}"
 
 
+class Technology(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Nom')
+    icon = models.CharField(
+        max_length=100, blank=True, verbose_name='Icône Bootstrap Icons ou emoji',
+        help_text='Ex: bi-code-slash | bi-database-fill | bi-filetype-py — ou emoji: 🐍 ⚛️'
+    )
+    color = models.CharField(
+        max_length=7, default='#4F46E5', verbose_name='Couleur hex',
+        help_text='Ex: #4F46E5'
+    )
+    url = models.URLField(blank=True, verbose_name='Lien documentation (optionnel)')
+    order = models.IntegerField(default=0, verbose_name='Ordre')
+
+    class Meta:
+        verbose_name = 'Technologie'
+        verbose_name_plural = 'Technologies'
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def is_bootstrap_icon(self):
+        return bool(self.icon and self.icon.startswith('bi-'))
+
+
 class PageView(models.Model):
     content_type = models.CharField(max_length=50)
     object_id = models.PositiveIntegerField()

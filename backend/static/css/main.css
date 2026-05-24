@@ -1096,3 +1096,73 @@ h1, h2, h3, h4, h5, h6 {
 .stat-number { color: white !important; font-size: 2.5rem; }
 .stat-label { color: rgba(255,255,255,0.75) !important; }
 .stat-icon { opacity: 0.9; }
+
+/* ========= HERO SINGLE (sans photo) ========= */
+.hero-single {
+  max-width: 780px; text-align: center; margin: 0 auto; padding: 7rem var(--page-pad) 5rem;
+}
+.hero-single .hero-eyebrow { justify-content: center; margin-left: auto; margin-right: auto; }
+.hero-single .hero-bio { margin-left: auto; margin-right: auto; }
+.hero-single .hero-actions { justify-content: center; }
+.hero-single .hero-socials { justify-content: center; }
+
+/* ========= HERO PILLS ========= */
+.hero-pills {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 2rem;
+}
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 100px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);
+  box-shadow: var(--shadow-xs);
+}
+.hero-pill i { font-size: 0.9rem; color: var(--primary); }
+.hero-pill strong { color: var(--text); }
+
+/* ========= STATS — 6 en grille ========= */
+.stats-section { padding: 3.5rem var(--page-pad); }
+.stats-grid {
+  max-width: var(--page-max); margin: 0 auto;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem;
+  background: transparent;
+}
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 500px) { .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; } }
+.stat-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-xl); padding: 1.25rem 0.75rem; text-align: center;
+  box-shadow: var(--shadow-xs); transition: all 0.25s;
+}
+.stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.stat-icon { width: 44px; height: 44px; border-radius: 12px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center; }
+.stat-icon i { font-size: 1.25rem; color: white; }
+.stat-number { font-family: var(--font-heading); font-size: 1.8rem; font-weight: 900; color: var(--text) !important; line-height: 1; letter-spacing: -0.03em; }
+.stat-label { font-size: 0.72rem; color: var(--text-muted) !important; margin-top: 5px; font-weight: 500; }
+@media (max-width: 500px) {
+  .stat-number { font-size: 1.35rem; }
+  .stat-icon { width: 36px; height: 36px; }
+  .stat-icon i { font-size: 1rem; }
+  .stat-card { padding: 1rem 0.5rem; }
+}
+
+/* ========= FOOTER — Navigation + Autres côte à côte mobile ========= */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.5rem 1rem;
+  }
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ========= TECH ICON SIZE (Bootstrap Icons) ========= */
+.tech-icon i { font-size: 1.5rem; }
+
+/* ========= FIX: hero-single — pas de double padding ========= */
+.hero .hero-inner { padding: 0; }
+.hero-single { padding: 7rem var(--page-pad) 5rem; }
+@media (max-width: 960px) { .hero-single { padding: 5.5rem 1.25rem 3.5rem; } }
+@media (max-width: 480px) { .hero-single { padding: 5rem 1rem 3rem; } }

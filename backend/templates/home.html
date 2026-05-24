@@ -7,83 +7,75 @@
   <div class="hero-blob-1"></div>
   <div class="hero-blob-2"></div>
   <div class="hero-inner">
-    <div class="hero-grid">
-      <!-- Text -->
-      <div>
-        <div class="hero-eyebrow">
-          <span class="dot"></span>
-          Bienvenue sur {{ settings.site_name|default:"Landry Net" }}
-        </div>
-        <h1 class="hero-title">
-          Bonjour, je suis<br>
-          <span class="gradient-text">{{ settings.author_name|default:"Landry" }}</span>
-        </h1>
-        <p class="hero-subtitle">{{ settings.author_job_title|default:"Développeur & Créateur de contenu" }}</p>
-        <p class="hero-bio">{{ settings.author_bio|default:"Passionné par la technologie, je partage mes connaissances à travers des articles, projets et astuces." }}</p>
-        <div class="hero-actions">
-          <a href="/articles/" class="btn btn-primary btn-lg">
-            <i class="bi bi-compass-fill"></i>
-            Explorer le blog
-          </a>
-          <a href="/a-propos/" class="btn btn-secondary btn-lg">
-            <i class="bi bi-person-circle"></i>
-            À propos
-          </a>
-          {% if settings.cv_file %}
-          <a href="{{ settings.cv_file.url }}" download class="btn btn-secondary btn-lg">
-            <i class="bi bi-download"></i>
-            CV
-          </a>
-          {% endif %}
-        </div>
-        <div class="hero-socials">
-          {% if settings.github_url %}
-          <a href="{{ settings.github_url }}" target="_blank" rel="noopener" class="hero-social" title="GitHub">
-            <i class="bi bi-github"></i>
-          </a>
-          {% endif %}
-          {% if settings.linkedin_url %}
-          <a href="{{ settings.linkedin_url }}" target="_blank" rel="noopener" class="hero-social" title="LinkedIn">
-            <i class="bi bi-linkedin"></i>
-          </a>
-          {% endif %}
-          {% if settings.twitter_url %}
-          <a href="{{ settings.twitter_url }}" target="_blank" rel="noopener" class="hero-social" title="Twitter / X">
-            <i class="bi bi-twitter-x"></i>
-          </a>
-          {% endif %}
-          {% if settings.youtube_url %}
-          <a href="{{ settings.youtube_url }}" target="_blank" rel="noopener" class="hero-social" title="YouTube">
-            <i class="bi bi-youtube"></i>
-          </a>
-          {% endif %}
-        </div>
+    <div class="hero-single">
+      <div class="hero-eyebrow">
+        <span class="dot"></span>
+        Bienvenue sur {{ settings.site_name|default:"Landry Net" }}
       </div>
-      <!-- Photo -->
-      <div class="hero-photo">
-        <div class="hero-photo-wrap">
-          <div class="hero-photo-glow"></div>
-          <div class="hero-photo-ring">
-            {% if settings.author_photo %}
-              <img src="{{ settings.author_photo.url }}" alt="{{ settings.author_name|default:"Landry" }}" class="hero-photo-img" loading="eager">
-            {% else %}
-              <div class="hero-photo-placeholder">{{ settings.author_name|default:"L"|first }}</div>
-            {% endif %}
-          </div>
-          <div class="hero-float-badge">
-            <i class="bi bi-patch-check-fill"></i>
-            {{ settings.author_job_title|default:"Développeur Web"|truncatechars:20 }}
-          </div>
-          <div class="hero-float-card">
-            <div class="float-icon">
-              <i class="bi bi-stars"></i>
-            </div>
-            <div>
-              <div class="label">Contenus créés</div>
-              <div class="value">{{ stats.articles_count|default:0 }} Articles & {{ stats.projects_count|default:0 }} Projets</div>
-            </div>
-          </div>
+      <h1 class="hero-title">
+        Bonjour, je suis<br>
+        <span class="gradient-text">{{ settings.author_name|default:"Landry" }}</span>
+      </h1>
+      <p class="hero-subtitle">{{ settings.author_job_title|default:"Développeur & Créateur de contenu" }}</p>
+      <p class="hero-bio">{{ settings.author_bio|default:"Passionné par la technologie, je partage mes connaissances à travers des articles, projets et astuces." }}</p>
+      <div class="hero-actions">
+        <a href="/articles/" class="btn btn-primary btn-lg">
+          <i class="bi bi-compass-fill"></i>
+          Explorer le blog
+        </a>
+        <a href="/a-propos/" class="btn btn-secondary btn-lg">
+          <i class="bi bi-person-circle"></i>
+          À propos
+        </a>
+        {% if settings.cv_file %}
+        <a href="{{ settings.cv_file.url }}" download class="btn btn-secondary btn-lg">
+          <i class="bi bi-download"></i>
+          CV
+        </a>
+        {% endif %}
+      </div>
+      <div class="hero-socials">
+        {% if settings.github_url %}
+        <a href="{{ settings.github_url }}" target="_blank" rel="noopener" class="hero-social" title="GitHub">
+          <i class="bi bi-github"></i>
+        </a>
+        {% endif %}
+        {% if settings.linkedin_url %}
+        <a href="{{ settings.linkedin_url }}" target="_blank" rel="noopener" class="hero-social" title="LinkedIn">
+          <i class="bi bi-linkedin"></i>
+        </a>
+        {% endif %}
+        {% if settings.twitter_url %}
+        <a href="{{ settings.twitter_url }}" target="_blank" rel="noopener" class="hero-social" title="Twitter / X">
+          <i class="bi bi-twitter-x"></i>
+        </a>
+        {% endif %}
+        {% if settings.youtube_url %}
+        <a href="{{ settings.youtube_url }}" target="_blank" rel="noopener" class="hero-social" title="YouTube">
+          <i class="bi bi-youtube"></i>
+        </a>
+        {% endif %}
+      </div>
+      <!-- Mini stats pills -->
+      <div class="hero-pills">
+        <div class="hero-pill">
+          <i class="bi bi-journal-richtext"></i>
+          <strong>{{ stats.articles_count|default:0 }}</strong> Articles
         </div>
+        <div class="hero-pill">
+          <i class="bi bi-code-square"></i>
+          <strong>{{ stats.projects_count|default:0 }}</strong> Projets
+        </div>
+        <div class="hero-pill">
+          <i class="bi bi-lightbulb-fill"></i>
+          <strong>{{ stats.tips_count|default:0 }}</strong> Astuces
+        </div>
+        {% if stats.subscribers_count %}
+        <div class="hero-pill">
+          <i class="bi bi-envelope-fill"></i>
+          <strong>{{ stats.subscribers_count }}</strong> Abonnés
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -92,26 +84,47 @@
 <!-- STATS -->
 <section class="stats-section">
   <div class="stats-grid">
-    <div class="stat-card" style="--stat-gradient: linear-gradient(90deg,#3B82F6,#06B6D4);">
+    <div class="stat-card">
       <div class="stat-icon" style="background:linear-gradient(135deg,#3B82F6,#06B6D4);">
         <i class="bi bi-journal-richtext"></i>
       </div>
       <div class="stat-number">{{ stats.articles_count|default:0 }}</div>
-      <div class="stat-label">Articles publiés</div>
+      <div class="stat-label">Articles</div>
     </div>
-    <div class="stat-card" style="--stat-gradient: linear-gradient(90deg,#8B5CF6,#EC4899);">
+    <div class="stat-card">
       <div class="stat-icon" style="background:linear-gradient(135deg,#8B5CF6,#EC4899);">
         <i class="bi bi-code-square"></i>
       </div>
       <div class="stat-number">{{ stats.projects_count|default:0 }}</div>
-      <div class="stat-label">Projets réalisés</div>
+      <div class="stat-label">Projets</div>
     </div>
-    <div class="stat-card" style="--stat-gradient: linear-gradient(90deg,#10B981,#059669);">
+    <div class="stat-card">
       <div class="stat-icon" style="background:linear-gradient(135deg,#10B981,#059669);">
         <i class="bi bi-lightbulb-fill"></i>
       </div>
       <div class="stat-number">{{ stats.tips_count|default:0 }}</div>
-      <div class="stat-label">Astuces partagées</div>
+      <div class="stat-label">Astuces</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
+        <i class="bi bi-envelope-fill"></i>
+      </div>
+      <div class="stat-number">{{ stats.subscribers_count|default:0 }}</div>
+      <div class="stat-label">Abonnés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:linear-gradient(135deg,#EC4899,#8B5CF6);">
+        <i class="bi bi-emoji-smile-fill"></i>
+      </div>
+      <div class="stat-number">{{ stats.reactions_count|default:0 }}</div>
+      <div class="stat-label">Réactions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:linear-gradient(135deg,#06B6D4,#3B82F6);">
+        <i class="bi bi-chat-dots-fill"></i>
+      </div>
+      <div class="stat-number">{{ stats.comments_count|default:0 }}</div>
+      <div class="stat-label">Commentaires</div>
     </div>
   </div>
 </section>
@@ -271,7 +284,7 @@
 </section>
 {% endif %}
 
-<!-- TECH STACK -->
+<!-- TECH STACK — depuis l'admin Django -->
 <section class="techstack-section">
   <div class="section-inner">
     <div class="techstack-header">
@@ -279,20 +292,33 @@
       <h2 class="section-title" style="text-align:center;">Technologies maîtrisées</h2>
       <p class="section-subtitle" style="text-align:center;max-width:500px;margin:0.5rem auto 0;">Les outils et langages que j'utilise au quotidien pour créer des solutions performantes.</p>
     </div>
+    {% if technologies %}
     <div class="techstack-grid">
-      <div class="tech-item"><span class="tech-icon tech-python">🐍</span><span class="tech-name">Python</span></div>
-      <div class="tech-item"><span class="tech-icon tech-django">🎸</span><span class="tech-name">Django</span></div>
-      <div class="tech-item"><span class="tech-icon tech-js">⚡</span><span class="tech-name">JavaScript</span></div>
-      <div class="tech-item"><span class="tech-icon tech-react">⚛️</span><span class="tech-name">React</span></div>
-      <div class="tech-item"><span class="tech-icon tech-html">🌐</span><span class="tech-name">HTML / CSS</span></div>
-      <div class="tech-item"><span class="tech-icon tech-sql">🗄️</span><span class="tech-name">PostgreSQL</span></div>
-      <div class="tech-item"><span class="tech-icon tech-git">🔀</span><span class="tech-name">Git / GitHub</span></div>
-      <div class="tech-item"><span class="tech-icon tech-api">🔌</span><span class="tech-name">REST API</span></div>
-      <div class="tech-item"><span class="tech-icon tech-docker">🐳</span><span class="tech-name">Docker</span></div>
-      <div class="tech-item"><span class="tech-icon tech-linux">🐧</span><span class="tech-name">Linux</span></div>
+      {% for tech in technologies %}
+      <{% if tech.url %}a href="{{ tech.url }}" target="_blank" rel="noopener"{% else %}div{% endif %} class="tech-item" {% if tech.url %}style="text-decoration:none;"{% endif %}>
+        <span class="tech-icon">
+          {% if tech.icon %}
+            {% if tech.is_bootstrap_icon %}
+              <i class="bi {{ tech.icon }}" style="color:{{ tech.color }};"></i>
+            {% else %}
+              {{ tech.icon }}
+            {% endif %}
+          {% else %}
+            <i class="bi bi-code-slash" style="color:{{ tech.color }};"></i>
+          {% endif %}
+        </span>
+        <span class="tech-name">{{ tech.name }}</span>
+      </{% if tech.url %}a{% else %}div{% endif %}>
+      {% endfor %}
     </div>
+    {% else %}
+    <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+      <i class="bi bi-database-add" style="font-size:2rem;display:block;margin-bottom:1rem;opacity:0.4;"></i>
+      <p>Aucune technologie configurée. Ajoutez-en depuis <a href="/admin/core/technology/add/" style="color:var(--primary);">l'administration</a>.</p>
+    </div>
+    {% endif %}
     <div style="text-align:center;margin-top:2.5rem;">
-      <a href="/a-propos/#competences" class="btn btn-secondary">Voir toutes mes compétences <i class="bi bi-arrow-right"></i></a>
+      <a href="/a-propos/" class="btn btn-secondary">Voir toutes mes compétences <i class="bi bi-arrow-right"></i></a>
     </div>
   </div>
 </section>

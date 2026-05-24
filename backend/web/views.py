@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 import json
 
-from core.models import SiteSettings, Skill, Experience, Education
+from core.models import SiteSettings, Skill, Experience, Education, Technology
 from articles.models import Article, Category as ArticleCategory
 from projects.models import Project, ProjectCategory
 from tips.models import Tip, TipCategory
@@ -24,16 +24,28 @@ def home(request):
     articles = Article.objects.filter(status='published').select_related('category')[:3]
     projects = Project.objects.filter(status='published').select_related('category')[:3]
     tips = Tip.objects.filter(status='published').select_related('category')[:3]
+    technologies = Technology.objects.all()
+    from newsletter.models import Subscriber
+    from reactions.models import Reaction
+    from comments.models import Comment
+    from django.db.models import Count
+    articles_count = Article.objects.filter(status='published').count()
+    projects_count = Project.objects.filter(status='published').count()
+    tips_count = Tip.objects.filter(status='published').count()
     stats = {
-        'articles_count': Article.objects.filter(status='published').count(),
-        'projects_count': Project.objects.filter(status='published').count(),
-        'tips_count': Tip.objects.filter(status='published').count(),
+        'articles_count': articles_count,
+        'projects_count': projects_count,
+        'tips_count': tips_count,
+        'subscribers_count': Subscriber.objects.filter(status='active').count(),
+        'reactions_count': Reaction.objects.count(),
+        'comments_count': Comment.objects.filter(is_approved=True).count(),
     }
     return render(request, 'home.html', {
         'settings': settings,
         'articles': articles,
         'projects': projects,
         'tips': tips,
+        'technologies': technologies,
         'stats': stats,
         'page_title': settings.site_name,
         'page_description': settings.description,
