@@ -116,6 +116,43 @@
   </div>
 </section>
 
+<!-- FEATURES / SERVICES -->
+<section class="features-section">
+  <div class="section-inner">
+    <div class="features-header">
+      <div class="section-eyebrow">Ce que vous trouverez ici</div>
+      <h2 class="features-main-title">Un espace dédié au partage<br>de connaissances tech</h2>
+      <p class="features-main-sub">Articles, projets open-source, astuces de pro et bien plus encore — tout pour progresser chaque jour.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card feature-card-blue">
+        <div class="feature-card-icon"><i class="bi bi-journal-richtext"></i></div>
+        <h3 class="feature-card-title">Articles & Tutoriels</h3>
+        <p class="feature-card-desc">Des guides pratiques et approfondis sur Python, Django, React, JavaScript et les meilleures pratiques du développement web moderne.</p>
+        <a href="/articles/" class="feature-card-link">Lire les articles <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="feature-card feature-card-purple">
+        <div class="feature-card-icon"><i class="bi bi-code-square"></i></div>
+        <h3 class="feature-card-title">Projets Open Source</h3>
+        <p class="feature-card-desc">Des projets réels avec tutoriels détaillés étape par étape. Clonez le code, apprenez en construisant, contribuez.</p>
+        <a href="/projets/" class="feature-card-link">Voir les projets <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="feature-card feature-card-green">
+        <div class="feature-card-icon"><i class="bi bi-lightbulb-fill"></i></div>
+        <h3 class="feature-card-title">Astuces & Conseils</h3>
+        <p class="feature-card-desc">Raccourcis, bonnes pratiques, outils productifs. Des astuces courtes et immédiatement applicables pour coder plus vite et mieux.</p>
+        <a href="/astuces/" class="feature-card-link">Parcourir les astuces <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="feature-card feature-card-pink">
+        <div class="feature-card-icon"><i class="bi bi-layers-fill"></i></div>
+        <h3 class="feature-card-title">Portfolio & Réalisations</h3>
+        <p class="feature-card-desc">Mes réalisations professionnelles, projets clients et créations personnelles. Un aperçu concret de mon travail.</p>
+        <a href="/portfolio/" class="feature-card-link">Voir le portfolio <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ARTICLES -->
 {% if articles %}
 <section class="section">
@@ -135,7 +172,7 @@
       <a href="/articles/{{ article.slug }}/" class="card">
         <div class="card-cover">
           {% if article.cover_image %}
-            <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" loading="eager" decoding="async" onerror="this.style.display='none'">
+            <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" loading="lazy" decoding="async" onerror="this.style.display='none'">
           {% else %}
             <div class="card-cover-icon"><i class="bi bi-journal-text"></i></div>
           {% endif %}
@@ -197,7 +234,7 @@
       <a href="/projets/{{ project.slug }}/" class="card">
         <div class="card-cover">
           {% if project.cover_image %}
-            <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" loading="eager" decoding="async" onerror="this.style.display='none'">
+            <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" loading="lazy" decoding="async" onerror="this.style.display='none'">
           {% else %}
             <div class="card-cover-icon"><i class="bi bi-code-square"></i></div>
           {% endif %}
@@ -234,6 +271,32 @@
 </section>
 {% endif %}
 
+<!-- TECH STACK -->
+<section class="techstack-section">
+  <div class="section-inner">
+    <div class="techstack-header">
+      <div class="section-eyebrow">Stack technique</div>
+      <h2 class="section-title" style="text-align:center;">Technologies maîtrisées</h2>
+      <p class="section-subtitle" style="text-align:center;max-width:500px;margin:0.5rem auto 0;">Les outils et langages que j'utilise au quotidien pour créer des solutions performantes.</p>
+    </div>
+    <div class="techstack-grid">
+      <div class="tech-item"><span class="tech-icon tech-python">🐍</span><span class="tech-name">Python</span></div>
+      <div class="tech-item"><span class="tech-icon tech-django">🎸</span><span class="tech-name">Django</span></div>
+      <div class="tech-item"><span class="tech-icon tech-js">⚡</span><span class="tech-name">JavaScript</span></div>
+      <div class="tech-item"><span class="tech-icon tech-react">⚛️</span><span class="tech-name">React</span></div>
+      <div class="tech-item"><span class="tech-icon tech-html">🌐</span><span class="tech-name">HTML / CSS</span></div>
+      <div class="tech-item"><span class="tech-icon tech-sql">🗄️</span><span class="tech-name">PostgreSQL</span></div>
+      <div class="tech-item"><span class="tech-icon tech-git">🔀</span><span class="tech-name">Git / GitHub</span></div>
+      <div class="tech-item"><span class="tech-icon tech-api">🔌</span><span class="tech-name">REST API</span></div>
+      <div class="tech-item"><span class="tech-icon tech-docker">🐳</span><span class="tech-name">Docker</span></div>
+      <div class="tech-item"><span class="tech-icon tech-linux">🐧</span><span class="tech-name">Linux</span></div>
+    </div>
+    <div style="text-align:center;margin-top:2.5rem;">
+      <a href="/a-propos/#competences" class="btn btn-secondary">Voir toutes mes compétences <i class="bi bi-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
 <!-- TIPS -->
 {% if tips %}
 <section class="section">
@@ -253,7 +316,7 @@
       <a href="/astuces/{{ tip.slug }}/" class="card">
         <div class="card-cover">
           {% if tip.cover_image %}
-            <img src="{{ tip.cover_image.url }}" alt="{{ tip.title }}" loading="eager" decoding="async" onerror="this.style.display='none'">
+            <img src="{{ tip.cover_image.url }}" alt="{{ tip.title }}" loading="lazy" decoding="async" onerror="this.style.display='none'">
           {% else %}
             <div class="card-cover-icon"><i class="bi bi-lightbulb-fill"></i></div>
           {% endif %}

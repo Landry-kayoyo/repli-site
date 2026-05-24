@@ -1,11 +1,14 @@
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 from django.conf import settings
 from .models import ContactMessage
 from .serializers import ContactMessageSerializer
 import threading
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _base_styles():
@@ -61,13 +64,28 @@ def _wrap(content, footer_html=''):
 </html>"""
 
 
+def _build_smtp_connection(s):
+    """Build an explicit SMTP connection from SiteSettings (thread-safe)."""
+    return get_connection(
+        backend='django.core.mail.backends.smtp.EmailBackend',
+        host=s.email_host or 'smtp.gmail.com',
+        port=int(s.email_port or 587),
+        username=s.email_host_user,
+        password=s.email_host_password,
+        use_tls=bool(s.email_use_tls),
+        fail_silently=False,
+    )
+
+
 def _send_emails(message_obj):
     try:
         from core.models import SiteSettings
         s = SiteSettings.objects.filter(pk=1).first()
-        if not s or not s.email_host_user:
+        if not s or not s.email_host_user or not s.email_host_password:
+            logger.warning('Contact email not sent: SMTP not configured in Site Settings.')
             return
-        s.apply_email_settings()
+
+        conn = _build_smtp_connection(s)
 
         site_name = s.site_name or 'Landry Net'
         frontend_url = settings.FRONTEND_URL or 'http://localhost:5000'
@@ -124,12 +142,14 @@ def _send_emails(message_obj):
                 msg = EmailMultiAlternatives(
                     f"[{site_name}] {ticket} — {message_obj.subject}",
                     admin_plain, from_email, [admin_recipient],
-                    reply_to=[message_obj.email]
+                    reply_to=[message_obj.email],
+                    connection=conn,
                 )
                 msg.attach_alternative(admin_html, "text/html")
                 msg.send()
-            except Exception:
-                pass
+                logger.info(f"Contact admin email sent to {admin_recipient}")
+            except Exception as e:
+                logger.error(f"Failed to send admin contact email: {e}")
 
         # ── 2. Confirmation to sender ──────────────────────────────
         confirm_body = f"""
@@ -180,17 +200,20 @@ def _send_emails(message_obj):
         confirm_plain = f"Merci {message_obj.name} !\n\nVotre message [{ticket}] a bien été reçu.\nRéponse attendue : 24–48h\n\nVotre message :\n{message_obj.message}\n\nVisitez le site : {frontend_url}"
 
         try:
+            conn2 = _build_smtp_connection(s)
             msg = EmailMultiAlternatives(
                 f"✅ Message reçu [{ticket}] — {site_name}",
-                confirm_plain, from_email, [message_obj.email]
+                confirm_plain, from_email, [message_obj.email],
+                connection=conn2,
             )
             msg.attach_alternative(confirm_html, "text/html")
             msg.send()
-        except Exception:
-            pass
+            logger.info(f"Confirmation email sent to {message_obj.email}")
+        except Exception as e:
+            logger.error(f"Failed to send confirmation email: {e}")
 
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"_send_emails unexpected error: {e}")
 
 
 class ContactMessageCreateView(generics.CreateAPIView):

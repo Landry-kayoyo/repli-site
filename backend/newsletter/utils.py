@@ -1,12 +1,28 @@
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 from django.conf import settings
 from django.utils.html import strip_tags
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _get_site():
     from core.models import SiteSettings
     s = SiteSettings.objects.first()
     return s
+
+
+def _build_smtp_connection(s):
+    """Build an explicit SMTP connection from SiteSettings (thread-safe)."""
+    return get_connection(
+        backend='django.core.mail.backends.smtp.EmailBackend',
+        host=s.email_host or 'smtp.gmail.com',
+        port=int(s.email_port or 587),
+        username=s.email_host_user,
+        password=s.email_host_password,
+        use_tls=bool(s.email_use_tls),
+        fail_silently=False,
+    )
 
 
 def _base_styles():
@@ -117,10 +133,10 @@ def send_newsletter_notification(title, excerpt, url, content_type_label, author
         return 0
     if not s.newsletter_send_on_publish:
         return 0
-    if not s.email_host_user:
+    if not s.email_host_user or not s.email_host_password:
+        logger.warning('Newsletter notification not sent: SMTP not configured.')
         return 0
 
-    s.apply_email_settings()
     subscribers = Subscriber.objects.filter(status='active')
     if not subscribers.exists():
         return 0
@@ -133,9 +149,10 @@ def send_newsletter_notification(title, excerpt, url, content_type_label, author
     from_email = f"{s.newsletter_from_name or s.site_name} <{s.email_host_user}>"
     sent_count = 0
     author_initial = (author_name[0] if author_name else 'L').upper()
+    frontend_url = settings.FRONTEND_URL or 'http://localhost:5000'
 
     for sub in subscribers:
-        unsub_url = f"{settings.FRONTEND_URL}/api/newsletter/unsubscribe/?token={sub.token}"
+        unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
         subject = f"✨ {content_type_label} : {title} — {s.site_name}"
         greeting_name = sub.name.split()[0] if sub.name else 'vous'
 
@@ -173,37 +190,40 @@ def send_newsletter_notification(title, excerpt, url, content_type_label, author
 
         footer_html = f"""
         <p>Vous recevez cet email car vous êtes abonné(e) à <strong style="color:#c7d2fe;">{s.site_name}</strong>.</p>
-        <p><a href="{settings.FRONTEND_URL}">{settings.FRONTEND_URL}</a></p>
+        <p><a href="{frontend_url}">{frontend_url}</a></p>
         <a href="{unsub_url}" class="unsub">Se désabonner</a>"""
 
         html = _html_wrapper(body_html, footer_html)
         plain = f"{subject}\n\n{s.newsletter_intro_text}\n\n{title}\n\n{excerpt}\n\nLire : {url}\n\nSe désabonner : {unsub_url}"
 
         try:
-            msg = EmailMultiAlternatives(subject, plain, from_email, [sub.email])
+            conn = _build_smtp_connection(s)
+            msg = EmailMultiAlternatives(subject, plain, from_email, [sub.email], connection=conn)
             msg.attach_alternative(html, "text/html")
             msg.send()
             sent_count += 1
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Failed to send newsletter to {sub.email}: {e}")
 
+    logger.info(f"Newsletter sent to {sent_count} subscribers.")
     return sent_count
 
 
 def send_welcome_email(subscriber_email, subscriber_name=''):
     """Send a beautiful welcome/confirmation email to a new subscriber."""
     s = _get_site()
-    if not s or not s.email_host_user:
+    if not s or not s.email_host_user or not s.email_host_password:
+        logger.warning('Welcome email not sent: SMTP not configured.')
         return False
 
-    s.apply_email_settings()
     greeting_name = subscriber_name.split()[0] if subscriber_name else 'vous'
     from .models import Subscriber
+    frontend_url = settings.FRONTEND_URL or 'http://localhost:5000'
     try:
         sub = Subscriber.objects.get(email=subscriber_email)
-        unsub_url = f"{settings.FRONTEND_URL}/api/newsletter/unsubscribe/?token={sub.token}"
+        unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
     except Exception:
-        unsub_url = f"{settings.FRONTEND_URL}/api/newsletter/unsubscribe/"
+        unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/"
 
     from_email = f"{s.newsletter_from_name or s.site_name} <{s.email_host_user}>"
     subject = f"🎉 Bienvenue sur {s.site_name} — Abonnement confirmé !"
@@ -244,7 +264,7 @@ def send_welcome_email(subscriber_email, subscriber_name=''):
         </div>
 
         <div style="text-align:center;margin:28px 0;">
-          <a href="{settings.FRONTEND_URL}" class="btn-cta">Explorer le site →</a>
+          <a href="{frontend_url}" class="btn-cta">Explorer le site →</a>
         </div>
 
         <hr class="divider">
@@ -255,18 +275,21 @@ def send_welcome_email(subscriber_email, subscriber_name=''):
 
     footer_html = f"""
       <p>Merci de votre confiance ! 🙏</p>
-      <p><a href="{settings.FRONTEND_URL}">{settings.FRONTEND_URL}</a></p>
+      <p><a href="{frontend_url}">{frontend_url}</a></p>
       <a href="{unsub_url}" class="unsub">Se désabonner</a>"""
 
     html = _html_wrapper(body_html, footer_html)
-    plain = f"Bienvenue sur {s.site_name} !\n\nVotre abonnement est confirmé. Vous recevrez les prochaines publications à {subscriber_email}.\n\nVisitez le site : {settings.FRONTEND_URL}\nSe désabonner : {unsub_url}"
+    plain = f"Bienvenue sur {s.site_name} !\n\nVotre abonnement est confirmé. Vous recevrez les prochaines publications à {subscriber_email}.\n\nVisitez le site : {frontend_url}\nSe désabonner : {unsub_url}"
 
     try:
-        msg = EmailMultiAlternatives(subject, plain, from_email, [subscriber_email])
+        conn = _build_smtp_connection(s)
+        msg = EmailMultiAlternatives(subject, plain, from_email, [subscriber_email], connection=conn)
         msg.attach_alternative(html, "text/html")
         msg.send()
+        logger.info(f"Welcome email sent to {subscriber_email}")
         return True
-    except Exception:
+    except Exception as e:
+        logger.error(f"Failed to send welcome email to {subscriber_email}: {e}")
         return False
 
 
@@ -276,10 +299,8 @@ def send_campaign(campaign_id):
     from django.utils import timezone
 
     s = _get_site()
-    if not s or not s.email_host_user:
+    if not s or not s.email_host_user or not s.email_host_password:
         return 0, "Email non configuré dans les paramètres du site."
-
-    s.apply_email_settings()
 
     try:
         campaign = NewsletterCampaign.objects.get(pk=campaign_id)
@@ -289,9 +310,10 @@ def send_campaign(campaign_id):
     subscribers = Subscriber.objects.filter(status='active')
     from_email = f"{s.newsletter_from_name or s.site_name} <{s.email_host_user}>"
     sent_count = 0
+    frontend_url = settings.FRONTEND_URL or 'http://localhost:5000'
 
     for sub in subscribers:
-        unsub_url = f"{settings.FRONTEND_URL}/api/newsletter/unsubscribe/?token={sub.token}"
+        unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
         greeting_name = sub.name.split()[0] if sub.name else 'vous'
 
         body_html = f"""
@@ -317,12 +339,13 @@ def send_campaign(campaign_id):
         plain = f"{campaign.subject}\n\nBonjour {greeting_name},\n\n{strip_tags(campaign.content)}\n\nSe désabonner : {unsub_url}"
 
         try:
-            msg = EmailMultiAlternatives(campaign.subject, plain, from_email, [sub.email])
+            conn = _build_smtp_connection(s)
+            msg = EmailMultiAlternatives(campaign.subject, plain, from_email, [sub.email], connection=conn)
             msg.attach_alternative(html, "text/html")
             msg.send()
             sent_count += 1
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Failed to send campaign to {sub.email}: {e}")
 
     campaign.status = 'sent'
     campaign.sent_at = timezone.now()
