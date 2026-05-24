@@ -24,7 +24,6 @@ def _get_site_context(settings):
     from articles.models import Article
     from projects.models import Project
     from tips.models import Tip
-    from portfolio.models import PortfolioItem
     from comments.models import Comment
     from core.models import PageView
     from django.db.models import Sum
@@ -35,7 +34,6 @@ def _get_site_context(settings):
         articles_count = Article.objects.filter(status='published').count()
         projects_count = Project.objects.filter(status='published').count()
         tips_count = Tip.objects.filter(status='published').count()
-        portfolio_count = PortfolioItem.objects.count()
         pending_comments = Comment.objects.filter(is_approved=False).count()
 
         recent_articles = list(
@@ -83,7 +81,7 @@ def _get_site_context(settings):
 
     except Exception as e:
         logger.error(f"Context error: {e}")
-        articles_count = projects_count = tips_count = portfolio_count = pending_comments = 0
+        articles_count = projects_count = tips_count = pending_comments = 0
         recent_articles = recent_projects = recent_tips = []
         categories_str = 'Non défini'
         views_today = views_7 = views_30 = 0
@@ -118,7 +116,6 @@ Biographie: {(settings.author_bio or '')[:300]}
 • {articles_count} articles publiés (catégories: {categories_str})
 • {projects_count} projets publiés
 • {tips_count} astuces publiées
-• {portfolio_count} réalisations portfolio
 • {pending_comments} commentaires en attente de modération
 
 ━━━ ANALYTIQUES (30 derniers jours) ━━━

@@ -8,10 +8,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-landrynet-dev-key-change-in-production-2024')
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# ========== AJOUT POUR PYTHONANYWHERE ==========
+# On garde la variable DEBUG mais on force à False pour PythonAnywhere
+# Si tu veux utiliser une variable d'environnement, crée DEBUG=False dans PythonAnywhere
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'  # Changé: default 'False' au lieu de 'True'
 
-ALLOWED_HOSTS = ['*']
+# On garde ALLOWED_HOSTS = ['*'] mais on ajoute explicitement PythonAnywhere
+ALLOWED_HOSTS = ['*', 'LandryIT.pythonanywhere.com']
 
+# On garde tes CSRF_TRUSTED_ORIGINS existants et on ajoute PythonAnywhere
 REPLIT_DEV_DOMAIN = os.environ.get('REPLIT_DEV_DOMAIN', '')
 CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.dev',
@@ -20,9 +25,11 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.kirk.replit.dev',
     'http://localhost:5000',
     'http://127.0.0.1:5000',
+    'https://LandryIT.pythonanywhere.com',  # AJOUTÉ
 ]
 if REPLIT_DEV_DOMAIN:
     CSRF_TRUSTED_ORIGINS.append(f'https://{REPLIT_DEV_DOMAIN}')
+# ========== FIN AJOUTS ==========
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
