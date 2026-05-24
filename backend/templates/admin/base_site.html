@@ -263,18 +263,109 @@ input:focus, textarea:focus, select:focus {
 .ln-quick-action:hover { background: #f0f4ff; border-color: #c7d2fe; transform: translateX(4px); color: #4F46E5; }
 .ln-quick-action .qa-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
 
-/* ── Responsive ──────────────────────────────────── */
-@media (max-width: 767px) {
-  #content { padding: 12px !important; }
-  #content-main { width: 100% !important; }
-  .submit-row { flex-direction: column !important; }
-  #result_list { font-size: .82rem; }
-  #result_list td, #result_list th { padding: 8px 10px !important; }
+/* ── Responsive — Mobile Admin ───────────────────── */
+@media (max-width: 900px) {
+  /* Header adaptatif */
+  #header {
+    height: auto !important;
+    min-height: 56px !important;
+    padding: 8px 14px !important;
+    flex-wrap: wrap !important;
+    gap: 6px 8px !important;
+    align-items: center !important;
+  }
+  #branding { flex: 1 1 auto; min-width: 0; }
+  #branding h1 { font-size: .95rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #user-tools {
+    font-size: .72rem !important;
+    order: 10; width: 100%;
+    padding: 5px 0 3px !important;
+    border-top: 1px solid rgba(255,255,255,.12) !important;
+    background: transparent !important;
+    color: rgba(255,255,255,.8) !important;
+  }
+  #user-tools a { color: rgba(255,255,255,.8) !important; font-size: .72rem !important; }
+  #ln-header-toolbar { margin-right: 2px; flex-shrink: 0; }
+  .ln-hbtn { width: 32px; height: 32px; font-size: .88rem; }
+  .toggle-nav-sidebar {
+    width: 38px !important; height: 38px !important;
+    background: rgba(255,255,255,.15) !important;
+    border-radius: 9px !important;
+    flex-shrink: 0;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+  }
+
+  /* Content */
+  #content { padding: 10px !important; }
+  #content-main { width: 100% !important; float: none !important; }
+  .colM, .colMS, .colSM { width: 100% !important; float: none !important; }
+
+  /* Tables horizontally scrollable */
+  #result_list { font-size: .78rem; overflow-x: auto; display: block; width: 100%; }
+  #result_list td, #result_list th { padding: 8px 10px !important; white-space: nowrap; }
+  .results { overflow-x: auto; }
+
+  /* Form layout fix */
+  .aligned label { width: 100% !important; padding: 0 0 5px !important; display: block !important; float: none !important; }
+  .aligned p { padding-left: 0 !important; margin-left: 0 !important; }
+  .form-row { padding: 8px 0 !important; }
+  .form-row > div { float: none !important; width: 100% !important; }
+  .inline-group .tabular .form-row { padding: 0 !important; }
+
+  /* Buttons */
+  .submit-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 12px !important;
+  }
+  .submit-row input, .submit-row a.button, .submit-row .deletelink {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 12px 16px !important;
+    font-size: .9rem !important;
+    min-height: 44px !important;
+  }
+
+  /* Headings */
   h1 { font-size: 1.15rem !important; }
+  h2 { font-size: 1rem !important; }
+
+  /* Quick actions */
+  .ln-quick-action { font-size: .82rem; padding: 10px 12px; }
+  .ln-stat-card { padding: 14px 16px; }
 }
-@media (max-width: 480px) {
-  div#user-tools { font-size: .75rem; }
-  .ln-stat-value { font-size: 1.5rem; }
+
+@media (max-width: 600px) {
+  /* Header ultra-compact */
+  #header { padding: 6px 10px !important; gap: 4px 6px !important; }
+  #branding h1 { font-size: .88rem !important; }
+  #branding h1 span:last-child { display: none !important; } /* cache badge ADMIN */
+  div#user-tools { font-size: .68rem !important; }
+  .ln-hbtn { width: 28px !important; height: 28px !important; font-size: .8rem !important; }
+  #content { padding: 8px !important; }
+  .module h2, .module caption { font-size: .72rem !important; padding: 8px 12px !important; }
+  .ln-stat-value { font-size: 1.35rem !important; }
+  fieldset { padding: 10px !important; }
+  fieldset h2 { margin: -10px -10px 10px !important; }
+
+  /* Notification dropdown — full width on very small screens */
+  .ln-notif-dropdown { width: calc(100vw - 20px) !important; right: -8px !important; }
+
+  /* AI panel full-screen bottom */
+  #ln-ai-panel {
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 88vh !important;
+    bottom: 0 !important; right: 0 !important; left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Select & inputs more comfortable */
+  input[type=text], input[type=email], input[type=url],
+  input[type=password], input[type=number], select {
+    font-size: 16px !important; /* Prevents iOS zoom */
+    padding: 10px 12px !important;
+    min-height: 44px !important;
+  }
 }
 
 /* ── Header toolbar (bell + dark) ─────────────────── */

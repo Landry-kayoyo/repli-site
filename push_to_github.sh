@@ -21,7 +21,19 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
 if git diff --cached --quiet; then
   echo "✅ Rien à committer — tout est déjà à jour."
 else
-  git commit -m "🚀 Refonte complète Landry Net — Design, Email, IA boostée, Optimisations — $TIMESTAMP"
+  git commit -m "✨ Refonte Landry Net — Hero centré, Tech Stack DB, Admin mobile, Fix emails — $TIMESTAMP
+
+Changements principaux :
+- Hero homepage : centré sans photo (clean mobile), pills de stats
+- Stats section (grille 3/6 cartes) : supprimée de la homepage
+- Nouveau modèle Technology (tech stack piloté depuis admin Django)
+  - Migration : core/0005_add_technology.py
+  - Widget recherche Bootstrap Icons en live dans l'admin
+- Fix emails contact + newsletter : get_connection() thread-safe
+- Admin Django : navbar mobile améliorée, meilleurs touch targets,
+  header compact, inputs 44px, tables scrollables, submit-row vertical
+- Footer mobile : Navigation + Autres côte à côte
+- README (replit.md) : mise à jour avec commandes de migration prod"
 fi
 
 git push origin main
