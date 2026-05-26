@@ -34,3 +34,9 @@ outputType = "webview"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+DEBUG = "False"
+SECRET_KEY = "django-replit-landrynet-d434nnylrcd8hib9a89hn3e8so67jbi7q"
