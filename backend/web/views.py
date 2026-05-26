@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
@@ -235,3 +235,20 @@ def contact(request):
 def handler404(request, exception):
     settings = get_settings()
     return render(request, '404.html', {'settings': settings}, status=404)
+
+
+def robots_txt(request):
+    s = get_settings()
+    scheme = 'https' if request.is_secure() else 'http'
+    host = request.get_host()
+    site_url = f"{scheme}://{host}"
+    content = f"""User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin-ai/
+Disallow: /api/
+Disallow: /ckeditor/
+
+Sitemap: {site_url}/sitemap.xml
+"""
+    return HttpResponse(content, content_type='text/plain; charset=utf-8')

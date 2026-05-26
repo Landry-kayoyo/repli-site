@@ -179,6 +179,41 @@ class Technology(models.Model):
         return bool(self.icon and self.icon.startswith('bi-'))
 
 
+class AIConfig(models.Model):
+    """Multiple AI API configurations — activate one to use it."""
+    name = models.CharField(max_length=100, verbose_name='Nom de la configuration',
+                            help_text='Ex: ChatAnywhere GPT-4, OpenAI principal, Backup gratuit')
+    api_key = models.CharField(max_length=500, verbose_name='Clé API',
+                               help_text='Votre clé API compatible OpenAI (sk-...)')
+    api_base_url = models.CharField(
+        max_length=300, default='https://api.chatanywhere.tech/v1',
+        verbose_name='URL de base API',
+        help_text='ChatAnywhere: https://api.chatanywhere.tech/v1 | OpenAI: https://api.openai.com/v1'
+    )
+    model = models.CharField(max_length=100, default='gpt-3.5-turbo', verbose_name='Modèle',
+                             help_text='gpt-3.5-turbo | gpt-4o-mini | gpt-4 | gpt-4o')
+    is_active = models.BooleanField(default=False, verbose_name='Configuration active',
+                                    help_text='Une seule configuration peut être active à la fois')
+    notes = models.TextField(blank=True, verbose_name='Notes personnelles',
+                             help_text='Ex: quota restant, date expiration, usage')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Configuration IA'
+        verbose_name_plural = 'Configurations IA'
+        ordering = ['-is_active', '-updated_at']
+
+    def __str__(self):
+        status = '✅ Active' if self.is_active else '⏸ Inactive'
+        return f"{self.name} [{self.model}] — {status}"
+
+    def save(self, *args, **kwargs):
+        if self.is_active:
+            AIConfig.objects.exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)
+
+
 class PageView(models.Model):
     content_type = models.CharField(max_length=50)
     object_id = models.PositiveIntegerField()

@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.db.models import Sum, TextField
 from django.utils import timezone
 from datetime import timedelta
-from .models import SiteSettings, Skill, Experience, Education, PageView, Technology
+from .models import SiteSettings, Skill, Experience, Education, PageView, Technology, AIConfig
 try:
     from ckeditor.widgets import CKEditorWidget
     CKEDITOR_AVAILABLE = True
@@ -246,3 +246,40 @@ class PageViewAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+@admin.register(AIConfig)
+class AIConfigAdmin(admin.ModelAdmin):
+    list_display = ('name', 'model', 'api_base_url_short', 'is_active', 'updated_at')
+    list_display_links = ('name',)
+    list_editable = ('is_active',)
+    list_filter = ('is_active', 'model')
+    search_fields = ('name', 'notes')
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('-is_active', '-updated_at')
+
+    fieldsets = (
+        ('Identification', {
+            'fields': ('name', 'is_active', 'notes'),
+            'description': (
+                '<div style="background:#eef2ff;border-left:4px solid #4F46E5;border-radius:6px;padding:14px;margin-bottom:10px;">'
+                '<b style="color:#4F46E5;">🔑 Gestion multi-API IA</b><br><br>'
+                'Créez plusieurs configurations (ChatAnywhere, OpenAI, etc.) '
+                'et activez celle que vous voulez utiliser. '
+                '<b>Une seule configuration peut être active à la fois.</b>'
+                '</div>'
+            ),
+        }),
+        ('Paramètres API', {
+            'fields': ('api_key', 'api_base_url', 'model'),
+        }),
+        ('Informations', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+
+    def api_base_url_short(self, obj):
+        url = obj.api_base_url or ''
+        return url.replace('https://', '').replace('http://', '')[:40]
+    api_base_url_short.short_description = 'URL de base'

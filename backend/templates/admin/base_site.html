@@ -20,7 +20,102 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
 /* ====================================================
-   THEME MODERNE - BLEU/CYAN - COMPLET
+   BOOTSTRAP GRID & UTILITIES (pour le dashboard)
+   ==================================================== */
+.row { display:flex; flex-wrap:wrap; margin-left:-8px; margin-right:-8px; }
+.row > * { padding-left:8px; padding-right:8px; box-sizing:border-box; }
+.col-6 { width:50%; }
+.col-4 { width:33.333%; }
+.col-12 { width:100%; }
+@media (min-width:576px) { .col-sm-6{width:50%;} }
+@media (min-width:768px) { .col-md-4{width:33.333%;} .col-md-6{width:50%;} .col-md-8{width:66.666%;} .col-md-12{width:100%;} }
+@media (min-width:992px) { .col-lg-2{width:16.666%;} .col-lg-3{width:25%;} .col-lg-4{width:33.333%;} .col-lg-6{width:50%;} .col-lg-8{width:66.666%;} .col-lg-9{width:75%;} .col-lg-12{width:100%;} }
+.g-1 > * { padding:4px; } .g-1 { margin:-4px; }
+.g-2 > * { padding:6px; } .g-2 { margin:-6px; }
+.g-3 > * { padding:8px; } .g-3 { margin:-8px; }
+.g-4 > * { padding:12px; } .g-4 { margin:-12px; }
+.d-flex { display:flex !important; }
+.d-none { display:none !important; }
+.d-block { display:block !important; }
+.flex-wrap { flex-wrap:wrap; }
+.flex-nowrap { flex-wrap:nowrap; }
+.flex-column { flex-direction:column; }
+.align-items-center { align-items:center; }
+.align-items-start { align-items:flex-start; }
+.align-items-end { align-items:flex-end; }
+.align-items-flex-end { align-items:flex-end; }
+.justify-content-between { justify-content:space-between; }
+.justify-content-center { justify-content:center; }
+.justify-content-start { justify-content:flex-start; }
+.flex-grow-1 { flex:1; }
+.flex-shrink-0 { flex-shrink:0; }
+.ms-auto { margin-left:auto; }
+.me-auto { margin-right:auto; }
+.gap-1 { gap:4px; } .gap-2 { gap:8px; } .gap-3 { gap:12px; } .gap-4 { gap:16px; }
+.mb-0{margin-bottom:0!important;} .mb-1{margin-bottom:4px!important;} .mb-2{margin-bottom:8px!important;}
+.mb-3{margin-bottom:12px!important;} .mb-4{margin-bottom:16px!important;} .mb-5{margin-bottom:24px!important;}
+.mt-0{margin-top:0!important;} .mt-1{margin-top:4px!important;} .mt-2{margin-top:8px!important;}
+.mt-3{margin-top:12px!important;} .mt-4{margin-top:16px!important;}
+.ms-1{margin-left:4px!important;} .ms-2{margin-left:8px!important;} .ms-3{margin-left:12px!important;}
+.me-1{margin-right:4px!important;} .me-2{margin-right:8px!important;} .me-3{margin-right:12px!important;}
+.m-1{margin:4px!important;} .m-2{margin:8px!important;} .m-3{margin:12px!important;}
+.p-1{padding:4px!important;} .p-2{padding:8px!important;} .p-3{padding:12px!important;} .p-4{padding:16px!important;}
+.px-2{padding-left:8px!important;padding-right:8px!important;} .px-3{padding-left:12px!important;padding-right:12px!important;}
+.py-1{padding-top:4px!important;padding-bottom:4px!important;} .py-2{padding-top:8px!important;padding-bottom:8px!important;}
+.py-3{padding-top:12px!important;padding-bottom:12px!important;}
+.fw-bold{font-weight:700!important;} .fw-semibold{font-weight:600!important;} .fw-normal{font-weight:400!important;}
+.fs-1{font-size:2.5rem!important;} .fs-2{font-size:2rem!important;} .fs-3{font-size:1.75rem!important;}
+.fs-4{font-size:1.5rem!important;} .fs-5{font-size:1.25rem!important;} .fs-6{font-size:1rem!important;}
+.small{font-size:0.875em!important;} .text-sm{font-size:0.8rem!important;}
+.text-center{text-align:center!important;} .text-start{text-align:left!important;} .text-end{text-align:right!important;}
+.text-uppercase{text-transform:uppercase!important;} .text-capitalize{text-transform:capitalize!important;}
+.text-white{color:#fff!important;} .text-dark{color:#212529!important;} .text-muted,.text-secondary{color:#6c757d!important;}
+.text-primary{color:#0d6efd!important;} .text-success{color:#198754!important;} .text-warning{color:#ffc107!important;}
+.text-danger{color:#dc3545!important;} .text-info{color:#0dcaf0!important;}
+.bg-white{background:#fff!important;} .bg-light{background:#f8f9fa!important;} .bg-dark{background:#212529!important;}
+.bg-primary{background:#0d6efd!important;} .bg-success{background:#198754!important;}
+.bg-warning{background:#ffc107!important;} .bg-danger{background:#dc3545!important;} .bg-info{background:#0dcaf0!important;}
+.bg-primary.bg-opacity-10{background:rgba(13,110,253,0.1)!important;}
+.bg-success.bg-opacity-10{background:rgba(25,135,84,0.1)!important;}
+.bg-warning.bg-opacity-10{background:rgba(255,193,7,0.15)!important;}
+.bg-danger.bg-opacity-10{background:rgba(220,53,69,0.1)!important;}
+.bg-info.bg-opacity-10{background:rgba(13,202,240,0.1)!important;}
+.bg-secondary.bg-opacity-10{background:rgba(108,117,125,0.1)!important;}
+.rounded{border-radius:6px!important;} .rounded-1{border-radius:4px!important;} .rounded-2{border-radius:8px!important;}
+.rounded-3{border-radius:12px!important;} .rounded-4{border-radius:16px!important;} .rounded-circle{border-radius:50%!important;}
+.border{border:1px solid #dee2e6!important;} .border-0{border:0!important;}
+.border-bottom{border-bottom:1px solid #dee2e6!important;} .border-top{border-top:1px solid #dee2e6!important;}
+.overflow-hidden{overflow:hidden!important;} .overflow-x-auto{overflow-x:auto!important;}
+.word-break-all{word-break:break-all!important;} .font-monospace{font-family:monospace!important;}
+.position-relative{position:relative!important;} .position-absolute{position:absolute!important;}
+.top-0{top:0!important;} .end-0{right:0!important;} .start-0{left:0!important;} .bottom-0{bottom:0!important;}
+.w-100{width:100%!important;} .h-100{height:100%!important;} .mw-100{max-width:100%!important;}
+.cursor-pointer{cursor:pointer;}
+.badge { display:inline-flex; align-items:center; padding:3px 8px; font-size:0.7rem; font-weight:700; border-radius:4px; }
+.badge.bg-success { color:white; } .badge.bg-warning { color:#1a1a1a; } .badge.bg-danger { color:white; }
+.badge.bg-info { color:#1a1a1a; } .badge.bg-primary { color:white; } .badge.bg-secondary { color:white; }
+.rounded-pill { border-radius:50px!important; }
+.btn { display:inline-flex; align-items:center; gap:5px; padding:8px 16px; font-size:0.875rem; font-weight:600; border-radius:8px; border:none; cursor:pointer; text-decoration:none; transition:opacity 0.2s,transform 0.15s; }
+.btn:hover { opacity:0.88; transform:translateY(-1px); }
+.btn-sm { padding:4px 12px!important; font-size:0.75rem!important; border-radius:6px!important; }
+.btn-primary { background:linear-gradient(135deg,#0d6efd,#0dcaf0)!important; color:white!important; }
+.btn-success { background:linear-gradient(135deg,#198754,#20c997)!important; color:white!important; }
+.btn-warning { background:linear-gradient(135deg,#ffc107,#fd7e14)!important; color:#1a1a1a!important; }
+.btn-danger { background:linear-gradient(135deg,#dc3545,#c82333)!important; color:white!important; }
+.btn-outline-primary { border:1px solid #0d6efd!important; color:#0d6efd!important; background:transparent!important; }
+.btn-outline-secondary { border:1px solid #6c757d!important; color:#6c757d!important; background:transparent!important; }
+.btn-outline-success { border:1px solid #198754!important; color:#198754!important; background:transparent!important; }
+.btn-outline-danger { border:1px solid #dc3545!important; color:#dc3545!important; background:transparent!important; }
+.btn-light { background:#f8f9fa!important; color:#212529!important; border:1px solid #dee2e6!important; }
+.btn-outline-light { border:1px solid rgba(255,255,255,0.5)!important; color:white!important; background:transparent!important; }
+.btn-group { display:inline-flex; }
+.btn-group > .btn { border-radius:0!important; border-right:0!important; }
+.btn-group > .btn:first-child { border-radius:8px 0 0 8px!important; }
+.btn-group > .btn:last-child { border-radius:0 8px 8px 0!important; border-right:1px solid rgba(0,0,0,0.1)!important; }
+.btn-group-sm > .btn { padding:3px 10px!important; font-size:0.72rem!important; }
+
+/* ====================================================
+   THEME MODERNE - COMPLET
    ==================================================== */
 :root {
   --primary: #0d6efd;
@@ -36,12 +131,8 @@
   --border: #dee2e6;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Inter', -apple-system, sans-serif !important;
-  background: #f0f2f5 !important;
-}
+* { box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, sans-serif !important; background: #f0f2f5 !important; }
 
 /* Header */
 #header {
@@ -51,88 +142,62 @@ body {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  position: sticky; top: 0; z-index: 1000;
 }
 #user-tools { color: rgba(255,255,255,0.8) !important; font-size: 0.85rem !important; }
 #user-tools a { color: rgba(255,255,255,0.9) !important; }
 
-/* Breadcrumbs */
-div.breadcrumbs {
-  background: white !important;
-  border-bottom: 1px solid var(--border) !important;
-  padding: 10px 24px !important;
-  font-size: 0.8rem;
+/* Mobile sidebar toggle */
+#toggle-nav-sidebar {
+  display: none;
+  align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  border: none; border-radius: 8px;
+  color: white; cursor: pointer; font-size: 1.1rem;
+  margin-right: 10px;
 }
+@media (max-width: 767px) {
+  #toggle-nav-sidebar { display: inline-flex !important; }
+  #nav-sidebar { transform: translateX(-110%); transition: transform 0.25s ease; position: fixed; top: 64px; left: 0; bottom: 0; z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+  #nav-sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0 !important; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 998; }
+  .sidebar-overlay.show { display: block; }
+}
+
+/* Breadcrumbs */
+div.breadcrumbs { background: white !important; border-bottom: 1px solid var(--border) !important; padding: 10px 24px !important; font-size: 0.8rem; }
 div.breadcrumbs a { color: var(--primary) !important; }
 
 /* Sidebar */
-#nav-sidebar {
-  background: white !important;
-  border-right: 1px solid var(--border) !important;
-}
-#nav-sidebar .module__title {
-  color: var(--secondary) !important;
-  font-size: 0.7rem !important;
-  text-transform: uppercase;
-  padding: 8px 16px !important;
-}
-#nav-sidebar a {
-  color: var(--dark) !important;
-  padding: 8px 16px !important;
-  margin: 2px 8px;
-  border-radius: 8px;
-}
-#nav-sidebar a:hover, #nav-sidebar .selected {
-  background: var(--primary-bg) !important;
-  color: var(--primary) !important;
-}
+#nav-sidebar { background: white !important; border-right: 1px solid var(--border) !important; }
+#nav-sidebar .module__title { color: var(--secondary) !important; font-size: 0.7rem !important; text-transform: uppercase; padding: 8px 16px !important; }
+#nav-sidebar a { color: var(--dark) !important; padding: 8px 16px !important; margin: 2px 8px; border-radius: 8px; display:block; }
+#nav-sidebar a:hover, #nav-sidebar .selected { background: var(--primary-bg) !important; color: var(--primary) !important; }
 
 /* Content */
 #content { padding: 24px !important; background: #f0f2f5 !important; }
 #content-main { max-width: 1400px; margin: 0 auto; }
 
 /* Modules / Cards */
-.module {
-  background: white !important;
-  border-radius: 12px !important;
-  border: 1px solid var(--border) !important;
-  margin-bottom: 24px;
-  overflow: hidden;
-}
-.module h2, .module caption {
-  background: linear-gradient(90deg, var(--primary), var(--primary-light)) !important;
-  color: white !important;
-  padding: 12px 20px !important;
-  font-size: 0.85rem !important;
-  font-weight: 600;
-}
+.module { background: white !important; border-radius: 12px !important; border: 1px solid var(--border) !important; margin-bottom: 24px; overflow: hidden; }
+.module h2, .module caption { background: linear-gradient(90deg, var(--primary), var(--primary-light)) !important; color: white !important; padding: 12px 20px !important; font-size: 0.85rem !important; font-weight: 600; }
 
-/* Fieldsets - Onglet SEO */
-fieldset {
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  margin: 20px 0 !important;
-  padding: 20px !important;
-  background: white;
-}
-fieldset h2 {
-  background: linear-gradient(90deg, var(--primary), var(--primary-light)) !important;
-  color: white !important;
-  margin: -20px -20px 20px -20px !important;
-  padding: 12px 20px !important;
-  border-radius: 12px 12px 0 0 !important;
-}
+/* Fieldsets */
+fieldset { border: 1px solid var(--border) !important; border-radius: 12px !important; margin: 20px 0 !important; padding: 20px !important; background: white; }
+fieldset h2 { background: linear-gradient(90deg, var(--primary), var(--primary-light)) !important; color: white !important; margin: -20px -20px 20px -20px !important; padding: 12px 20px !important; border-radius: 12px 12px 0 0 !important; }
 
 /* Form rows */
 .form-row { padding: 12px 0 !important; border-bottom: 1px solid #f0f0f0; }
 .aligned label { font-weight: 600; color: var(--dark); }
 
 /* Inputs */
-input, textarea, select {
+input[type="text"], input[type="email"], input[type="url"], input[type="number"], input[type="password"], input[type="search"], textarea, select {
   border: 1px solid var(--border) !important;
   border-radius: 8px !important;
   padding: 10px 14px !important;
   font-size: 0.875rem !important;
-  width: 100% !important;
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--primary) !important;
@@ -140,21 +205,17 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px rgba(13,110,253,0.1) !important;
 }
 
-/* Buttons */
-.button, input[type="submit"], .submit-row input {
+/* Submit buttons */
+.button, input[type="submit"], .submit-row input[type="submit"] {
   background: linear-gradient(135deg, var(--primary), var(--primary-light)) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 8px !important;
-  padding: 10px 20px !important;
-  font-weight: 600 !important;
-  cursor: pointer;
+  color: white !important; border: none !important; border-radius: 8px !important;
+  padding: 10px 20px !important; font-weight: 600 !important; cursor: pointer;
 }
 .deletelink { background: linear-gradient(135deg, var(--danger), #c82333) !important; }
 .addlink { background: transparent !important; color: var(--primary) !important; border: 1px solid var(--primary) !important; }
 
 /* Tables */
-#result_list { border-radius: 12px; overflow-x: auto; border: 1px solid var(--border) !important; }
+#result_list { border-radius: 12px; overflow: auto; border: 1px solid var(--border) !important; }
 #result_list thead th { background: var(--light) !important; padding: 12px 16px !important; }
 #result_list tbody tr:hover { background: var(--primary-bg) !important; }
 
@@ -162,120 +223,174 @@ input:focus, textarea:focus, select:focus {
 .submit-row { background: var(--light) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; padding: 16px 20px !important; display: flex; gap: 12px; flex-wrap: wrap; }
 
 /* ====================================================
-   BOUTONS IA (✨)
+   BOUTONS IA DANS LES FORMULAIRES
    ==================================================== */
 .ln-ai-suggest {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+  display: inline-flex; align-items: center; gap: 5px;
   background: linear-gradient(135deg, #0d6efd, #0dcaf0);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 5px 12px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  margin-left: 8px;
+  color: white; border: none; border-radius: 6px;
+  padding: 5px 12px; font-size: 0.7rem; font-weight: 600;
+  cursor: pointer; transition: opacity 0.2s; margin-left: 8px;
 }
 .ln-ai-suggest:hover { opacity: 0.85; }
 .ln-ai-struct { background: linear-gradient(135deg, #198754, #20c997) !important; }
 
 /* ====================================================
-   AI WIDGET (BOUTON FLOTTANT + PANEL)
+   AI WIDGET COMPLET
    ==================================================== */
 #ln-ai-btn {
   position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-  width: 56px; height: 56px; border-radius: 28px;
+  width: 54px; height: 54px; border-radius: 27px;
   background: linear-gradient(135deg, #0d6efd, #0dcaf0);
-  color: white; font-size: 1.4rem;
+  color: white; font-size: 1.3rem;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 15px rgba(13,110,253,0.4);
-  cursor: pointer; border: none;
-  transition: transform 0.2s;
+  cursor: pointer; border: none; transition: transform 0.2s;
 }
-#ln-ai-btn:hover { transform: scale(1.05); }
+#ln-ai-btn:hover { transform: scale(1.08); }
 
 #ln-ai-panel {
   position: fixed; z-index: 9998;
   background: white; border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.18);
   border: 1px solid var(--border);
   display: none; flex-direction: column; overflow: hidden;
-  bottom: 90px; right: 24px;
-  width: 400px; max-height: 550px;
+  bottom: 88px; right: 24px;
+  width: 420px; height: 580px;
 }
-#ln-ai-panel.open { display: flex; animation: slideUp 0.2s ease; }
-@keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+#ln-ai-panel.open { display: flex; animation: aiSlideUp 0.22s ease; }
+@keyframes aiSlideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
 .ai-panel-head {
   background: linear-gradient(135deg, #0d6efd, #0dcaf0);
-  color: white; padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+  color: white; padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
 }
-.ai-messages { flex: 1; overflow-y: auto; padding: 12px; background: var(--light); max-height: 350px; }
-.ai-msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 0.8rem; margin-bottom: 8px; }
-.ai-msg.user { background: linear-gradient(135deg, #0d6efd, #0dcaf0); color: white; margin-left: auto; }
-.ai-msg.ai { background: white; border: 1px solid var(--border); }
-.ai-msg.system { background: var(--primary-bg); color: var(--primary); text-align: center; max-width: 100%; }
-.ai-quick-btns { padding: 8px 12px; display: flex; gap: 6px; overflow-x: auto; border-top: 1px solid var(--border); }
-.ai-quick-btn { padding: 5px 12px; background: var(--primary-bg); border: none; border-radius: 20px; font-size: 0.7rem; color: var(--primary); cursor: pointer; white-space: nowrap; }
-.ai-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border); }
-.ai-input-row input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; }
-.ai-input-row button { background: linear-gradient(135deg, #0d6efd, #0dcaf0); border: none; border-radius: 8px; color: white; padding: 8px 12px; cursor: pointer; }
+.ai-panel-actions { display:flex; gap:6px; margin-left:auto; }
+.ai-panel-btn { background:rgba(255,255,255,0.18); border:none; color:white; width:28px; height:28px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.85rem; }
+.ai-panel-btn:hover { background:rgba(255,255,255,0.3); }
+
+.ai-messages { flex:1; overflow-y:auto; padding:12px; background:#f8faff; }
+.ai-msg { max-width:88%; padding:10px 13px; border-radius:14px; font-size:0.82rem; margin-bottom:8px; line-height:1.55; position:relative; }
+.ai-msg.user { background:linear-gradient(135deg,#0d6efd,#0dcaf0); color:white; margin-left:auto; border-radius:14px 14px 4px 14px; }
+.ai-msg.ai { background:white; border:1px solid var(--border); border-radius:14px 14px 14px 4px; }
+.ai-msg.system { background:#e7f1ff; color:#0d6efd; text-align:center; max-width:100%; border-radius:8px; font-size:0.78rem; }
+.ai-msg.error { background:#fff5f5; border:1px solid #fca5a5; color:#dc2626; border-radius:14px 14px 14px 4px; }
+.ai-copy-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.08); border:none; border-radius:5px; padding:3px 7px; font-size:0.68rem; cursor:pointer; color:inherit; opacity:0; transition:opacity 0.2s; }
+.ai-msg.ai:hover .ai-copy-btn, .ai-msg.user:hover .ai-copy-btn { opacity:1; }
+.ai-msg.user .ai-copy-btn { background:rgba(255,255,255,0.25); color:white; }
+.ai-msg h4, .ai-msg h5 { font-size:0.85rem; font-weight:700; margin:6px 0 3px; }
+.ai-msg code { background:rgba(0,0,0,0.07); padding:2px 5px; border-radius:4px; font-size:0.78rem; font-family:monospace; }
+.ai-msg pre { background:rgba(0,0,0,0.06); padding:8px; border-radius:6px; overflow-x:auto; font-size:0.75rem; }
+.ai-msg ul { padding-left:16px; margin:4px 0; }
+.ai-msg li { margin:2px 0; }
+.ai-msg strong { font-weight:700; }
+.ai-msg em { font-style:italic; }
+
+.ai-typing-indicator { display:flex; gap:5px; padding:10px 14px; background:white; border:1px solid var(--border); border-radius:14px 14px 14px 4px; width:fit-content; margin-bottom:8px; }
+.ai-typing-dot { width:7px; height:7px; background:#0d6efd; border-radius:50%; animation:typingBounce 1.2s infinite; }
+.ai-typing-dot:nth-child(2) { animation-delay:0.2s; }
+.ai-typing-dot:nth-child(3) { animation-delay:0.4s; }
+@keyframes typingBounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-6px); } }
+
+/* Prompts presets panel */
+.ai-presets { display:none; padding:8px 12px; background:#f0f4ff; border-top:1px solid #d0deff; max-height:160px; overflow-y:auto; flex-shrink:0; }
+.ai-presets.show { display:block; }
+.ai-preset-item { padding:7px 10px; border-radius:8px; cursor:pointer; font-size:0.78rem; color:#1a3a6e; border:1px solid transparent; margin-bottom:5px; transition:all 0.15s; }
+.ai-preset-item:hover { background:white; border-color:#c7d8ff; }
+.ai-preset-item:last-child { margin-bottom:0; }
+.ai-preset-label { font-weight:600; display:block; margin-bottom:1px; }
+.ai-preset-text { color:#5a7ab0; font-size:0.72rem; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Quick actions */
+.ai-quick-btns { padding:8px 10px; display:flex; gap:6px; overflow-x:auto; border-top:1px solid var(--border); flex-shrink:0; background:white; scrollbar-width:none; }
+.ai-quick-btns::-webkit-scrollbar { display:none; }
+.ai-quick-btn { padding:5px 11px; background:var(--primary-bg); border:1px solid #c7d8ff; border-radius:20px; font-size:0.72rem; color:#0d6efd; cursor:pointer; white-space:nowrap; font-weight:600; transition:all 0.15s; flex-shrink:0; }
+.ai-quick-btn:hover { background:#0d6efd; color:white; border-color:#0d6efd; }
+
+/* Input area */
+.ai-input-area { padding:10px 12px; border-top:1px solid var(--border); background:white; flex-shrink:0; }
+.ai-input-toolbar { display:flex; gap:6px; margin-bottom:6px; align-items:center; }
+.ai-toolbar-btn { background:var(--primary-bg); border:1px solid #c7d8ff; border-radius:6px; color:#0d6efd; padding:3px 9px; font-size:0.7rem; font-weight:600; cursor:pointer; white-space:nowrap; }
+.ai-toolbar-btn:hover { background:#0d6efd; color:white; }
+.ai-toolbar-btn.active { background:#0d6efd; color:white; }
+.ai-input-row { display:flex; gap:8px; }
+.ai-input-row input { flex:1; padding:9px 13px; border:1.5px solid var(--border); border-radius:10px; font-size:0.83rem; background:var(--light); outline:none; transition:border-color 0.2s; }
+.ai-input-row input:focus { border-color:#0d6efd; background:white; }
+.ai-send-btn { background:linear-gradient(135deg,#0d6efd,#0dcaf0); border:none; border-radius:10px; color:white; padding:9px 14px; cursor:pointer; font-size:0.9rem; transition:opacity 0.2s; flex-shrink:0; }
+.ai-send-btn:hover { opacity:0.85; }
+.ai-send-btn:disabled { opacity:0.5; }
+
+/* Publish bar */
+.ai-publish-bar { display:none; background:#eef7ee; border-top:1px solid #a8d5a2; padding:8px 12px; flex-shrink:0; }
+.ai-publish-bar.show { display:block; }
+.ai-publish-form { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.ai-pub-select { padding:5px 8px; border:1px solid #cce0cc; border-radius:7px; font-size:0.75rem; background:white; }
+.ai-pub-input { flex:1; min-width:100px; padding:5px 9px; border:1px solid #cce0cc; border-radius:7px; font-size:0.75rem; }
+.ai-pub-btn { padding:5px 12px; background:#198754; border:none; border-radius:7px; color:white; font-size:0.75rem; font-weight:700; cursor:pointer; }
+.ai-pub-btn:hover { background:#157347; }
 
 /* ====================================================
    HEADER TOOLBAR (BELL + DARK MODE)
    ==================================================== */
-#ln-header-toolbar { display: flex; align-items: center; gap: 8px; margin-left: 16px; }
-.ln-hbtn { background: rgba(255,255,255,0.12); border: none; border-radius: 8px; width: 34px; height: 34px; color: white; cursor: pointer; position: relative; }
-.ln-bell-badge { position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; font-size: 10px; padding: 2px 5px; border-radius: 20px; min-width: 16px; }
-.ln-notif-wrap { position: relative; }
-.ln-notif-dropdown { position: absolute; top: 42px; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: none; z-index: 1050; border: 1px solid var(--border); }
-.ln-notif-dropdown.open { display: block; animation: slideDown 0.2s ease; }
+#ln-header-toolbar { display:flex; align-items:center; gap:8px; margin-left:16px; }
+.ln-hbtn { background:rgba(255,255,255,0.12); border:none; border-radius:8px; width:34px; height:34px; color:white; cursor:pointer; position:relative; display:flex; align-items:center; justify-content:center; }
+.ln-bell-badge { position:absolute; top:-4px; right:-4px; background:var(--danger); color:white; font-size:10px; padding:2px 5px; border-radius:20px; min-width:16px; text-align:center; }
+.ln-notif-wrap { position:relative; }
+.ln-notif-dropdown { position:absolute; top:42px; right:0; width:320px; background:white; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.15); display:none; z-index:1050; border:1px solid var(--border); }
+.ln-notif-dropdown.open { display:block; animation:slideDown 0.2s ease; }
 @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-.ln-notif-head { background: linear-gradient(135deg, #0d6efd, #0dcaf0); padding: 12px 16px; border-radius: 12px 12px 0 0; color: white; display: flex; justify-content: space-between; }
-.ln-notif-list { max-height: 300px; overflow-y: auto; }
-.ln-notif-item { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--border); text-decoration: none; color: var(--dark); }
-.ln-notif-item:hover { background: var(--primary-bg); }
+.ln-notif-head { background:linear-gradient(135deg,#0d6efd,#0dcaf0); padding:12px 16px; border-radius:12px 12px 0 0; color:white; display:flex; justify-content:space-between; align-items:center; }
+.ln-notif-list { max-height:300px; overflow-y:auto; }
+.ln-notif-item { display:flex; padding:12px 16px; border-bottom:1px solid var(--border); text-decoration:none; color:var(--dark); }
+.ln-notif-item:hover { background:var(--primary-bg); }
+
+/* ====================================================
+   DARK MODE
+   ==================================================== */
+.dm body, .dm { background:#0f172a !important; color:#e2e8f0 !important; }
+.dm #content { background:#0f172a !important; }
+.dm .module, .dm fieldset { background:#1e293b !important; border-color:#334155 !important; }
+.dm input[type="text"],.dm input[type="email"],.dm textarea,.dm select { background:#334155 !important; border-color:#475569 !important; color:#e2e8f0 !important; }
+.dm .ln-notif-dropdown { background:#1e293b !important; border-color:#334155 !important; }
+.dm .ln-notif-item { color:#e2e8f0 !important; border-bottom-color:#334155 !important; }
+.dm .ln-notif-item:hover { background:#1e3a5f !important; }
+.dm .ai-messages { background:#0f172a !important; }
+.dm .ai-msg.ai { background:#1e293b !important; border-color:#334155 !important; color:#e2e8f0 !important; }
+.dm .ai-msg.system { background:#1e3a5f !important; color:#93c5fd !important; }
+.dm .ai-quick-btns { background:#1e293b !important; border-top-color:#334155 !important; }
+.dm .ai-quick-btn { background:#334155 !important; border-color:#475569 !important; color:#93c5fd !important; }
+.dm .ai-input-area { background:#1e293b !important; border-top-color:#334155 !important; }
+.dm .ai-input-row input { background:#334155 !important; border-color:#475569 !important; color:#e2e8f0 !important; }
+.dm .ai-presets { background:#1e293b !important; border-color:#334155 !important; }
+.dm .ai-preset-item { color:#93c5fd !important; }
+.dm .ai-preset-item:hover { background:#334155 !important; border-color:#475569 !important; }
+.dm #ln-ai-panel { background:#1e293b !important; border-color:#334155 !important; }
+.dm .ai-panel-head { background:linear-gradient(135deg,#1d4ed8,#0891b2) !important; }
 
 /* ====================================================
    RESPONSIVE MOBILE
    ==================================================== */
 @media (max-width: 768px) {
-  #header { padding: 8px 16px !important; flex-wrap: wrap; height: auto !important; }
-  #branding { width: 100%; margin-bottom: 8px; }
-  #user-tools { width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px !important; }
-  #content { padding: 16px !important; }
-  .submit-row { flex-direction: column; }
-  .submit-row input { width: 100%; }
-  #result_list { min-width: 500px; }
-  #ln-ai-panel { bottom: 0; right: 0; left: 0; width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; }
-  #ln-ai-btn { bottom: 16px; right: 16px; width: 50px; height: 50px; font-size: 1.2rem; }
+  #header { padding:8px 16px !important; height:auto !important; min-height:56px; gap:8px; }
+  #user-tools { font-size:0.75rem !important; }
+  #content { padding:12px !important; }
+  .submit-row { flex-direction:column; }
+  #ln-ai-panel { bottom:0; right:0; left:0; width:100%; height:85vh; max-height:85vh; border-radius:20px 20px 0 0; }
+  #ln-ai-btn { bottom:16px; right:16px; width:50px; height:50px; font-size:1.2rem; }
 }
-
-/* ====================================================
-   DARK MODE
-   ==================================================== */
-.dm body, .dm { background: #0f172a !important; color: #e2e8f0 !important; }
-.dm #content { background: #0f172a !important; }
-.dm .module, .dm fieldset { background: #1e293b !important; border-color: #334155 !important; }
-.dm input, .dm textarea, .dm select { background: #334155 !important; border-color: #475569 !important; color: #e2e8f0 !important; }
-.dm .ln-notif-dropdown { background: #1e293b !important; border-color: #334155 !important; }
-.dm .ln-notif-item { color: #e2e8f0 !important; border-bottom-color: #334155 !important; }
-.dm .ai-messages { background: #0f172a !important; }
-.dm .ai-msg.ai { background: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important; }
-.dm .ai-quick-btns, .dm .ai-input-row { border-top-color: #334155 !important; background: #1e293b !important; }
-.dm .ai-input-row input { background: #334155 !important; border-color: #475569 !important; color: #e2e8f0 !important; }
 </style>
 {% endblock %}
 
 {% block footer %}
 {{ block.super }}
 
+<!-- SIDEBAR OVERLAY pour mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <script>
 // ====================================================
-// DARK MODE + NOTIFICATIONS + AI
+// DARK MODE + NOTIFICATIONS + MOBILE SIDEBAR
 // ====================================================
 (function() {
   var isDark = localStorage.getItem('ln_admin_dark') === '1';
@@ -288,30 +403,30 @@ input:focus, textarea:focus, select:focus {
     toolbar.id = 'ln-header-toolbar';
     toolbar.innerHTML = `
       <div class="ln-notif-wrap">
-        <button class="ln-hbtn" id="ln-bell-btn"><i class="bi bi-bell-fill"></i><span class="ln-bell-badge" id="ln-bell-badge" style="display:none;">0</span></button>
+        <button class="ln-hbtn" id="ln-bell-btn" title="Notifications"><i class="bi bi-bell-fill"></i><span class="ln-bell-badge" id="ln-bell-badge" style="display:none;">0</span></button>
         <div class="ln-notif-dropdown" id="ln-notif-dropdown">
-          <div class="ln-notif-head"><h4 style="margin:0;font-size:0.85rem;"><i class="bi bi-bell-fill me-1"></i>Notifications</h4><span id="ln-notif-count">...</span></div>
-          <div class="ln-notif-list" id="ln-notif-list"><div class="ln-notif-empty" style="padding:20px;text-align:center;">Chargement...</div></div>
-          <div class="ln-notif-footer" style="padding:10px 16px;border-top:1px solid #dee2e6;text-align:center;"><a href="/admin/comments/comment/?is_approved__exact=0">Commentaires en attente →</a></div>
+          <div class="ln-notif-head"><h4 style="margin:0;font-size:0.85rem;"><i class="bi bi-bell-fill" style="margin-right:6px;"></i>Notifications</h4><span id="ln-notif-count" style="font-size:0.75rem;opacity:0.85;">...</span></div>
+          <div class="ln-notif-list" id="ln-notif-list"><div style="padding:20px;text-align:center;font-size:0.8rem;">Chargement...</div></div>
+          <div style="padding:10px 16px;border-top:1px solid #dee2e6;text-align:center;"><a href="/admin/comments/comment/?is_approved__exact=0" style="font-size:0.78rem;color:#0d6efd;">Voir les commentaires en attente →</a></div>
         </div>
       </div>
-      <button class="ln-hbtn" id="ln-dark-toggle"><i id="ln-dark-icon" class="bi bi-${isDark ? 'sun-fill' : 'moon-fill'}"></i></button>
+      <button class="ln-hbtn" id="ln-dark-toggle" title="Mode sombre/clair"><i id="ln-dark-icon" class="bi bi-${isDark ? 'sun-fill' : 'moon-fill'}"></i></button>
     `;
     userTools.parentNode.insertBefore(toolbar, userTools.nextSibling);
-    
+
     document.getElementById('ln-dark-toggle').onclick = function() {
       isDark = !isDark;
       document.body.classList.toggle('dm', isDark);
       localStorage.setItem('ln_admin_dark', isDark ? '1' : '0');
       document.getElementById('ln-dark-icon').className = `bi bi-${isDark ? 'sun-fill' : 'moon-fill'}`;
     };
-    
+
     var bellBtn = document.getElementById('ln-bell-btn');
     var dropdown = document.getElementById('ln-notif-dropdown');
     bellBtn.onclick = function(e) { e.stopPropagation(); dropdown.classList.toggle('open'); if(dropdown.classList.contains('open')) loadNotifications(); };
-    document.addEventListener('click', function(e) { if(!dropdown.contains(e.target) && e.target !== bellBtn) dropdown.classList.remove('open'); });
+    document.addEventListener('click', function(e) { if(dropdown && !dropdown.contains(e.target) && e.target !== bellBtn) dropdown.classList.remove('open'); });
   }
-  
+
   function loadNotifications() {
     fetch('/api/comments/?limit=20', {credentials:'same-origin'})
       .then(r => r.json())
@@ -320,17 +435,60 @@ input:focus, textarea:focus, select:focus {
         var list = document.getElementById('ln-notif-list');
         var badge = document.getElementById('ln-bell-badge');
         var countSpan = document.getElementById('ln-notif-count');
-        if(pending.length === 0) list.innerHTML = '<div class="ln-notif-empty" style="padding:20px;text-align:center;">✅ Tout est à jour</div>';
-        else list.innerHTML = pending.slice(0,5).map(c => `<a href="/admin/comments/comment/${c.id}/change/" class="ln-notif-item"><div><div class="ln-notif-title" style="font-weight:600;">Commentaire en attente</div><div class="ln-notif-sub" style="font-size:0.7rem;">${c.author_name||'Anonyme'} - ${(c.content||'').substring(0,40)}...</div></div></a>`).join('');
+        if (!list) return;
+        if(pending.length === 0) {
+          list.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.8rem;color:#6c757d;">✅ Tout est à jour</div>';
+        } else {
+          list.innerHTML = pending.slice(0,5).map(c =>
+            `<a href="/admin/comments/comment/${c.id}/change/" class="ln-notif-item">
+              <div><div style="font-weight:600;font-size:0.82rem;">💬 Commentaire en attente</div>
+              <div style="font-size:0.72rem;color:#6c757d;margin-top:2px;">${c.author_name||'Anonyme'} — ${(c.content||'').substring(0,45)}...</div></div>
+            </a>`
+          ).join('');
+        }
         var n = pending.length;
-        if(n > 0) { badge.textContent = n > 9 ? '9+' : n; badge.style.display = 'flex'; }
-        else badge.style.display = 'none';
-        if(countSpan) countSpan.textContent = n > 0 ? n + ' nouvelle(s)' : 'Aucune alerte';
-      });
+        if(badge) { if(n > 0) { badge.textContent = n > 9 ? '9+' : n; badge.style.display = 'flex'; } else badge.style.display = 'none'; }
+        if(countSpan) countSpan.textContent = n > 0 ? n + ' en attente' : 'Aucune alerte';
+      }).catch(() => {});
   }
-  
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectToolbar);
-  else injectToolbar();
+
+  // Mobile sidebar toggle
+  function setupMobileSidebar() {
+    var toggleBtn = document.getElementById('toggle-nav-sidebar');
+    if (!toggleBtn) {
+      // Create toggle if doesn't exist
+      var branding = document.getElementById('branding');
+      if (branding) {
+        var btn = document.createElement('button');
+        btn.id = 'toggle-nav-sidebar';
+        btn.innerHTML = '<i class="bi bi-list"></i>';
+        btn.title = 'Menu';
+        branding.parentNode.insertBefore(btn, branding);
+        toggleBtn = btn;
+      }
+    }
+    if (toggleBtn) {
+      var sidebar = document.getElementById('nav-sidebar');
+      var overlay = document.getElementById('sidebarOverlay');
+      toggleBtn.onclick = function() {
+        if (sidebar) sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('show');
+      };
+      if (overlay) {
+        overlay.onclick = function() {
+          if (sidebar) sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        };
+      }
+    }
+  }
+
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { injectToolbar(); setupMobileSidebar(); });
+  } else {
+    injectToolbar();
+    setupMobileSidebar();
+  }
 })();
 </script>
 
@@ -340,189 +498,476 @@ input:focus, textarea:focus, select:focus {
 <!-- AI PANEL -->
 <div id="ln-ai-panel">
   <div class="ai-panel-head">
-    <div class="ai-avatar" style="width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="bi bi-robot"></i></div>
-    <div><div class="ai-title" style="font-weight:700;">Assistant IA</div><div class="ai-sub" style="font-size:0.7rem;opacity:0.8;" id="ai-panel-sub">Chargement...</div></div>
-    <button class="ai-close" onclick="toggleAI()" style="margin-left:auto;background:none;border:none;color:white;cursor:pointer;"><i class="bi bi-x-lg"></i></button>
+    <div style="width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-robot" style="font-size:1rem;"></i></div>
+    <div style="flex:1;">
+      <div style="font-weight:700;font-size:0.9rem;">Assistant IA</div>
+      <div style="font-size:0.68rem;opacity:0.8;" id="ai-panel-sub">Chargement...</div>
+    </div>
+    <div class="ai-panel-actions">
+      <button class="ai-panel-btn" onclick="clearAIHistory()" title="Nouvelle conversation"><i class="bi bi-arrow-counterclockwise"></i></button>
+      <button class="ai-panel-btn" id="ai-presets-toggle-btn" onclick="togglePresets()" title="Prompts préconfigurés"><i class="bi bi-bookmark-fill"></i></button>
+      <button class="ai-panel-btn" onclick="toggleAI()" title="Fermer"><i class="bi bi-x-lg"></i></button>
+    </div>
   </div>
+
+  <!-- Presets panel -->
+  <div class="ai-presets" id="ai-presets">
+    <div style="font-size:0.72rem;font-weight:700;color:#1a3a6e;margin-bottom:6px;padding:0 2px;">Prompts préconfigurés — cliquez pour utiliser</div>
+    <div id="ai-presets-list"></div>
+  </div>
+
+  <!-- Messages -->
   <div class="ai-messages" id="ai-messages">
-    <div class="ai-msg system">👋 Bonjour ! Je peux vous aider à rédiger du contenu, optimiser le SEO, suggérer des titres et plus encore.</div>
+    <div class="ai-msg system">👋 Bonjour ! Je connais tout le contenu de votre site et je peux vous aider à créer, analyser et optimiser. Demandez-moi n'importe quoi !</div>
   </div>
+
+  <!-- Publish bar (appears when content ready) -->
+  <div class="ai-publish-bar" id="ai-publish-bar">
+    <div style="font-size:0.73rem;font-weight:700;color:#166534;margin-bottom:6px;">📤 Publier le contenu généré</div>
+    <div class="ai-publish-form">
+      <select class="ai-pub-select" id="pub-type">
+        <option value="article">Article</option>
+        <option value="project">Projet</option>
+        <option value="tip">Astuce</option>
+      </select>
+      <input type="text" class="ai-pub-input" id="pub-title" placeholder="Titre..." maxlength="200">
+      <select class="ai-pub-select" id="pub-status">
+        <option value="draft">Brouillon</option>
+        <option value="published">Publier</option>
+      </select>
+      <button class="ai-pub-btn" onclick="publishAIContent()"><i class="bi bi-send-fill"></i> Publier</button>
+    </div>
+  </div>
+
+  <!-- Quick buttons -->
   <div class="ai-quick-btns">
-    <button class="ai-quick-btn" onclick="aiQuick('Crée un article sur les tendances web 2025')">✍️ Article</button>
-    <button class="ai-quick-btn" onclick="aiQuick('Donne-moi 10 idées d\'articles tech')">💡 Idées</button>
-    <button class="ai-quick-btn" onclick="aiQuick('Améliore le SEO de mon site')">📈 SEO</button>
-    <button class="ai-quick-btn" onclick="aiQuick('Suggère des icônes Bootstrap pour un site tech')">🎨 Icônes</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Fais un audit SEO complet de mon site et donne-moi les 5 actions prioritaires.')">📈 SEO</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Donne-moi 10 idées d\'articles tech originaux pour mon site basées sur les tendances actuelles.')">💡 Idées</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Crée un article complet et professionnel sur les meilleures pratiques en développement web. Format HTML prêt à publier.')">✍️ Article</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Identifie les lacunes de contenu sur mon site et suggère des sujets manquants.')">🔍 Lacunes</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Crée un plan de croissance sur 30 jours pour mon site avec des objectifs réalistes.')">🚀 Croissance</button>
+    <button class="ai-quick-btn" onclick="showPublishBar()">📤 Créer & Publier</button>
   </div>
-  <div class="ai-input-row">
-    <input type="text" id="ai-input" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter')sendAI()">
-    <button onclick="sendAI()"><i class="bi bi-send-fill"></i></button>
+
+  <!-- Input area -->
+  <div class="ai-input-area">
+    <div class="ai-input-row">
+      <input type="text" id="ai-input" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter'&&!event.shiftKey)sendAI()">
+      <button class="ai-send-btn" onclick="sendAI()" id="ai-send-btn" title="Envoyer"><i class="bi bi-send-fill"></i></button>
+    </div>
   </div>
 </div>
 
 <script>
 // ====================================================
-// IA CHAT COMPLET
+// IA CHAT — VERSION AMÉLIORÉE
 // ====================================================
+
+// PROMPTS PRÉCONFIGURÉS
+var PRESET_PROMPTS = [
+  { label: '🎯 Analyse complète du site', text: 'Fais une analyse complète de mon site: contenu, SEO, points forts et axes d\'amélioration.' },
+  { label: '📊 Rapport de performance', text: 'Donne-moi un rapport de performance de mon site avec les statistiques et les recommandations.' },
+  { label: '✍️ Article tech 2025', text: 'Crée un article complet sur les tendances technologiques de 2025. Format HTML prêt à publier, 800 mots minimum.' },
+  { label: '💡 10 idées d\'articles', text: 'Propose 10 idées d\'articles originaux et pertinents pour mon audience, basés sur mes catégories existantes.' },
+  { label: '🔍 Audit SEO détaillé', text: 'Fais un audit SEO complet et donne-moi un plan d\'action prioritaire avec des délais réalistes.' },
+  { label: '📧 Email newsletter', text: 'Rédige un email newsletter engageant pour présenter mes dernières publications à mes abonnés.' },
+  { label: '🚀 Plan croissance 30j', text: 'Crée un plan de croissance sur 30 jours avec des objectifs SMART et un calendrier éditorial.' },
+  { label: '🎨 Améliorer ma bio', text: 'Améliore ma biographie d\'auteur pour qu\'elle soit plus percutante, professionnelle et engageante.' },
+];
+
+// Init presets
+var presetsContainer = document.getElementById('ai-presets-list');
+if (presetsContainer) {
+  presetsContainer.innerHTML = PRESET_PROMPTS.map(function(p) {
+    return `<div class="ai-preset-item" onclick="usePreset('${p.text.replace(/'/g,"\\'")}')">
+      <span class="ai-preset-label">${p.label}</span>
+      <span class="ai-preset-text">${p.text.substring(0, 55)}...</span>
+    </div>`;
+  }).join('');
+}
+
+function usePreset(text) {
+  var input = document.getElementById('ai-input');
+  if (input) input.value = text;
+  togglePresets(false);
+  sendAI();
+}
+
+function togglePresets(forceClose) {
+  var panel = document.getElementById('ai-presets');
+  var btn = document.getElementById('ai-presets-toggle-btn');
+  if (!panel) return;
+  var isOpen = panel.classList.contains('show');
+  if (forceClose === true || isOpen) {
+    panel.classList.remove('show');
+    if (btn) btn.style.background = '';
+  } else {
+    panel.classList.add('show');
+    if (btn) btn.style.background = 'rgba(255,255,255,0.35)';
+  }
+}
+
+// History management
+var AI_HISTORY_KEY = 'ln_ai_history_v3';
 var aiHistory = [];
 var aiOpen = false;
 var aiLoading = false;
+var lastAiContent = '';
 
-function toggleAI() {
-  aiOpen = !aiOpen;
-  var panel = document.getElementById('ln-ai-panel');
-  if(aiOpen) { panel.classList.add('open'); document.getElementById('ai-input').focus(); }
-  else panel.classList.remove('open');
+function saveHistory() {
+  try {
+    localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(aiHistory.slice(-40)));
+  } catch(e) {}
 }
 
-document.getElementById('ln-ai-btn').onclick = toggleAI;
+function loadHistory() {
+  try {
+    var stored = localStorage.getItem(AI_HISTORY_KEY);
+    if (stored) {
+      aiHistory = JSON.parse(stored) || [];
+      var container = document.getElementById('ai-messages');
+      if (container && aiHistory.length > 0) {
+        container.innerHTML = '';
+        var toShow = aiHistory.slice(-20);
+        toShow.forEach(function(msg) {
+          addMsg(msg.role, msg.content, false);
+        });
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+  } catch(e) { aiHistory = []; }
+}
 
-function addMsg(role, text) {
+function clearAIHistory() {
+  aiHistory = [];
+  saveHistory();
   var container = document.getElementById('ai-messages');
+  if (container) {
+    container.innerHTML = '<div class="ai-msg system">🆕 Nouvelle conversation démarrée. Comment puis-je vous aider ?</div>';
+  }
+  hidePublishBar();
+}
+
+// Message formatting — convert markdown to clean HTML
+function formatMessage(text) {
+  if (!text) return '';
+  var html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Code blocks
+  html = html.replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+  // Inline code
+  html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  // Bold
+  html = html.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+  // Italic
+  html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  // H3/H2/H1 headers
+  html = html.replace(/^### (.+)$/gm, '<div style="font-weight:700;font-size:0.85rem;margin:8px 0 3px;color:#1e40af;">$1</div>');
+  html = html.replace(/^## (.+)$/gm, '<div style="font-weight:800;font-size:0.9rem;margin:10px 0 4px;color:#1e40af;">$1</div>');
+  html = html.replace(/^# (.+)$/gm, '<div style="font-weight:800;font-size:0.95rem;margin:10px 0 4px;color:#1e40af;">$1</div>');
+  // Horizontal rules
+  html = html.replace(/^---+$/gm, '<hr style="border:none;border-top:1px solid rgba(0,0,0,0.1);margin:8px 0;">');
+  // Numbered lists
+  html = html.replace(/^\d+\.\s+(.+)$/gm, function(m, content) { return '<li style="margin:3px 0;">' + content + '</li>'; });
+  // Bullet lists
+  html = html.replace(/^[\-\*•]\s+(.+)$/gm, function(m, content) { return '<li style="margin:3px 0;">' + content + '</li>'; });
+  // Wrap li groups
+  html = html.replace(/(<li[^>]*>[\s\S]*?<\/li>)(\n<li)/g, '$1$2');
+  html = html.replace(/((?:<li[^>]*>[\s\S]*?<\/li>\n?)+)/g, '<ul style="padding-left:16px;margin:4px 0;">$1</ul>');
+  // Paragraphs
+  html = html.replace(/\n\n/g, '<br><br>');
+  html = html.replace(/\n/g, '<br>');
+
+  return html;
+}
+
+function addMsg(role, text, store) {
+  var container = document.getElementById('ai-messages');
+  if (!container) return;
   var div = document.createElement('div');
-  div.className = 'ai-msg ' + role;
-  div.innerHTML = text.replace(/\n/g, '<br>');
+  div.className = 'ai-msg ' + (role === 'user' ? 'user' : role === 'error' ? 'error' : 'ai');
+
+  if (role === 'assistant' || role === 'ai') {
+    var formatted = formatMessage(text);
+    div.innerHTML = formatted;
+    // Copy button
+    var copyBtn = document.createElement('button');
+    copyBtn.className = 'ai-copy-btn';
+    copyBtn.title = 'Copier';
+    copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+    copyBtn.onclick = function() {
+      var rawText = text;
+      navigator.clipboard.writeText(rawText).then(function() {
+        copyBtn.innerHTML = '<i class="bi bi-check-lg"></i>';
+        copyBtn.style.background = 'rgba(25,135,84,0.15)';
+        copyBtn.style.color = '#198754';
+        setTimeout(function() {
+          copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+          copyBtn.style.background = '';
+          copyBtn.style.color = '';
+        }, 2000);
+      }).catch(function() {
+        var ta = document.createElement('textarea');
+        ta.value = rawText;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        copyBtn.innerHTML = '<i class="bi bi-check-lg"></i>';
+        setTimeout(function() { copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>'; }, 2000);
+      });
+    };
+    div.appendChild(copyBtn);
+    lastAiContent = text;
+  } else if (role === 'user') {
+    var escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    div.innerHTML = escaped.replace(/\n/g, '<br>');
+  } else {
+    div.innerHTML = text;
+  }
+
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
+
+  if (store !== false) {
+    var storeRole = role === 'user' ? 'user' : 'assistant';
+    if (role !== 'system' && role !== 'error') {
+      aiHistory.push({ role: storeRole, content: text });
+      saveHistory();
+    }
+  }
 }
 
 function showTyping() {
   var container = document.getElementById('ai-messages');
   var div = document.createElement('div');
-  div.className = 'ai-typing';
-  div.id = 'ai-typing';
-  div.innerHTML = '...';
-  div.style.padding = '8px 12px';
-  div.style.background = '#e7f1ff';
-  div.style.borderRadius = '12px';
-  div.style.width = '50px';
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+  div.id = 'ai-typing-el';
+  div.className = 'ai-typing-indicator';
+  div.innerHTML = '<div class="ai-typing-dot"></div><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div>';
+  if (container) { container.appendChild(div); container.scrollTop = container.scrollHeight; }
 }
 
 function hideTyping() {
-  var t = document.getElementById('ai-typing');
-  if(t) t.remove();
+  var t = document.getElementById('ai-typing-el');
+  if (t) t.remove();
 }
 
 function getCsrf() {
-  var cookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
-  return cookie ? cookie.split('=')[1] : '';
+  var cookie = document.cookie.split(';').find(function(c) { return c.trim().startsWith('csrftoken='); });
+  return cookie ? cookie.trim().split('=')[1] : '';
+}
+
+function setLoading(loading) {
+  aiLoading = loading;
+  var btn = document.getElementById('ai-send-btn');
+  var input = document.getElementById('ai-input');
+  if (btn) btn.disabled = loading;
+  if (input) input.disabled = loading;
 }
 
 function callAI(msg) {
-  aiLoading = true;
+  setLoading(true);
   showTyping();
   fetch('/admin-ai/chat/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
     body: JSON.stringify({ message: msg, history: aiHistory.slice(-20) })
   })
-  .then(r => r.json())
-  .then(data => {
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
     hideTyping();
-    aiLoading = false;
+    setLoading(false);
     var reply = data.reply || data.error || 'Désolé, une erreur est survenue.';
-    addMsg('ai', reply);
-    aiHistory.push({ role: 'assistant', content: reply });
+    var isError = !data.ok && data.error;
+    addMsg(isError ? 'error' : 'assistant', reply);
+    if (!isError && hasPublishableContent(reply)) {
+      suggestPublish(reply);
+    }
   })
-  .catch(e => {
+  .catch(function(e) {
     hideTyping();
-    aiLoading = false;
-    addMsg('ai', '❌ Erreur: ' + e.message);
+    setLoading(false);
+    addMsg('error', 'Erreur de connexion: ' + e.message);
   });
 }
 
+function hasPublishableContent(text) {
+  var triggers = ['article', 'titre', 'contenu', 'voici', 'html', '<h', 'excerpt', 'publier', 'brouillon'];
+  var lower = text.toLowerCase();
+  return triggers.filter(function(t) { return lower.includes(t); }).length >= 3 && text.length > 400;
+}
+
+function suggestPublish(content) {
+  showPublishBar();
+  var titleMatch = content.match(/(?:titre[:\s]+|title[:\s]+|^#\s+)(.{10,80})/im);
+  if (titleMatch) {
+    var pubTitle = document.getElementById('pub-title');
+    if (pubTitle) pubTitle.value = titleMatch[1].replace(/[*#_]/g,'').trim().substring(0, 100);
+  }
+}
+
+function showPublishBar() {
+  var bar = document.getElementById('ai-publish-bar');
+  if (bar) bar.classList.add('show');
+}
+
+function hidePublishBar() {
+  var bar = document.getElementById('ai-publish-bar');
+  if (bar) bar.classList.remove('show');
+}
+
+window.publishAIContent = function() {
+  var type = document.getElementById('pub-type');
+  var title = document.getElementById('pub-title');
+  var status = document.getElementById('pub-status');
+  if (!title || !title.value.trim()) {
+    alert('Veuillez saisir un titre pour le contenu à publier.');
+    return;
+  }
+
+  var content = lastAiContent || 'Contenu généré par l\'IA.';
+  var excerpt = content.replace(/<[^>]+>/g,'').substring(0, 200);
+
+  fetch('/admin-ai/publish/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({
+      type: type ? type.value : 'article',
+      title: title.value.trim(),
+      content: content,
+      excerpt: excerpt,
+      status: status ? status.value : 'draft',
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      var statusLabel = data.status === 'published' ? '✅ Publié' : '📝 Brouillon créé';
+      addMsg('system', statusLabel + ' — <a href="' + data.admin_url + '" target="_blank" style="color:#0d6efd;font-weight:700;">Éditer dans l\'admin</a>' + (data.status === 'published' ? ' | <a href="' + data.public_url + '" target="_blank" style="color:#198754;font-weight:700;">Voir en ligne</a>' : ''));
+      hidePublishBar();
+    } else {
+      addMsg('error', 'Erreur lors de la publication: ' + (data.error || 'Inconnue'));
+    }
+  })
+  .catch(function(e) {
+    addMsg('error', 'Erreur: ' + e.message);
+  });
+};
+
+window.toggleAI = function() {
+  aiOpen = !aiOpen;
+  var panel = document.getElementById('ln-ai-panel');
+  if (aiOpen) {
+    panel.classList.add('open');
+    var input = document.getElementById('ai-input');
+    if (input) setTimeout(function() { input.focus(); }, 100);
+  } else {
+    panel.classList.remove('open');
+  }
+};
+
+document.getElementById('ln-ai-btn').onclick = toggleAI;
+
 window.sendAI = function() {
   var input = document.getElementById('ai-input');
+  if (!input) return;
   var msg = input.value.trim();
-  if(!msg || aiLoading) return;
+  if (!msg || aiLoading) return;
   input.value = '';
-  if(!aiOpen) toggleAI();
+  if (!aiOpen) toggleAI();
   addMsg('user', msg);
-  aiHistory.push({ role: 'user', content: msg });
   callAI(msg);
 };
 
 window.aiQuick = function(msg) {
-  if(!aiOpen) toggleAI();
+  if (!aiOpen) toggleAI();
   addMsg('user', msg);
-  aiHistory.push({ role: 'user', content: msg });
   callAI(msg);
 };
 
+// Check AI status
 fetch('/api/settings/', { credentials: 'same-origin' })
-  .then(r => r.json())
-  .then(() => { document.getElementById('ai-panel-sub').textContent = 'Prêt'; })
-  .catch(() => { document.getElementById('ai-panel-sub').textContent = 'Configurer'; });
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var sub = document.getElementById('ai-panel-sub');
+    if (sub) sub.textContent = data.ai_enabled ? 'Prêt à vous aider' : 'À configurer dans les paramètres';
+  })
+  .catch(function() {
+    var sub = document.getElementById('ai-panel-sub');
+    if (sub) sub.textContent = 'Vérifiez la configuration';
+  });
+
+// Load history on page load
+loadHistory();
 </script>
 
 <script>
 // ====================================================
-// INJECTION DES BOUTONS IA DANS LES FORMULAIRES (✨)
+// INJECTION BOUTONS IA DANS LES FORMULAIRES
 // ====================================================
 (function() {
   function injectAISuggestButtons() {
     var fieldMap = {
-      'id_title': { label: '✨ Titres IA', action: 'title', prompt: function(val, title) { return 'Suggère 5 titres accrocheurs SEO pour: "' + (val || title || 'ce contenu') + '"'; } },
-      'id_meta_title': { label: '✨ SEO IA', action: 'seo', prompt: function(val, title) { return 'Meta-title (60 caractères max) pour: "' + title + '"'; } },
-      'id_meta_description': { label: '✨ SEO IA', action: 'seo', prompt: function(val, title) { return 'Meta-description (160 caractères max) pour: "' + title + '"'; } },
-      'id_excerpt': { label: '✨ Description IA', action: 'excerpt', prompt: function(val, title) { return 'Description courte percutante (2-3 phrases, 180 caractères) pour: "' + title + '"'; } },
-      'id_tags': { label: '✨ Tags IA', action: 'tags', prompt: function(val, title) { return 'Propose 8 tags pertinents pour: "' + title + '". Un tag par ligne.'; } },
-      'id_subtitle': { label: '✨ Sous-titre IA', action: 'subtitle', prompt: function(val, title) { return 'Suggère 3 sous-titres accrocheurs pour: "' + title + '"'; } }
+      'id_title': { label: '✨ Titres IA', prompt: function(val, title) { return 'Suggère 5 titres accrocheurs SEO pour: "' + (val || title || 'ce contenu') + '"'; } },
+      'id_meta_title': { label: '✨ SEO', prompt: function(val, title) { return 'Meta-title (60 caractères max) pour: "' + title + '"'; } },
+      'id_meta_description': { label: '✨ SEO', prompt: function(val, title) { return 'Meta-description (160 caractères max) pour: "' + title + '"'; } },
+      'id_excerpt': { label: '✨ Description', prompt: function(val, title) { return 'Description courte percutante (2-3 phrases, 180 caractères max) pour: "' + title + '"'; } },
+      'id_tags': { label: '✨ Tags', prompt: function(val, title) { return 'Propose 8 tags pertinents pour: "' + title + '". Un par ligne.'; } },
+      'id_subtitle': { label: '✨ Sous-titre', prompt: function(val, title) { return 'Suggère 3 sous-titres accrocheurs pour: "' + title + '"'; } }
     };
-    
-    for(var fieldId in fieldMap) {
-      var el = document.getElementById(fieldId);
-      if(!el) continue;
-      var info = fieldMap[fieldId];
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'ln-ai-suggest';
-      btn.innerHTML = info.label;
-      btn.onclick = function(e, fieldEl, promptGen) {
-        e.preventDefault();
-        var val = fieldEl.value || '';
-        var titleEl = document.getElementById('id_title');
-        var title = titleEl ? titleEl.value : val;
-        var prompt = promptGen(val, title);
-        if(!aiOpen) toggleAI();
-        addMsg('user', prompt);
-        aiHistory.push({ role: 'user', content: prompt });
-        callAI(prompt);
-      }.bind(null, {preventDefault:function(){}}, el, info.prompt);
-      
-      var parent = el.parentNode;
-      if(parent) {
-        parent.style.display = 'flex';
-        parent.style.alignItems = 'center';
-        parent.style.flexWrap = 'wrap';
-        parent.style.gap = '6px';
-        parent.appendChild(btn);
-      }
+
+    for (var fieldId in fieldMap) {
+      (function(fId, info) {
+        var el = document.getElementById(fId);
+        if (!el) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ln-ai-suggest';
+        btn.innerHTML = info.label;
+        btn.onclick = function() {
+          var titleEl = document.getElementById('id_title');
+          var title = titleEl ? titleEl.value : el.value;
+          var prompt = info.prompt(el.value, title);
+          if (!aiOpen) toggleAI();
+          addMsg('user', prompt);
+          callAI(prompt);
+        };
+        var parent = el.parentNode;
+        if (parent) {
+          parent.style.cssText += ';display:flex;align-items:center;flex-wrap:wrap;gap:6px;';
+          parent.appendChild(btn);
+        }
+      })(fieldId, fieldMap[fieldId]);
     }
-    
-    // Bouton Plan IA
+
     var titleEl = document.getElementById('id_title');
-    if(titleEl && titleEl.parentNode) {
+    if (titleEl && titleEl.parentNode) {
       var structBtn = document.createElement('button');
       structBtn.type = 'button';
       structBtn.className = 'ln-ai-suggest ln-ai-struct';
       structBtn.innerHTML = '🗂 Plan IA';
-      structBtn.onclick = function(e) {
-        e.preventDefault();
-        var t = titleEl.value || '';
-        var prompt = 'Génère un plan détaillé (H2/H3) pour un article/projet intitulé: "' + t + '"';
-        if(!aiOpen) toggleAI();
+      structBtn.onclick = function() {
+        var t = titleEl.value || 'ce contenu';
+        var prompt = 'Génère un plan détaillé structuré pour un article intitulé: "' + t + '"';
+        if (!aiOpen) toggleAI();
         addMsg('user', prompt);
-        aiHistory.push({ role: 'user', content: prompt });
         callAI(prompt);
       };
       titleEl.parentNode.appendChild(structBtn);
     }
   }
-  
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectAISuggestButtons);
-  else setTimeout(injectAISuggestButtons, 500);
+
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectAISuggestButtons);
+  } else {
+    setTimeout(injectAISuggestButtons, 500);
+  }
 })();
 </script>
 {% endblock %}
