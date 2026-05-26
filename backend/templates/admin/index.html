@@ -6,653 +6,358 @@
 
 {% block content %}
 <style>
-/* ═══════════════════════════════════════════════════════════
-   DASHBOARD — LANDRY NET ADMIN — FULL REDESIGN
-═══════════════════════════════════════════════════════════ */
-
-/* ── Reset & base ── */
-.db { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; color: #1e1b4b; }
-
-/* ── Hero banner ── */
-.db-hero {
-  background: linear-gradient(135deg, #312e81 0%, #4F46E5 45%, #7C3AED 100%);
-  border-radius: 20px; padding: 28px 28px 24px; margin-bottom: 24px;
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 16px; flex-wrap: wrap; position: relative; overflow: hidden;
-}
-.db-hero::before {
-  content: ''; position: absolute; top: -40px; right: -40px;
-  width: 200px; height: 200px; border-radius: 50%;
-  background: rgba(255,255,255,.06);
-}
-.db-hero::after {
-  content: ''; position: absolute; bottom: -60px; right: 80px;
-  width: 150px; height: 150px; border-radius: 50%;
-  background: rgba(255,255,255,.04);
-}
-.db-hero-left { position: relative; z-index: 1; }
-.db-hero-greeting {
-  font-size: .78rem; font-weight: 600; color: rgba(255,255,255,.6);
-  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px;
-}
-.db-hero-title {
-  font-size: 1.65rem; font-weight: 800; color: #fff;
-  letter-spacing: -.5px; line-height: 1.1; margin-bottom: 4px;
-}
-.db-hero-date { font-size: .82rem; color: rgba(255,255,255,.65); }
-.db-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; position: relative; z-index: 1; }
-.db-btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 10px 18px; border-radius: 10px; font-size: .84rem;
-  font-weight: 600; text-decoration: none; transition: all .2s; white-space: nowrap;
-}
-.db-btn-ghost {
-  background: rgba(255,255,255,.14); color: #fff;
-  border: 1px solid rgba(255,255,255,.25);
-}
-.db-btn-ghost:hover { background: rgba(255,255,255,.22); color: #fff; }
-.db-btn-solid { background: #fff; color: #4F46E5; }
-.db-btn-solid:hover { background: #f0f4ff; color: #4338ca; transform: translateY(-1px); }
-
-/* ── Stats row ── */
-.db-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 24px; }
-.db-stat {
-  background: #fff; border: 1px solid #e8e7ff; border-radius: 16px;
-  padding: 20px 18px; text-decoration: none; display: block;
-  box-shadow: 0 2px 12px rgba(79,70,229,.06);
-  transition: transform .25s, box-shadow .25s;
-  position: relative; overflow: hidden;
-}
-.db-stat::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--stat-color, #4F46E5);
-}
-.db-stat:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(79,70,229,.13); }
-.db-stat-icon {
-  width: 40px; height: 40px; border-radius: 11px; margin-bottom: 12px;
-  display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
-  background: var(--stat-bg, #eef2ff);
-}
-.db-stat-icon i { color: var(--stat-color, #4F46E5); }
-.db-stat-value { font-size: 1.75rem; font-weight: 800; color: #1e1b4b; line-height: 1; margin-bottom: 4px; }
-.db-stat-label { font-size: .7rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; }
-
-/* ── Section title ── */
-.db-sec-title {
-  font-size: .7rem; font-weight: 800; color: #9ca3af;
-  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
-  display: flex; align-items: center; gap: 8px;
-}
-.db-sec-title::before {
-  content: ''; width: 3px; height: 14px; border-radius: 2px;
-  background: var(--dot-color, #4F46E5); flex-shrink: 0;
-}
-
-/* ── Section card ── */
-.db-card {
-  background: #fff; border: 1px solid #e8e7ff; border-radius: 16px;
-  padding: 22px; box-shadow: 0 2px 12px rgba(79,70,229,.05);
-}
-
-/* ── Layout ── */
-.db-cols { display: grid; grid-template-columns: 1fr 300px; gap: 20px; margin-bottom: 24px; }
-.db-col-left { display: flex; flex-direction: column; gap: 20px; }
-.db-col-right { display: flex; flex-direction: column; gap: 16px; }
-
-/* ── AI Config ── */
-.db-ai-banner {
-  background: linear-gradient(135deg, #f5f3ff, #eef2ff);
-  border: 1px solid #c7d2fe; border-radius: 16px;
-  padding: 18px 20px; display: flex; align-items: center;
-  gap: 14px; flex-wrap: wrap; margin-bottom: 24px;
-}
-.db-ai-icon {
-  width: 48px; height: 48px; border-radius: 13px; flex-shrink: 0;
-  background: linear-gradient(135deg, #4F46E5, #7C3AED);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.35rem; color: #fff;
-}
-.db-ai-text { flex: 1; min-width: 160px; }
-.db-ai-text h3 { font-size: .9rem; font-weight: 700; color: #1e1b4b; margin: 0 0 3px; }
-.db-ai-text p { font-size: .78rem; color: #6b7280; margin: 0; }
-.db-ai-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-/* ── Analytics ── */
-.db-analytics { margin-bottom: 24px; }
-.db-analytics-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
-}
-.db-period-tabs { display: flex; background: #f5f3ff; border-radius: 10px; padding: 3px; gap: 2px; }
-.db-period-tab {
-  font-size: .74rem; font-weight: 600; padding: 5px 14px; border-radius: 7px;
-  cursor: pointer; border: none; background: none; color: #9ca3af;
-  transition: all .2s; font-family: inherit;
-}
-.db-period-tab.active { background: #fff; color: #4F46E5; box-shadow: 0 1px 6px rgba(79,70,229,.12); }
-.db-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-.db-kpi {
-  background: linear-gradient(135deg, #f8f7ff, #f0f2ff);
-  border: 1px solid #e0e7ff; border-radius: 12px; padding: 16px;
-  text-align: center;
-}
-.db-kpi-value { font-size: 2rem; font-weight: 800; color: #4F46E5; line-height: 1; margin-bottom: 4px; }
-.db-kpi-label { font-size: .68rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; }
-.db-analytics-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.db-chart-wrap { height: 90px; display: flex; align-items: flex-end; gap: 2px; margin: 8px 0; }
-.db-bar {
-  flex: 1; border-radius: 4px 4px 0 0; min-width: 3px;
-  background: linear-gradient(to top, #4F46E5cc, #7C3AEDcc);
-  transition: opacity .2s, transform .2s; cursor: pointer; position: relative;
-}
-.db-bar:hover { opacity: .8; transform: scaleY(1.04); transform-origin: bottom; }
-.db-chart-dates { display: flex; justify-content: space-between; font-size: .65rem; color: #c4c3d4; margin-top: 4px; }
-
-/* ── Top pages ── */
-.db-top-page {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 0; border-bottom: 1px solid #f5f3ff;
-}
-.db-top-page:last-child { border-bottom: none; padding-bottom: 0; }
-.db-rank {
-  width: 24px; height: 24px; border-radius: 7px; font-size: .72rem; font-weight: 800;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.db-top-title { flex: 1; font-size: .82rem; font-weight: 600; color: #1e1b4b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.db-top-title a { color: inherit; text-decoration: none; }
-.db-top-title a:hover { color: #4F46E5; }
-.db-type-chip { font-size: .66rem; padding: 2px 8px; border-radius: 20px; font-weight: 700; flex-shrink: 0; }
-.db-views { font-size: .78rem; font-weight: 700; color: #4F46E5; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
-
-/* ── Recent items ── */
-.db-recent-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 0; border-bottom: 1px solid #f8f7ff;
-}
-.db-recent-item:last-child { border-bottom: none; padding-bottom: 0; }
-.db-recent-icon {
-  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: .95rem;
-}
-.db-recent-body { flex: 1; min-width: 0; }
-.db-recent-title { font-size: .85rem; font-weight: 600; color: #1e1b4b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.db-recent-meta { font-size: .7rem; color: #9ca3af; margin-top: 2px; }
-.db-recent-links { display: flex; gap: 5px; flex-shrink: 0; }
-.db-recent-link { font-size: .75rem; color: #6b7280; text-decoration: none; padding: 3px 7px; border-radius: 5px; background: #f5f3ff; transition: all .15s; }
-.db-recent-link:hover { background: #eef2ff; color: #4F46E5; }
-
-/* ── Quick actions grid ── */
-.db-qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.db-qa {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
-  padding: 14px 14px 12px; background: #fff; border: 1px solid #e8e7ff;
-  border-radius: 12px; text-decoration: none; color: #1e1b4b;
-  transition: all .2s; position: relative;
-}
-.db-qa:hover { border-color: #c7d2fe; background: #f8f7ff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79,70,229,.1); }
-.db-qa-icon {
-  width: 36px; height: 36px; border-radius: 9px;
-  display: flex; align-items: center; justify-content: center; font-size: .95rem;
-}
-.db-qa-label { font-size: .8rem; font-weight: 600; line-height: 1.2; }
-.db-qa-arrow { position: absolute; top: 10px; right: 10px; font-size: .7rem; color: #c4c3d4; }
-
-/* ── System status ── */
-.db-sys-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 9px 0; border-bottom: 1px solid #f8f7ff; font-size: .82rem;
-}
-.db-sys-row:last-child { border-bottom: none; }
-.db-sys-label { color: #6b7280; display: flex; align-items: center; gap: 7px; }
-.db-sys-label i { font-size: .85rem; }
-
-/* ── Badges ── */
-.badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: .68rem; font-weight: 700; }
-.badge-green { background: #d1fae5; color: #065f46; }
-.badge-yellow { background: #fef3c7; color: #92400e; }
-.badge-red { background: #fee2e2; color: #991b1b; }
-.badge-blue { background: #dbeafe; color: #1e40af; }
-.badge-purple { background: #ede9fe; color: #5b21b6; }
-
-/* ── Skeleton ── */
-.skel { background: linear-gradient(90deg, #f0f0f8 25%, #e8e8f4 50%, #f0f0f8 75%); background-size: 200%; animation: sh 1.5s infinite; border-radius: 6px; }
-@keyframes sh { 0%{background-position:200%} 100%{background-position:-200%} }
-
-/* ── Responsive ── */
-@media (max-width: 1100px) {
-  .db-stats { grid-template-columns: repeat(3, 1fr); }
-  .db-cols { grid-template-columns: 1fr; }
-  .db-col-right { flex-direction: row; flex-wrap: wrap; }
-  .db-col-right > * { flex: 1 1 280px; }
-}
-@media (max-width: 700px) {
-  .db-hero { padding: 22px 18px; }
-  .db-hero-title { font-size: 1.3rem; }
-  .db-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .db-analytics-body { grid-template-columns: 1fr; }
-  .db-kpis { gap: 8px; }
-  .db-kpi-value { font-size: 1.6rem; }
-  .db-qa-grid { grid-template-columns: 1fr 1fr; }
-  .db-card { padding: 16px; }
-  .db-col-right { flex-direction: column; }
-}
-@media (max-width: 480px) {
-  .db-stats { grid-template-columns: repeat(2, 1fr); }
-  .db-hero-actions .db-btn { font-size: .78rem; padding: 8px 13px; }
-  .db-period-tabs { display: none; }
-  .db-kpi-value { font-size: 1.4rem; }
-}
+.db-container { max-width: 1400px; margin: 0 auto; }
+.hero-banner { background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 20px; padding: 28px 32px; margin-bottom: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.stat-card { background: white; border-radius: 16px; padding: 20px 16px; text-align: center; text-decoration: none; display: block; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #e9ecef; }
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+.stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.stat-value { font-size: 1.75rem; font-weight: 800; color: #1a1a2e; line-height: 1; }
+.stat-label { font-size: 0.7rem; color: #6c757d; font-weight: 600; text-transform: uppercase; margin-top: 4px; }
+.ai-banner { background: linear-gradient(135deg, #e7f1ff, #d4e4ff); border-radius: 16px; padding: 16px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.analytics-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid #e9ecef; }
+.chart-container { display: flex; align-items: flex-end; gap: 4px; height: 100px; margin-top: 12px; }
+.chart-bar { flex: 1; background: linear-gradient(to top, #0d6efd, #0dcaf0); border-radius: 4px 4px 0 0; transition: opacity 0.2s; cursor: pointer; min-width: 4px; }
+.quick-action { display: flex; flex-direction: column; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 12px; text-decoration: none; transition: all 0.2s; }
+.quick-action:hover { transform: translateY(-2px); background: #e7f1ff; }
+.skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes shimmer { 0% { background-position: 200%; } 100% { background-position: -200%; } }
+@media (max-width: 768px) { .hero-banner { padding: 20px; } .stat-value { font-size: 1.25rem; } .stat-icon { width: 36px; height: 36px; } }
+.dm .stat-card, .dm .analytics-card { background: #1e293b; border-color: #334155; }
+.dm .stat-value { color: #e2e8f0; }
+.dm .quick-action { background: #334155; color: #e2e8f0; }
+.dm .ai-banner { background: #1e293b; border-color: #334155; }
+.dm .ai-banner .text-secondary { color: #94a3b8 !important; }
 </style>
 
-<div class="db">
-
-<!-- ── Hero ── -->
-<div class="db-hero">
-  <div class="db-hero-left">
-    <div class="db-hero-greeting">Administration</div>
-    <div class="db-hero-title" id="db-title">Tableau de bord</div>
-    <div class="db-hero-date" id="db-date">Chargement…</div>
-  </div>
-  <div class="db-hero-actions">
-    <a href="/" target="_blank" class="db-btn db-btn-ghost"><i class="bi bi-box-arrow-up-right"></i>Voir le site</a>
-    <a href="/admin/articles/article/add/" class="db-btn db-btn-solid"><i class="bi bi-plus-lg"></i>Nouvel article</a>
-  </div>
-</div>
-
-<!-- ── Stats ── -->
-<div class="db-stats" id="db-stats-grid">
-  {% for _ in "123456" %}
-  <div class="db-stat"><div class="skel" style="width:40px;height:40px;border-radius:11px;margin-bottom:12px;"></div><div class="skel" style="height:28px;width:50px;margin-bottom:6px;"></div><div class="skel" style="height:11px;width:70px;"></div></div>
-  {% endfor %}
-</div>
-
-<!-- ── AI Banner ── -->
-<div class="db-ai-banner">
-  <div class="db-ai-icon">🤖</div>
-  <div class="db-ai-text">
-    <h3>Assistant IA — Landry Net</h3>
-    <p>Activez la clé API pour les suggestions, l'analyse du contenu et le chat intelligent.</p>
-  </div>
-  <div class="db-ai-actions">
-    <span class="badge badge-yellow" id="ai-status-indicator">⏳ Non configuré</span>
-    <a href="/admin/core/sitesettings/1/change/#id_ai_enabled" class="db-btn db-btn-ghost" style="background:#fff;border-color:#c7d2fe;color:#4F46E5;padding:7px 13px;font-size:.78rem;">
-      <i class="bi bi-gear"></i>Configurer
-    </a>
-  </div>
-</div>
-
-<!-- ── Analytics ── -->
-<div class="db-card db-analytics">
-  <div class="db-analytics-header">
-    <div class="db-sec-title" style="--dot-color:#4F46E5;margin-bottom:0;">Analytiques — Vues de pages</div>
-    <div class="db-period-tabs">
-      <button class="db-period-tab" onclick="switchPeriod(7,this)">7j</button>
-      <button class="db-period-tab active" onclick="switchPeriod(30,this)" id="tab-30">30j</button>
-      <button class="db-period-tab" onclick="switchPeriod(90,this)">90j</button>
-    </div>
-  </div>
-
-  <div class="db-kpis" id="db-kpis">
-    {% for _ in "123" %}<div class="db-kpi"><div class="skel" style="height:32px;width:60px;margin:0 auto 6px;"></div><div class="skel" style="height:10px;width:70px;margin:0 auto;"></div></div>{% endfor %}
-  </div>
-
-  <div class="db-analytics-body">
+<div class="db-container">
+  <!-- Hero Banner -->
+  <div class="hero-banner">
     <div>
-      <div class="db-sec-title" style="--dot-color:#4F46E5;font-size:.66rem;">Graphique journalier</div>
-      <div class="db-chart-wrap" id="db-chart"></div>
-      <div class="db-chart-dates" id="db-chart-dates"></div>
+      <div class="text-white-50 small text-uppercase" style="font-size:0.7rem;">Administration</div>
+      <h1 class="text-white fw-bold mb-1" id="dbTitle" style="font-size:1.5rem;">Tableau de bord</h1>
+      <div class="text-white-50 small" id="dbDate"></div>
     </div>
-    <div>
-      <div class="db-sec-title" style="--dot-color:#7C3AED;font-size:.66rem;">Top pages</div>
-      <div id="db-top-pages"><div style="color:#c4c3d4;font-size:.82rem;">Chargement…</div></div>
+    <div class="d-flex gap-2">
+      <a href="/" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up-right"></i> Voir le site</a>
+      <a href="/admin/articles/article/add/" class="btn btn-light btn-sm"><i class="bi bi-plus-lg"></i> Nouvel article</a>
     </div>
   </div>
-</div>
 
-<!-- ── Main columns ── -->
-<div class="db-cols">
-  <!-- Left: recent content -->
-  <div class="db-col-left">
-    <div class="db-card">
-      <div class="db-sec-title" style="--dot-color:#4F46E5;">Publications récentes</div>
-      <div id="db-recent-articles">
-        {% for _ in "123" %}
-        <div class="db-recent-item">
-          <div class="skel" style="width:36px;height:36px;border-radius:10px;flex-shrink:0;"></div>
-          <div style="flex:1;"><div class="skel" style="height:13px;width:80%;margin-bottom:5px;"></div><div class="skel" style="height:10px;width:40%;"></div></div>
+  <!-- Stats Grid (6 cartes) -->
+  <div class="row g-3 mb-4" id="statsGrid">
+    {% for _ in "123456" %}
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="stat-card">
+        <div class="skeleton mx-auto" style="width:40px;height:40px;border-radius:10px;"></div>
+        <div class="skeleton mx-auto mt-2" style="width:50px;height:28px;"></div>
+        <div class="skeleton mx-auto mt-1" style="width:60px;height:10px;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- AI Banner -->
+  <div class="ai-banner">
+    <div class="d-flex align-items-center gap-3">
+      <div class="bg-primary rounded-3 p-2" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+        <i class="bi bi-robot text-white fs-4"></i>
+      </div>
+      <div>
+        <h6 class="fw-bold mb-0">Assistant IA — Landry Net</h6>
+        <p class="small text-secondary mb-0">Activez la clé API pour les suggestions, l'analyse de contenu et le chat intelligent</p>
+      </div>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <span class="badge bg-warning" id="aiStatus">⏳ Non configuré</span>
+      <a href="/admin/core/sitesettings/1/change/" class="btn btn-primary btn-sm"><i class="bi bi-gear"></i> Configurer</a>
+    </div>
+  </div>
+
+  <!-- Analytics Card -->
+  <div class="analytics-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+      <h6 class="fw-bold mb-0"><i class="bi bi-graph-up text-primary me-2"></i>Analytiques — Vues de pages</h6>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-primary period-btn" data-days="7">7j</button>
+        <button class="btn btn-primary period-btn active" data-days="30">30j</button>
+        <button class="btn btn-outline-primary period-btn" data-days="90">90j</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-4" id="kpis">
+      <div class="col-4"><div class="bg-light rounded-3 p-3 text-center skeleton" style="height:70px;"></div></div>
+      <div class="col-4"><div class="bg-light rounded-3 p-3 text-center skeleton" style="height:70px;"></div></div>
+      <div class="col-4"><div class="bg-light rounded-3 p-3 text-center skeleton" style="height:70px;"></div></div>
+    </div>
+
+    <!-- Chart + Top Pages -->
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="small text-secondary mb-2">Graphique journalier</div>
+        <div class="chart-container" id="chart"></div>
+        <div class="d-flex justify-content-between small text-secondary mt-2" id="chartDates"></div>
+      </div>
+      <div class="col-md-6">
+        <div class="small text-secondary mb-2">Top pages</div>
+        <div id="topPages"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two Columns Layout -->
+  <div class="row g-4">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+      <div class="analytics-card mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-file-text text-primary me-2"></i>Publications récentes</h6>
+        <div id="recentArticles"></div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="analytics-card">
+            <h6 class="fw-bold mb-3"><i class="bi bi-code-slash text-success me-2"></i>Projets récents</h6>
+            <div id="recentProjects"></div>
+          </div>
         </div>
-        {% endfor %}
+        <div class="col-md-6">
+          <div class="analytics-card">
+            <h6 class="fw-bold mb-3"><i class="bi bi-lightbulb text-warning me-2"></i>Astuces récentes</h6>
+            <div id="recentTips"></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div class="db-card">
-        <div class="db-sec-title" style="--dot-color:#10b981;">Projets</div>
-        <div id="db-recent-projects"><div class="skel" style="height:13px;width:85%;margin-bottom:8px;"></div><div class="skel" style="height:13px;width:70%;"></div></div>
+    <!-- Right Column -->
+    <div class="col-lg-4">
+      <!-- Sitemap Card -->
+      <div class="analytics-card mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-sitemap text-primary me-2"></i>Sitemap · Google Search Console</h6>
+        <p class="small text-secondary mb-2">Soumettez cette URL à Google Search Console :</p>
+        <div class="bg-light p-2 rounded border small font-monospace mb-3" id="sitemapUrl" style="word-break:break-all;">Chargement...</div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary btn-sm flex-grow-1" id="copySitemapBtn"><i class="bi bi-clipboard"></i> Copier</button>
+          <a href="#" target="_blank" class="btn btn-outline-secondary btn-sm flex-grow-1" id="viewSitemapBtn"><i class="bi bi-eye"></i> Voir</a>
+          <a href="https://search.google.com/search-console/sitemaps" target="_blank" class="btn btn-outline-success btn-sm flex-grow-1"><i class="bi bi-google"></i> Google</a>
+        </div>
       </div>
-      <div class="db-card">
-        <div class="db-sec-title" style="--dot-color:#f59e0b;">Astuces</div>
-        <div id="db-recent-tips"><div class="skel" style="height:13px;width:85%;margin-bottom:8px;"></div><div class="skel" style="height:13px;width:70%;"></div></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Right: actions + system -->
-  <div class="db-col-right">
+      <!-- Quick Actions -->
+      <div class="analytics-card mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-lightning-charge text-warning me-2"></i>Actions rapides</h6>
+        <div class="row g-2">
+          <div class="col-6"><a href="/admin/articles/article/add/" class="quick-action"><i class="bi bi-file-earmark-text fs-4 text-primary"></i><small class="mt-1">Article</small></a></div>
+          <div class="col-6"><a href="/admin/projects/project/add/" class="quick-action"><i class="bi bi-code-slash fs-4 text-success"></i><small class="mt-1">Projet</small></a></div>
+          <div class="col-6"><a href="/admin/tips/tip/add/" class="quick-action"><i class="bi bi-lightbulb fs-4 text-warning"></i><small class="mt-1">Astuce</small></a></div>
+          <div class="col-6"><a href="/admin/comments/comment/?is_approved__exact=0" class="quick-action position-relative" id="commentsAction"><i class="bi bi-chat-dots fs-4 text-danger"></i><small class="mt-1">Modérer</small><span class="badge bg-danger rounded-pill position-absolute top-0 end-0 m-1" id="pendingBadge" style="display:none;"></span></a></div>
+          <div class="col-6"><a href="/admin/core/skill/add/" class="quick-action"><i class="bi bi-bar-chart fs-4 text-info"></i><small class="mt-1">Compétence</small></a></div>
+          <div class="col-6"><a href="/admin/newsletter/subscriber/" class="quick-action"><i class="bi bi-envelope fs-4 text-success"></i><small class="mt-1">Abonnés</small></a></div>
+        </div>
+      </div>
 
-    <!-- ── Sitemap Google ── -->
-    <div class="db-card" style="border-top:3px solid #4F46E5;">
-      <div class="db-sec-title" style="--dot-color:#4F46E5;margin-bottom:10px;">
-        Sitemap · Google Search Console
-      </div>
-      <p style="font-size:.73rem;color:#9ca3af;margin:0 0 10px;line-height:1.5;">Soumettez cette URL à Google Search Console pour référencer votre site :</p>
-      <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:9px;padding:9px 12px;font-size:.72rem;font-family:'JetBrains Mono',monospace;color:#4F46E5;margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;" id="sm-url-display" onclick="copySitemapUrl()" title="Cliquer pour copier">Calcul…</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button onclick="copySitemapUrl()" id="sm-copy-btn" style="flex:1;min-width:80px;padding:8px 10px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border:none;border-radius:9px;font-size:.76rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:opacity .2s;">
-          <i class="bi bi-clipboard"></i>Copier
-        </button>
-        <a id="sm-view-btn" href="#" target="_blank" style="flex:1;min-width:80px;padding:8px 10px;background:#f0f4ff;border:1px solid #c7d2fe;border-radius:9px;font-size:.76rem;font-weight:600;color:#4F46E5;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;">
-          <i class="bi bi-eye"></i>Voir
-        </a>
-        <a href="https://search.google.com/search-console/sitemaps" target="_blank" style="flex:1;min-width:80px;padding:8px 10px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:9px;font-size:.76rem;font-weight:600;color:#059669;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;">
-          <i class="bi bi-google"></i>Google
-        </a>
-      </div>
-    </div>
-
-    <div class="db-card">
-      <div class="db-sec-title" style="--dot-color:#7C3AED;">Actions rapides</div>
-      <div class="db-qa-grid">
-        <a href="/admin/articles/article/add/" class="db-qa">
-          <div class="db-qa-icon" style="background:#eef2ff;"><i class="bi bi-file-earmark-text" style="color:#4F46E5;"></i></div>
-          <div class="db-qa-label">Nouvel article</div>
-          <i class="bi bi-arrow-right db-qa-arrow"></i>
-        </a>
-        <a href="/admin/projects/project/add/" class="db-qa">
-          <div class="db-qa-icon" style="background:#ecfdf5;"><i class="bi bi-code-slash" style="color:#10b981;"></i></div>
-          <div class="db-qa-label">Nouveau projet</div>
-          <i class="bi bi-arrow-right db-qa-arrow"></i>
-        </a>
-        <a href="/admin/tips/tip/add/" class="db-qa">
-          <div class="db-qa-icon" style="background:#fefce8;"><i class="bi bi-lightbulb" style="color:#f59e0b;"></i></div>
-          <div class="db-qa-label">Nouvelle astuce</div>
-          <i class="bi bi-arrow-right db-qa-arrow"></i>
-        </a>
-        <a href="/admin/core/sitesettings/1/change/" class="db-qa">
-          <div class="db-qa-icon" style="background:#fff1f2;"><i class="bi bi-sliders" style="color:#e11d48;"></i></div>
-          <div class="db-qa-label">Réglages SEO</div>
-          <i class="bi bi-arrow-right db-qa-arrow"></i>
-        </a>
-        <a href="/admin/core/skill/add/" class="db-qa">
-          <div class="db-qa-icon" style="background:#f5f3ff;"><i class="bi bi-bar-chart" style="color:#7C3AED;"></i></div>
-          <div class="db-qa-label">Compétence</div>
-          <i class="bi bi-arrow-right db-qa-arrow"></i>
-        </a>
-        <a href="/admin/comments/comment/?is_approved__exact=0" class="db-qa" id="db-qa-comments">
-          <div class="db-qa-icon" style="background:#fff7ed;"><i class="bi bi-chat-dots" style="color:#ea580c;"></i></div>
-          <div class="db-qa-label">Modérer <span class="badge badge-red" id="db-pending-count" style="display:none;font-size:.6rem;"></span></div>
-          <i class="bi bi-arrow-right db-qa-arrow"></i>
-        </a>
-        <a href="/admin/newsletter/subscriber/" class="db-qa">
-          <div class="db-qa-icon" style="background:#f0fdf4;"><i class="bi bi-envelope" style="color:#16a34a;"></i></div>
-          <div class="db-qa-label">Abonnés</div>
-          <i class="bi bi-arrow-right db-qa-arrow"></i>
-        </a>
-        <a href="/admin/core/sitesettings/1/change/" class="db-qa">
-          <div class="db-qa-icon" style="background:#f8f9ff;"><i class="bi bi-gear" style="color:#6b7280;"></i></div>
-          <div class="db-qa-label">Paramètres</div>
-          <i class="bi bi-arrow-right db-qa-arrow"></i>
-        </a>
-      </div>
-    </div>
-
-    <div class="db-card">
-      <div class="db-sec-title" style="--dot-color:#10b981;">Statut système</div>
-      <div class="db-sys-row">
-        <span class="db-sys-label"><i class="bi bi-globe" style="color:#4F46E5;"></i>Site public</span>
-        <a href="/" target="_blank" class="badge badge-green">✓ En ligne</a>
-      </div>
-      <div class="db-sys-row">
-        <span class="db-sys-label"><i class="bi bi-plug" style="color:#10b981;"></i>API REST</span>
-        <a href="/api/settings/" target="_blank" class="badge badge-green">✓ Active</a>
-      </div>
-      <div class="db-sys-row">
-        <span class="db-sys-label"><i class="bi bi-database" style="color:#6b7280;"></i>Django</span>
-        <span class="badge badge-blue">v 5.2</span>
-      </div>
-      <div class="db-sys-row">
-        <span class="db-sys-label"><i class="bi bi-graph-up" style="color:#7C3AED;"></i>Analytiques</span>
-        <span class="badge badge-purple" id="db-analytics-status">Chargement…</span>
-      </div>
-      <div class="db-sys-row">
-        <span class="db-sys-label"><i class="bi bi-robot" style="color:#4F46E5;"></i>Assistant IA</span>
-        <span class="badge" id="db-ai-status" style="background:#fef3c7;color:#92400e;">⏳ Config.</span>
-      </div>
-      <div class="db-sys-row">
-        <span class="db-sys-label"><i class="bi bi-envelope-check" style="color:#10b981;"></i>Email Gmail</span>
-        <span class="badge badge-green" id="db-email-status">✓ Configuré</span>
-      </div>
-      <div class="db-sys-row" id="db-sitemap-row" style="display:none;">
-        <span class="db-sys-label"><i class="bi bi-diagram-3" style="color:#6366f1;"></i>Sitemap</span>
-        <a href="#" target="_blank" class="badge badge-purple" id="db-sitemap-link" style="text-decoration:none;">Voir ↗</a>
+      <!-- System Status -->
+      <div class="analytics-card">
+        <h6 class="fw-bold mb-3"><i class="bi bi-server me-2"></i>Statut système</h6>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="bi bi-globe me-2 text-primary"></i>Site public</span><span class="badge bg-success">✓ En ligne</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="bi bi-plug me-2 text-success"></i>API REST</span><span class="badge bg-success">✓ Active</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="bi bi-database me-2 text-secondary"></i>Django</span><span class="badge bg-info">v 5.2</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="bi bi-robot me-2 text-info"></i>Assistant IA</span><span class="badge bg-warning" id="systemAiStatus">⏳ Config.</span></div>
+        <div class="d-flex justify-content-between py-2"><span><i class="bi bi-envelope-check me-2 text-success"></i>Email</span><span class="badge bg-success" id="emailStatus">✓ Configuré</span></div>
       </div>
     </div>
   </div>
-</div><!-- end db-cols -->
-
-</div><!-- end .db -->
+</div>
 
 <script>
-(function(){
-  /* ── Greeting & date ── */
-  var h = new Date().getHours();
-  var greet = h < 5 ? 'Bonne nuit' : h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
-  var dateStr = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-  document.getElementById('db-title').textContent = greet + ' 👋';
-  document.getElementById('db-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+// ====================================================
+// DASHBOARD - CHARGEMENT DES DONNÉES
+// ====================================================
 
-  /* ── Stat definitions ── */
-  var STATS = [
-    {id:'articles', label:'Articles', icon:'bi-file-earmark-text', color:'#4F46E5', bg:'#eef2ff', url:'/api/articles/?status=published&limit=1', listUrl:'/api/articles/?status=published&limit=5', admin:'/admin/articles/article/'},
-    {id:'projects', label:'Projets', icon:'bi-code-slash', color:'#10b981', bg:'#ecfdf5', url:'/api/projects/?status=published&limit=1', listUrl:'/api/projects/?status=published&limit=3', admin:'/admin/projects/project/'},
-    {id:'tips', label:'Astuces', icon:'bi-lightbulb', color:'#f59e0b', bg:'#fefce8', url:'/api/tips/?status=published&limit=1', listUrl:'/api/tips/?status=published&limit=3', admin:'/admin/tips/tip/'},
-    {id:'comments', label:'En attente', icon:'bi-chat-dots', color:'#ea580c', bg:'#fff7ed', url:'/api/comments/?limit=1', admin:'/admin/comments/comment/'},
-    {id:'subscribers', label:'Abonnés', icon:'bi-envelope-check', color:'#16a34a', bg:'#f0fdf4', url:'/api/newsletter/subscribers/?limit=1', admin:'/admin/newsletter/subscriber/'},
-    {id:'pageviews', label:'Pages vues', icon:'bi-graph-up', color:'#6366f1', bg:'#eef2ff', url:'/api/stats/', admin:'/admin/'},
-  ];
+// Date et heure
+var today = new Date();
+var hours = today.getHours();
+var greeting = hours < 12 ? 'Bonjour' : hours < 18 ? 'Bon après-midi' : 'Bonsoir';
+document.getElementById('dbTitle').textContent = greeting + ' 👋';
+document.getElementById('dbDate').textContent = today.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
-  function makeStatCard(def, count) {
-    return '<a href="'+def.admin+'" class="db-stat" style="--stat-color:'+def.color+';--stat-bg:'+def.bg+';" title="'+def.label+'">' +
-      '<div class="db-stat-icon"><i class="bi '+def.icon+'"></i></div>' +
-      '<div class="db-stat-value">' + (count !== null ? count : '—') + '</div>' +
-      '<div class="db-stat-label">' + def.label + '</div></a>';
-  }
+// Configuration des stats
+var statsConfig = [
+  {name:'Articles', icon:'bi-file-earmark-text', color:'primary', url:'/api/articles/?status=published&limit=1', admin:'/admin/articles/article/'},
+  {name:'Projets', icon:'bi-code-slash', color:'success', url:'/api/projects/?status=published&limit=1', admin:'/admin/projects/project/'},
+  {name:'Astuces', icon:'bi-lightbulb', color:'warning', url:'/api/tips/?status=published&limit=1', admin:'/admin/tips/tip/'},
+  {name:'Commentaires', icon:'bi-chat-dots', color:'danger', url:'/api/comments/?limit=1', admin:'/admin/comments/comment/'},
+  {name:'Abonnés', icon:'bi-envelope-check', color:'success', url:'/api/newsletter/subscribers/?limit=1', admin:'/admin/newsletter/subscriber/'},
+  {name:'Vues', icon:'bi-graph-up', color:'primary', url:'/api/stats/', admin:'/admin/'}
+];
 
-  var grid = document.getElementById('db-stats-grid');
-  Promise.all(STATS.map(function(def){
-    return fetch(def.url, {credentials:'same-origin'})
-      .then(function(r){ return r.json(); })
-      .then(function(d){ return {def:def, count: d.count !== undefined ? d.count : (d.results ? d.results.length : null), results: d.results||[]}; })
-      .catch(function(){ return {def:def, count:null, results:[]}; });
-  })).then(function(results){
-    grid.innerHTML = '';
-    results.forEach(function(r){ grid.innerHTML += makeStatCard(r.def, r.count); });
-    var a = results.find(function(r){ return r.def.id==='articles'; });
-    var p = results.find(function(r){ return r.def.id==='projects'; });
-    var t = results.find(function(r){ return r.def.id==='tips'; });
-    if (a) loadRecent(a.def.listUrl, 'db-recent-articles', 'article');
-    if (p) loadRecent(p.def.listUrl, 'db-recent-projects', 'project');
-    if (t) loadRecent(t.def.listUrl, 'db-recent-tips', 'tip');
-    loadPending();
+function loadStats() {
+  var grid = document.getElementById('statsGrid');
+  Promise.all(statsConfig.map(stat =>
+    fetch(stat.url, {credentials:'same-origin'})
+      .then(r => r.json().catch(()=>({})))
+      .then(d => ({stat: stat, count: d.count || (d.results ? d.results.length : 0)}))
+  )).then(results => {
+    grid.innerHTML = results.map(r => `
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="${r.stat.admin}" class="stat-card">
+          <div class="stat-icon bg-${r.stat.color} bg-opacity-10 mx-auto">
+            <i class="bi ${r.stat.icon} fs-3 text-${r.stat.color}"></i>
+          </div>
+          <div class="stat-value">${r.count}</div>
+          <div class="stat-label">${r.stat.name}</div>
+        </a>
+      </div>
+    `).join('');
+    
+    // Charger les contenus récents
+    var articlesResult = results.find(r => r.stat.name === 'Articles');
+    var projectsResult = results.find(r => r.stat.name === 'Projets');
+    var tipsResult = results.find(r => r.stat.name === 'Astuces');
+    if(articlesResult) loadRecent('/api/articles/?status=published&limit=5', 'recentArticles', 'article');
+    if(projectsResult) loadRecent('/api/projects/?status=published&limit=3', 'recentProjects', 'project');
+    if(tipsResult) loadRecent('/api/tips/?status=published&limit=3', 'recentTips', 'tip');
+  });
+}
+
+function loadRecent(url, containerId, type) {
+  fetch(url, {credentials:'same-origin'})
+    .then(r => r.json())
+    .then(data => {
+      var items = data.results || [];
+      var container = document.getElementById(containerId);
+      if(items.length === 0) {
+        container.innerHTML = '<div class="text-secondary text-center py-3">Aucun contenu</div>';
+        return;
+      }
+      var icons = {article:'bi-file-earmark-text', project:'bi-code-slash', tip:'bi-lightbulb'};
+      var colors = {article:'primary', project:'success', tip:'warning'};
+      var urls = {article:'/admin/articles/article/', project:'/admin/projects/project/', tip:'/admin/tips/tip/'};
+      var limit = type === 'article' ? 5 : 3;
+      container.innerHTML = items.slice(0, limit).map(item => `
+        <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+          <div class="bg-${colors[type]} bg-opacity-10 rounded-circle p-2">
+            <i class="bi ${icons[type]} text-${colors[type]}"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-semibold small">${item.title || item.name || 'Sans titre'}</div>
+            <div class="small text-secondary">${new Date(item.created_at || item.published_at).toLocaleDateString('fr-FR')}</div>
+          </div>
+          <a href="${urls[type]}${item.id}/change/" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-pencil"></i>
+          </a>
+        </div>
+      `).join('');
+    });
+}
+
+// Analytics
+var currentDays = 30;
+
+function loadAnalytics() {
+  fetch(`/api/stats/detailed/?days=${currentDays}`, {credentials:'same-origin'})
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('kpis').innerHTML = `
+        <div class="col-4"><div class="bg-light rounded-3 p-3 text-center"><div class="fw-bold fs-3 text-primary">${data.views_today || 0}</div><div class="small text-secondary">Aujourd'hui</div></div></div>
+        <div class="col-4"><div class="bg-light rounded-3 p-3 text-center"><div class="fw-bold fs-3 text-primary">${data.views_last_7_days || 0}</div><div class="small text-secondary">7 jours</div></div></div>
+        <div class="col-4"><div class="bg-light rounded-3 p-3 text-center"><div class="fw-bold fs-3 text-primary">${data.views_last_30_days || 0}</div><div class="small text-secondary">30 jours</div></div></div>
+      `;
+      
+      var daily = data.daily_views || [];
+      var chart = document.getElementById('chart');
+      if(daily.length > 0) {
+        var maxViews = Math.max(...daily.map(d => d.views || 0), 1);
+        chart.innerHTML = daily.slice(-30).map(day => `
+          <div class="chart-bar" style="height: ${Math.max(5, (day.views || 0) / maxViews * 100)}%" title="${day.date}: ${day.views || 0} vues"></div>
+        `).join('');
+        if(daily.length > 1) {
+          var first = new Date(daily[0].date);
+          var last = new Date(daily[daily.length-1].date);
+          document.getElementById('chartDates').innerHTML = `<span>${first.getDate()}/${first.getMonth()+1}</span><span>${last.getDate()}/${last.getMonth()+1}</span>`;
+        }
+      } else {
+        chart.innerHTML = '<div class="text-secondary text-center w-100 py-3">Aucune donnée</div>';
+      }
+    });
+  
+  fetch(`/api/most-viewed/?days=${currentDays}&limit=5`, {credentials:'same-origin'})
+    .then(r => r.json())
+    .then(data => {
+      var pages = data.results || [];
+      var container = document.getElementById('topPages');
+      if(pages.length === 0) {
+        container.innerHTML = '<div class="text-secondary text-center py-3">Aucune page visitée</div>';
+        return;
+      }
+      container.innerHTML = pages.map((page, i) => `
+        <div class="d-flex align-items-center gap-2 py-2 border-bottom">
+          <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width:28px;height:28px;">${i+1}</div>
+          <div class="flex-grow-1 small fw-semibold">${page.object_title || 'Sans titre'}</div>
+          <div class="small text-primary"><i class="bi bi-eye"></i> ${page.total_views || 0}</div>
+        </div>
+      `).join('');
+    });
+}
+
+// Périodes
+document.querySelectorAll('.period-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.period-btn').forEach(b => {
+      b.classList.remove('active', 'btn-primary');
+      b.classList.add('btn-outline-primary');
+    });
+    this.classList.add('active', 'btn-primary');
+    this.classList.remove('btn-outline-primary');
+    currentDays = parseInt(this.dataset.days);
+    loadAnalytics();
+  });
+});
+
+// Sitemap
+var sitemapUrl = window.location.origin + '/sitemap.xml';
+document.getElementById('sitemapUrl').textContent = sitemapUrl;
+document.getElementById('viewSitemapBtn').href = sitemapUrl;
+document.getElementById('copySitemapBtn').onclick = function() {
+  navigator.clipboard.writeText(sitemapUrl).then(() => {
+    var btn = document.getElementById('copySitemapBtn');
+    var original = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Copié !';
+    setTimeout(() => btn.innerHTML = original, 2000);
+  });
+};
+
+// Paramètres et statuts
+fetch('/api/settings/', {credentials:'same-origin'})
+  .then(r => r.json())
+  .then(data => {
+    if(data.ai_enabled) {
+      var aiStatus = document.getElementById('aiStatus');
+      var systemAiStatus = document.getElementById('systemAiStatus');
+      if(aiStatus) { aiStatus.textContent = '✓ Prêt'; aiStatus.className = 'badge bg-success'; }
+      if(systemAiStatus) { systemAiStatus.textContent = '✓ Actif'; systemAiStatus.className = 'badge bg-success'; }
+    }
+    if(data.email_configured === false) {
+      var emailStatus = document.getElementById('emailStatus');
+      if(emailStatus) { emailStatus.textContent = '⚠ À configurer'; emailStatus.className = 'badge bg-warning'; }
+    }
   });
 
-  /* ── Recent items ── */
-  var IC = {article:'bi-file-earmark-text', project:'bi-code-slash', tip:'bi-lightbulb'};
-  var CO = {article:'#4F46E5', project:'#10b981', tip:'#f59e0b'};
-  var BG = {article:'#eef2ff', project:'#ecfdf5', tip:'#fefce8'};
-  var ED = {article:'/admin/articles/article/', project:'/admin/projects/project/', tip:'/admin/tips/tip/'};
-  var SL = {article:'/articles/', project:'/projets/', tip:'/astuces/'};
-
-  function loadRecent(url, cid, type) {
-    fetch(url, {credentials:'same-origin'}).then(function(r){ return r.json(); }).then(function(d){
-      var items = d.results || [];
-      var c = document.getElementById(cid);
-      if (!items.length) { c.innerHTML = '<div style="color:#c4c3d4;font-size:.82rem;padding:6px 0;">Aucun contenu publié</div>'; return; }
-      c.innerHTML = '';
-      var limit = type === 'article' ? 5 : 3;
-      items.slice(0, limit).forEach(function(item){
-        var date = new Date(item.published_at||item.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-        var cat = (item.category && (item.category.name || item.category)) ? ' · ' + (item.category.name || item.category) : '';
-        c.innerHTML +=
-          '<div class="db-recent-item">' +
-          '<div class="db-recent-icon" style="background:'+BG[type]+';"><i class="bi '+IC[type]+'" style="color:'+CO[type]+';"></i></div>' +
-          '<div class="db-recent-body"><div class="db-recent-title">'+(item.title||item.name||'—')+'</div><div class="db-recent-meta">'+date+cat+'</div></div>' +
-          '<div class="db-recent-links">' +
-          '<a href="'+SL[type]+(item.slug||'')+'" target="_blank" class="db-recent-link" title="Voir">↗</a>' +
-          '<a href="'+ED[type]+(item.id||'')+'/change/" class="db-recent-link" title="Modifier">✎</a>' +
-          '</div></div>';
-      });
-    }).catch(function(){});
-  }
-
-  function loadPending() {
-    fetch('/api/comments/?limit=50', {credentials:'same-origin'}).then(function(r){ return r.json(); }).then(function(d){
-      var n = (d.results||[]).filter(function(c){ return !c.is_approved; }).length;
-      if (n > 0) { var b = document.getElementById('db-pending-count'); b.textContent = n; b.style.display = 'inline-flex'; }
-    }).catch(function(){});
-  }
-
-  /* ── AI status + Settings ── */
-  fetch('/api/settings/', {credentials:'same-origin'}).then(function(r){ return r.json(); }).then(function(d){
-    ['ai-status-indicator','db-ai-status'].forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) { el.textContent = '✓ Prêt'; el.className = 'badge badge-green'; }
-    });
-    /* Sitemap URL — always show with origin/sitemap.xml */
-    var sitemapUrl = window.location.origin + '/sitemap.xml';
-    var smDisplay = document.getElementById('sm-url-display');
-    var smView = document.getElementById('sm-view-btn');
-    if (smDisplay) smDisplay.textContent = sitemapUrl;
-    if (smView) smView.href = sitemapUrl;
-    /* Legacy row */
-    var configuredUrl = d.google_sitemap_url || '';
-    if (configuredUrl) {
-      var row = document.getElementById('db-sitemap-row');
-      var link = document.getElementById('db-sitemap-link');
-      if (row) row.style.display = 'flex';
-      if (link) { link.href = configuredUrl; link.title = configuredUrl; }
+// Commentaires en attente
+fetch('/api/comments/?limit=50', {credentials:'same-origin'})
+  .then(r => r.json())
+  .then(data => {
+    var pending = (data.results || []).filter(c => !c.is_approved).length;
+    if(pending > 0) {
+      var badge = document.getElementById('pendingBadge');
+      badge.textContent = pending;
+      badge.style.display = 'inline-block';
     }
-    /* Email check */
-    var emailSt = document.getElementById('db-email-status');
-    if (emailSt && !d.email_configured) {
-      emailSt.textContent = '⚠ À configurer';
-      emailSt.className = 'badge badge-yellow';
-    }
-  }).catch(function(){});
+  });
 
-  /* ── Analytics ── */
-  var TYPE_COLOR = {article:'#4F46E5', project:'#10b981', tip:'#f59e0b', portfolio:'#e11d48'};
-  var TYPE_BG    = {article:'#eef2ff', project:'#ecfdf5', tip:'#fefce8', portfolio:'#fff1f2'};
-  var TYPE_LABEL = {article:'Article', project:'Projet', tip:'Astuce', portfolio:'Portfolio'};
-  var currentDays = 30;
-
-  window.switchPeriod = function(days, btn) {
-    currentDays = days;
-    document.querySelectorAll('.db-period-tab').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    loadAnalytics();
-  };
-
-  function loadAnalytics() {
-    /* KPIs */
-    fetch('/api/stats/detailed/?days='+currentDays, {credentials:'same-origin'})
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        document.getElementById('db-kpis').innerHTML =
-          kpi(d.views_today||0, "Aujourd'hui") +
-          kpi(d.views_last_7_days||0, '7 jours') +
-          kpi(d.views_last_30_days||0, '30 jours');
-
-        /* Chart */
-        var daily = (d.daily_views||[]).slice(-Math.min((d.daily_views||[]).length, 30));
-        var chartEl = document.getElementById('db-chart');
-        var datesEl = document.getElementById('db-chart-dates');
-        if (daily.length > 0) {
-          var maxV = Math.max.apply(null, daily.map(function(x){ return x.views||0; })) || 1;
-          chartEl.innerHTML = daily.map(function(day){
-            var pct = Math.max(5, Math.round(((day.views||0)/maxV)*90));
-            var d2 = new Date(day.date);
-            var lbl = (d2.getDate())+'/'+(d2.getMonth()+1);
-            return '<div class="db-bar" style="height:'+pct+'%;" title="'+lbl+': '+(day.views||0)+' vue(s)"></div>';
-          }).join('');
-          if (daily.length > 1) {
-            var f = new Date(daily[0].date), l = new Date(daily[daily.length-1].date);
-            datesEl.innerHTML = '<span>'+f.getDate()+'/'+(f.getMonth()+1)+'</span><span>'+l.getDate()+'/'+(l.getMonth()+1)+'</span>';
-          }
-        } else {
-          chartEl.innerHTML = '<div style="color:#c4c3d4;font-size:.75rem;padding:8px 0;width:100%;text-align:center;">Aucune donnée</div>';
-        }
-
-        var sa = document.getElementById('db-analytics-status');
-        if (sa) { sa.textContent = '✓ Actif'; sa.className = 'badge badge-green'; }
-      }).catch(function(){
-        var sa = document.getElementById('db-analytics-status');
-        if (sa) { sa.textContent = '⚠ Erreur'; sa.className = 'badge badge-yellow'; }
-      });
-
-    /* Top pages */
-    fetch('/api/most-viewed/?days='+currentDays+'&limit=6', {credentials:'same-origin'})
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        var list = document.getElementById('db-top-pages');
-        var items = d.results || [];
-        if (!items.length) { list.innerHTML = '<div style="color:#c4c3d4;font-size:.78rem;padding:6px 0;">Aucune visite enregistrée</div>'; return; }
-        list.innerHTML = items.map(function(item, i){
-          var type = item.content_type || 'page';
-          var col = TYPE_COLOR[type] || '#6b7280';
-          var bg = TYPE_BG[type] || '#f3f4f6';
-          var lbl = TYPE_LABEL[type] || type;
-          var slug = item.object_slug ? ('/'+({'article':'articles','project':'projets','tip':'astuces'}[type]||type)+'/'+item.object_slug+'/') : '#';
-          var rankStyles = [
-            'background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;',
-            'background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff;',
-            'background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;',
-          ];
-          var rs = i < 3 ? rankStyles[i] : 'background:#eef2ff;color:#4F46E5;';
-          return '<div class="db-top-page">' +
-            '<div class="db-rank" style="'+rs+'">'+(i+1)+'</div>' +
-            '<div class="db-top-title"><a href="'+slug+'" target="_blank">'+(item.object_title||'—')+'</a></div>' +
-            '<span class="db-type-chip" style="background:'+bg+';color:'+col+';">'+lbl+'</span>' +
-            '<div class="db-views"><i class="bi bi-eye" style="font-size:.62rem;"></i>'+(item.total_views||0)+'</div>' +
-            '</div>';
-        }).join('');
-      }).catch(function(){});
-  }
-
-  function kpi(val, label) {
-    return '<div class="db-kpi"><div class="db-kpi-value">'+val+'</div><div class="db-kpi-label">'+label+'</div></div>';
-  }
-
-  loadAnalytics();
-
-  /* ── Sitemap copy ── */
-  window.copySitemapUrl = function() {
-    var url = window.location.origin + '/sitemap.xml';
-    var btn = document.getElementById('sm-copy-btn');
-    var display = document.getElementById('sm-url-display');
-    function feedback() {
-      if (btn) { var o = btn.innerHTML; btn.innerHTML = '<i class="bi bi-check-lg"></i>Copié !'; btn.style.background = '#10b981'; setTimeout(function(){ btn.innerHTML = o; btn.style.background = 'linear-gradient(135deg,#4F46E5,#7C3AED)'; }, 2200); }
-      if (display) { display.style.background = '#d1fae5'; display.style.borderColor = '#6ee7b7'; setTimeout(function(){ display.style.background = '#eef2ff'; display.style.borderColor = '#c7d2fe'; }, 2200); }
-    }
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(feedback).catch(function(){
-        var t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); feedback();
-      });
-    } else {
-      var t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); feedback();
-    }
-  };
-})();
+// Initialisation
+loadStats();
+loadAnalytics();
 </script>
 {% endblock %}
 
