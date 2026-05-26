@@ -6,7 +6,7 @@
 {% block branding %}
 <div id="site-name" style="display:flex;align-items:center;gap:10px;">
   <a href="{% url 'admin:index' %}" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;">
-    <span style="width:34px;height:34px;background:linear-gradient(135deg,#0d6efd,#0dcaf0);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;">LN</span>
+    <span id="admin-logo-mark" style="width:34px;height:34px;background:linear-gradient(135deg,#0d6efd,#0dcaf0);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;overflow:hidden;">LN</span>
     <span style="font-weight:700;font-size:18px;">Landry Net</span>
     <span style="font-size:11px;background:rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;">ADMIN</span>
   </a>
@@ -132,7 +132,8 @@
 }
 
 * { box-sizing: border-box; }
-body { font-family: 'Inter', -apple-system, sans-serif !important; background: #f0f2f5 !important; }
+body { font-family: 'Inter', -apple-system, sans-serif !important; background: #f0f2f5 !important; color: #212529 !important; }
+.text-white-50 { color: rgba(255,255,255,0.5) !important; }
 
 /* Header */
 #header {
@@ -367,6 +368,22 @@ input:focus, textarea:focus, select:focus {
 .dm .ai-preset-item:hover { background:#334155 !important; border-color:#475569 !important; }
 .dm #ln-ai-panel { background:#1e293b !important; border-color:#334155 !important; }
 .dm .ai-panel-head { background:linear-gradient(135deg,#1d4ed8,#0891b2) !important; }
+/* Dark mode — utilitaires Bootstrap adaptés */
+.dm .bg-light { background:#1e293b !important; }
+.dm .bg-white { background:#1e293b !important; }
+.dm .border-bottom { border-bottom-color:#334155 !important; }
+.dm .border-top { border-top-color:#334155 !important; }
+.dm .border { border-color:#334155 !important; }
+.dm .text-secondary, .dm .text-muted { color:#94a3b8 !important; }
+.dm .text-dark { color:#e2e8f0 !important; }
+.dm #nav-sidebar { background:#1e293b !important; border-color:#334155 !important; }
+.dm #nav-sidebar a { color:#cbd5e1 !important; }
+.dm #nav-sidebar a:hover, .dm #nav-sidebar .selected { background:#1e3a5f !important; color:#93c5fd !important; }
+.dm div.breadcrumbs { background:#1e293b !important; border-bottom-color:#334155 !important; color:#94a3b8 !important; }
+.dm div.breadcrumbs a { color:#93c5fd !important; }
+.dm .submit-row { background:#1e293b !important; border-color:#334155 !important; }
+.dm .ai-publish-bar { background:#0f2f1a !important; border-top-color:#166534 !important; }
+.dm .ai-pub-select, .dm .ai-pub-input { background:#1e293b !important; border-color:#334155 !important; color:#e2e8f0 !important; }
 
 /* ====================================================
    RESPONSIVE MOBILE
@@ -532,6 +549,9 @@ input:focus, textarea:focus, select:focus {
         <option value="tip">Astuce</option>
       </select>
       <input type="text" class="ai-pub-input" id="pub-title" placeholder="Titre..." maxlength="200">
+      <select class="ai-pub-select" id="pub-author" title="Auteur">
+        <option value="">Auteur...</option>
+      </select>
       <select class="ai-pub-select" id="pub-status">
         <option value="draft">Brouillon</option>
         <option value="published">Publier</option>
@@ -548,6 +568,7 @@ input:focus, textarea:focus, select:focus {
     <button class="ai-quick-btn" onclick="aiQuick('Identifie les lacunes de contenu sur mon site et suggère des sujets manquants.')">🔍 Lacunes</button>
     <button class="ai-quick-btn" onclick="aiQuick('Crée un plan de croissance sur 30 jours pour mon site avec des objectifs réalistes.')">🚀 Croissance</button>
     <button class="ai-quick-btn" onclick="showPublishBar()">📤 Créer & Publier</button>
+    <button class="ai-quick-btn" onclick="window.open('/admin-ai/newsletter/','_blank')" style="background:#f0fff4;border-color:#86efac;color:#166534;">📧 Newsletter</button>
     <button class="ai-quick-btn" onclick="window.open('/admin-ai/diagnostic/','_blank')" style="background:#fff0f8;border-color:#f9a8d4;color:#be185d;">🔧 Diagnostic</button>
   </div>
 
@@ -650,9 +671,26 @@ function clearAIHistory() {
   hidePublishBar();
 }
 
-// Message formatting — convert markdown to clean HTML
+// Detect if content contains HTML tags (from AI)
+function isHtmlContent(text) {
+  return /<(h[1-6]|p|ul|ol|li|div|table|br\s*\/?>|strong|em|blockquote|pre|code|hr)[>\s\/]/i.test(text);
+}
+
+// Sanitize AI HTML — remove dangerous tags only
+function sanitizeAiHtml(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/javascript:/gi, '');
+}
+
+// Message formatting — convert markdown to clean HTML (for plain text/markdown)
 function formatMessage(text) {
   if (!text) return '';
+  // If content is HTML, return it directly (sanitized)
+  if (isHtmlContent(text)) {
+    return sanitizeAiHtml(text);
+  }
   var html = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -694,8 +732,14 @@ function addMsg(role, text, store) {
   div.className = 'ai-msg ' + (role === 'user' ? 'user' : role === 'error' ? 'error' : 'ai');
 
   if (role === 'assistant' || role === 'ai') {
-    var formatted = formatMessage(text);
-    div.innerHTML = formatted;
+    // Always use formatMessage which now handles both HTML and markdown
+    div.innerHTML = formatMessage(text);
+    // Inject styles into bare h1-h6 from AI HTML
+    div.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(function(el) {
+      el.style.cssText = 'font-size:0.9rem;font-weight:800;color:#1e40af;margin:8px 0 4px;';
+    });
+    div.querySelectorAll('p').forEach(function(el) { el.style.margin = '4px 0'; });
+    div.querySelectorAll('ul,ol').forEach(function(el) { el.style.cssText = 'padding-left:16px;margin:4px 0;'; });
     // Copy button
     var copyBtn = document.createElement('button');
     copyBtn.className = 'ai-copy-btn';
@@ -817,6 +861,7 @@ function suggestPublish(content) {
 function showPublishBar() {
   var bar = document.getElementById('ai-publish-bar');
   if (bar) bar.classList.add('show');
+  loadPubAuthors();
 }
 
 function hidePublishBar() {
@@ -824,10 +869,31 @@ function hidePublishBar() {
   if (bar) bar.classList.remove('show');
 }
 
+// Load admin users into author selector
+var _usersLoaded = false;
+function loadPubAuthors() {
+  if (_usersLoaded) return;
+  fetch('/admin-ai/users/', {credentials:'same-origin'})
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var sel = document.getElementById('pub-author');
+      if (!sel || !data.users) return;
+      sel.innerHTML = '<option value="">Auteur...</option>';
+      data.users.forEach(function(u) {
+        var opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.display;
+        sel.appendChild(opt);
+      });
+      _usersLoaded = true;
+    }).catch(function() {});
+}
+
 window.publishAIContent = function() {
   var type = document.getElementById('pub-type');
   var title = document.getElementById('pub-title');
   var status = document.getElementById('pub-status');
+  var authorEl = document.getElementById('pub-author');
   if (!title || !title.value.trim()) {
     alert('Veuillez saisir un titre pour le contenu à publier.');
     return;
@@ -845,6 +911,7 @@ window.publishAIContent = function() {
       content: content,
       excerpt: excerpt,
       status: status ? status.value : 'draft',
+      author_id: authorEl && authorEl.value ? parseInt(authorEl.value) : null,
     })
   })
   .then(function(r) { return r.json(); })
@@ -893,12 +960,33 @@ window.aiQuick = function(msg) {
   callAI(msg);
 };
 
-// Check AI status
+// Check AI status + load logo from site settings
 fetch('/api/settings/', { credentials: 'same-origin' })
   .then(function(r) { return r.json(); })
   .then(function(data) {
     var sub = document.getElementById('ai-panel-sub');
     if (sub) sub.textContent = data.ai_enabled ? 'Prêt à vous aider' : 'À configurer dans les paramètres';
+    // Update admin logo with site logo if available
+    if (data.logo_url) {
+      var logoMark = document.getElementById('admin-logo-mark');
+      if (logoMark) {
+        logoMark.innerHTML = '';
+        logoMark.style.background = 'transparent';
+        logoMark.style.padding = '0';
+        var img = document.createElement('img');
+        img.src = data.logo_url;
+        img.alt = data.site_name || 'Logo';
+        img.style.cssText = 'width:34px;height:34px;object-fit:contain;border-radius:8px;display:block;';
+        logoMark.appendChild(img);
+      }
+    }
+    // Update admin site name in branding
+    if (data.site_name) {
+      var nameSpan = document.querySelector('#site-name span:nth-child(2)');
+      if (nameSpan && nameSpan.style && !nameSpan.style.fontSize) {
+        nameSpan.textContent = data.site_name;
+      }
+    }
   })
   .catch(function() {
     var sub = document.getElementById('ai-panel-sub');

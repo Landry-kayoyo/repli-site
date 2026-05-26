@@ -38,6 +38,9 @@ urlpatterns = [
     path('admin-ai/diagnostic/', __import__('core.diagnostic_views', fromlist=['diagnostic_page']).diagnostic_page, name='admin-ai-diagnostic'),
     path('admin-ai/test-smtp/', __import__('core.diagnostic_views', fromlist=['test_smtp_connection']).test_smtp_connection, name='admin-ai-test-smtp'),
     path('admin-ai/send-test-email/', __import__('core.diagnostic_views', fromlist=['send_test_email']).send_test_email, name='admin-ai-send-test-email'),
+    path('admin-ai/newsletter/', __import__('core.diagnostic_views', fromlist=['newsletter_management']).newsletter_management, name='admin-ai-newsletter'),
+    path('admin-ai/newsletter/send/', __import__('core.diagnostic_views', fromlist=['send_newsletter_campaign']).send_newsletter_campaign, name='admin-ai-newsletter-send'),
+    path('admin-ai/users/', __import__('core.ai_views', fromlist=['get_admin_users']).get_admin_users, name='admin-ai-users'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('rss/', include('core.feeds_urls')),
 

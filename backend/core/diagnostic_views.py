@@ -304,3 +304,58 @@ def send_test_email(request):
     except Exception as e:
         logger.error(f"send_test_email error: {e}")
         return JsonResponse({'success': False, 'msg': f'❌ Erreur inattendue : {str(e)}'})
+
+
+@staff_member_required
+def newsletter_management(request):
+    """Newsletter management page — compose and send to all active subscribers."""
+    from newsletter.models import Subscriber, NewsletterCampaign
+    stats = {
+        'total': Subscriber.objects.count(),
+        'active': Subscriber.objects.filter(status='active').count(),
+        'confirmed': Subscriber.objects.filter(status='active', confirmed=True).count(),
+        'unsubscribed': Subscriber.objects.filter(status='unsubscribed').count(),
+    }
+    campaigns = NewsletterCampaign.objects.order_by('-created_at')[:10]
+    from core.models import SiteSettings
+    site_settings = SiteSettings.objects.first()
+    smtp_ok = bool(site_settings and site_settings.email_host_user and site_settings.email_host_password) if site_settings else False
+    ctx = {
+        'title': 'Gestion Newsletter',
+        'stats': stats,
+        'campaigns': campaigns,
+        'smtp_ok': smtp_ok,
+        'site_settings': site_settings,
+    }
+    return render(request, 'admin/newsletter_management.html', ctx)
+
+
+@staff_member_required
+def send_newsletter_campaign(request):
+    """Create and send a newsletter campaign."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST requis'}, status=405)
+    import json
+    try:
+        body = json.loads(request.body)
+        subject = body.get('subject', '').strip()
+        content = body.get('content', '').strip()
+        send_now = body.get('send_now', False)
+    except Exception:
+        return JsonResponse({'error': 'JSON invalide'}, status=400)
+
+    if not subject or not content:
+        return JsonResponse({'error': 'Sujet et contenu requis'}, status=400)
+
+    from newsletter.models import NewsletterCampaign
+    campaign = NewsletterCampaign.objects.create(subject=subject, content=content, status='draft')
+
+    if send_now:
+        try:
+            from newsletter.utils import send_campaign
+            sent, msg = send_campaign(campaign.pk)
+            return JsonResponse({'ok': True, 'sent': sent, 'message': msg, 'campaign_id': campaign.pk})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e), 'campaign_id': campaign.pk}, status=500)
+    else:
+        return JsonResponse({'ok': True, 'sent': 0, 'message': 'Brouillon sauvegardé.', 'campaign_id': campaign.pk})

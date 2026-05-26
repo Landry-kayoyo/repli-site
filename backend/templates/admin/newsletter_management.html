@@ -1,0 +1,290 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Gestion Newsletter | Landry Net Admin{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Accueil</a> › Gestion Newsletter
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+.nl-container { max-width: 1100px; margin: 0 auto; }
+.nl-card { background: white; border-radius: 16px; border: 1px solid #e9ecef; margin-bottom: 24px; overflow: hidden; }
+.nl-card-head { background: linear-gradient(90deg, #0d6efd, #0dcaf0); color: white; padding: 16px 24px; }
+.nl-card-head h2 { font-size: 1rem; font-weight: 700; margin: 0; }
+.nl-card-body { padding: 24px; }
+.nl-stat { background: #f8f9fa; border-radius: 12px; padding: 20px; text-align: center; }
+.nl-stat-val { font-size: 2rem; font-weight: 800; color: #0d6efd; line-height: 1; }
+.nl-stat-lbl { font-size: 0.72rem; color: #6c757d; font-weight: 600; text-transform: uppercase; margin-top: 6px; }
+.nl-compose textarea { width: 100%; border: 1.5px solid #dee2e6; border-radius: 10px; padding: 14px; font-size: 0.875rem; font-family: inherit; resize: vertical; min-height: 220px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+.nl-compose textarea:focus { border-color: #0d6efd; }
+.nl-compose input[type="text"] { width: 100%; border: 1.5px solid #dee2e6; border-radius: 10px; padding: 12px 14px; font-size: 0.875rem; font-family: inherit; outline: none; margin-bottom: 12px; box-sizing: border-box; transition: border-color 0.2s; }
+.nl-compose input:focus { border-color: #0d6efd; }
+.nl-campaign-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+.nl-campaign-row:last-child { border-bottom: none; }
+.nl-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+.nl-badge.sent { background: #d1fae5; color: #065f46; }
+.nl-badge.draft { background: #fef3c7; color: #92400e; }
+.nl-alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 0.875rem; display: none; }
+.nl-alert.success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.nl-alert.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.nl-alert.show { display: block; }
+.nl-progress { display: none; align-items: center; gap: 10px; }
+.nl-progress.show { display: flex; }
+.nl-spinner { width: 20px; height: 20px; border: 3px solid #e9ecef; border-top-color: #0d6efd; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.nl-tip { background: #e7f1ff; border-left: 3px solid #0d6efd; border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 0.82rem; color: #1a3a6e; margin-bottom: 16px; }
+/* Dark mode */
+.dm .nl-card { background: #1e293b !important; border-color: #334155 !important; }
+.dm .nl-stat { background: #0f172a !important; }
+.dm .nl-stat-lbl { color: #94a3b8 !important; }
+.dm .nl-compose textarea, .dm .nl-compose input[type="text"] { background: #334155 !important; border-color: #475569 !important; color: #e2e8f0 !important; }
+.dm .nl-campaign-row { border-bottom-color: #334155 !important; }
+.dm .nl-tip { background: #1e3a5f !important; border-color: #3b82f6 !important; color: #93c5fd !important; }
+</style>
+
+<div class="nl-container">
+  <!-- Stats Header -->
+  <div class="nl-card">
+    <div class="nl-card-head">
+      <h2><i class="bi bi-envelope-paper-fill" style="margin-right:8px;"></i>Gestion Newsletter — Statistiques abonnés</h2>
+    </div>
+    <div class="nl-card-body">
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="nl-stat">
+            <div class="nl-stat-val" style="color:#0d6efd;">{{ stats.total }}</div>
+            <div class="nl-stat-lbl">Total abonnés</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="nl-stat">
+            <div class="nl-stat-val" style="color:#198754;">{{ stats.active }}</div>
+            <div class="nl-stat-lbl">Actifs</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="nl-stat">
+            <div class="nl-stat-val" style="color:#0dcaf0;">{{ stats.confirmed }}</div>
+            <div class="nl-stat-lbl">Confirmés</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="nl-stat">
+            <div class="nl-stat-val" style="color:#dc3545;">{{ stats.unsubscribed }}</div>
+            <div class="nl-stat-lbl">Désabonnés</div>
+          </div>
+        </div>
+      </div>
+
+      {% if not smtp_ok %}
+      <div class="nl-tip mt-4">
+        <strong>⚠️ SMTP non configuré.</strong> Allez dans <a href="/admin/core/sitesettings/1/change/" style="color:#0d6efd;">Paramètres du site</a> et renseignez votre compte Gmail + mot de passe d'application pour pouvoir envoyer des emails.
+      </div>
+      {% endif %}
+
+      <div class="d-flex gap-2 mt-4" style="flex-wrap:wrap;">
+        <a href="/admin/newsletter/subscriber/" class="btn btn-outline-primary btn-sm"><i class="bi bi-people"></i> Gérer les abonnés</a>
+        <a href="/admin/newsletter/newslettercampaign/" class="btn btn-outline-secondary btn-sm"><i class="bi bi-archive"></i> Voir toutes les campagnes</a>
+        <a href="/admin-ai/diagnostic/" class="btn btn-outline-secondary btn-sm"><i class="bi bi-heart-pulse"></i> Diagnostic Email</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compose Newsletter -->
+  <div class="nl-card">
+    <div class="nl-card-head">
+      <h2><i class="bi bi-pencil-square" style="margin-right:8px;"></i>Composer une newsletter</h2>
+    </div>
+    <div class="nl-card-body">
+      <div class="nl-tip">
+        💡 Le contenu est envoyé enveloppé dans un beau template HTML à tous vos <strong>{{ stats.active }} abonné(s) actif(s)</strong>.
+        Vous pouvez utiliser du HTML dans le contenu pour une mise en forme avancée.
+      </div>
+
+      <div id="nl-alert" class="nl-alert"></div>
+
+      <div class="nl-compose">
+        <label style="font-size:0.8rem;font-weight:700;color:#374151;display:block;margin-bottom:6px;">Sujet de l'email <span style="color:#dc3545;">*</span></label>
+        <input type="text" id="nl-subject" placeholder="Ex: 📬 Mes dernières publications — Mai 2026" maxlength="250">
+
+        <label style="font-size:0.8rem;font-weight:700;color:#374151;display:block;margin-bottom:6px;">Contenu (HTML ou texte) <span style="color:#dc3545;">*</span></label>
+        <textarea id="nl-content" placeholder="Bonjour,&#10;&#10;Voici les dernières nouvelles de mon site...&#10;&#10;Vous pouvez utiliser du HTML : &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;a href=&quot;...&quot;&gt;, etc."></textarea>
+
+        <div id="nl-char-count" style="font-size:0.72rem;color:#6c757d;text-align:right;margin-top:4px;margin-bottom:16px;">0 caractères</div>
+
+        <div class="d-flex gap-2" style="flex-wrap:wrap;">
+          <button class="btn btn-outline-secondary btn-sm" onclick="saveDraft()">
+            <i class="bi bi-floppy"></i> Sauvegarder brouillon
+          </button>
+          <button class="btn btn-success btn-sm" onclick="sendNewsletter()" id="nl-send-btn"
+            {% if not smtp_ok %}disabled title="Configurez d'abord le SMTP"{% endif %}>
+            <i class="bi bi-send-fill"></i> Envoyer à {{ stats.active }} abonné(s)
+          </button>
+        </div>
+
+        <div class="nl-progress mt-3" id="nl-progress">
+          <div class="nl-spinner"></div>
+          <span style="font-size:0.85rem;color:#0d6efd;">Envoi en cours… veuillez patienter.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Generator Helper -->
+  <div class="nl-card">
+    <div class="nl-card-head" style="background:linear-gradient(90deg,#7c3aed,#0d6efd);">
+      <h2><i class="bi bi-robot" style="margin-right:8px;"></i>Générer avec l'IA</h2>
+    </div>
+    <div class="nl-card-body">
+      <p style="font-size:0.875rem;color:#6c757d;margin-bottom:16px;">Cliquez sur un des boutons ci-dessous pour générer une newsletter via l'IA, puis copiez-collez le résultat dans le champ ci-dessus.</p>
+      <div class="d-flex gap-2" style="flex-wrap:wrap;">
+        <button class="btn btn-outline-primary btn-sm" onclick="askAI('Rédige une newsletter HTML complète présentant mes dernières publications. Commence directement par le HTML du contenu, sans enveloppe complète. Utilise des titres h2, paragraphes p, et liste ul. Sois engageant et professionnel.')">
+          <i class="bi bi-file-earmark-text"></i> Résumé de publications
+        </button>
+        <button class="btn btn-outline-primary btn-sm" onclick="askAI('Rédige une newsletter HTML engageante pour présenter un nouveau projet ou article tech. Utilise des balises h2, p, ul, strong. Format HTML direct sans balises html/head/body.')">
+          <i class="bi bi-code-slash"></i> Nouveau projet/article
+        </button>
+        <button class="btn btn-outline-primary btn-sm" onclick="askAI('Rédige un email newsletter HTML de motivation pour mes abonnés développeurs avec des astuces pratiques. Format HTML avec h2, p, ul, strong. Direct, sans html/head/body wrapper.')">
+          <i class="bi bi-lightbulb"></i> Astuces & motivation
+        </button>
+      </div>
+      <div class="nl-tip mt-3">
+        <i class="bi bi-info-circle"></i> L'Assistant IA s'ouvrira avec votre demande. Copiez la réponse générée et collez-la dans le champ "Contenu" ci-dessus.
+      </div>
+    </div>
+  </div>
+
+  <!-- Campaign History -->
+  {% if campaigns %}
+  <div class="nl-card">
+    <div class="nl-card-head" style="background:linear-gradient(90deg,#475569,#334155);">
+      <h2><i class="bi bi-clock-history" style="margin-right:8px;"></i>Campagnes récentes</h2>
+    </div>
+    <div class="nl-card-body">
+      {% for campaign in campaigns %}
+      <div class="nl-campaign-row">
+        <span class="nl-badge {% if campaign.status == 'sent' %}sent{% else %}draft{% endif %}">
+          {% if campaign.status == 'sent' %}✓ Envoyée{% else %}📝 Brouillon{% endif %}
+        </span>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:0.875rem;">{{ campaign.subject }}</div>
+          <div style="font-size:0.72rem;color:#6c757d;">
+            Créée le {{ campaign.created_at|date:"d/m/Y à H:i" }}
+            {% if campaign.sent_at %} · Envoyée le {{ campaign.sent_at|date:"d/m/Y à H:i" }}{% endif %}
+          </div>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="reuseCampaign('{{ campaign.subject|escapejs }}', `{{ campaign.content|escapejs }}`)">
+          <i class="bi bi-arrow-repeat"></i> Réutiliser
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+var nlSubject = document.getElementById('nl-subject');
+var nlContent = document.getElementById('nl-content');
+var nlCharCount = document.getElementById('nl-char-count');
+var nlAlert = document.getElementById('nl-alert');
+
+if (nlContent) {
+  nlContent.addEventListener('input', function() {
+    if (nlCharCount) nlCharCount.textContent = nlContent.value.length + ' caractères';
+  });
+}
+
+function showAlert(msg, type) {
+  if (!nlAlert) return;
+  nlAlert.textContent = msg;
+  nlAlert.className = 'nl-alert ' + type + ' show';
+  setTimeout(function() { nlAlert.classList.remove('show'); }, 6000);
+}
+
+function getCsrf() {
+  var c = document.cookie.split(';').find(function(c) { return c.trim().startsWith('csrftoken='); });
+  return c ? c.trim().split('=')[1] : '';
+}
+
+function saveDraft() {
+  var subject = nlSubject ? nlSubject.value.trim() : '';
+  var content = nlContent ? nlContent.value.trim() : '';
+  if (!subject || !content) { showAlert('⚠️ Sujet et contenu requis.', 'error'); return; }
+
+  fetch('/admin-ai/newsletter/send/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ subject: subject, content: content, send_now: false })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) showAlert('📝 Brouillon sauvegardé avec succès !', 'success');
+    else showAlert('Erreur : ' + (d.error || 'Inconnue'), 'error');
+  })
+  .catch(function(e) { showAlert('Erreur : ' + e.message, 'error'); });
+}
+
+function sendNewsletter() {
+  var subject = nlSubject ? nlSubject.value.trim() : '';
+  var content = nlContent ? nlContent.value.trim() : '';
+  if (!subject || !content) { showAlert('⚠️ Sujet et contenu requis.', 'error'); return; }
+
+  var activeCount = {{ stats.active }};
+  if (activeCount === 0) { showAlert('⚠️ Aucun abonné actif à qui envoyer.', 'error'); return; }
+
+  if (!confirm('Envoyer cette newsletter à ' + activeCount + ' abonné(s) actif(s) ?\n\nSujet : ' + subject)) return;
+
+  var sendBtn = document.getElementById('nl-send-btn');
+  var progress = document.getElementById('nl-progress');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Envoi...'; }
+  if (progress) progress.classList.add('show');
+
+  fetch('/admin-ai/newsletter/send/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ subject: subject, content: content, send_now: true })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (progress) progress.classList.remove('show');
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="bi bi-send-fill"></i> Envoyer à {{ stats.active }} abonné(s)'; }
+    if (d.ok) {
+      showAlert('✅ ' + d.message, 'success');
+      if (nlSubject) nlSubject.value = '';
+      if (nlContent) nlContent.value = '';
+      if (nlCharCount) nlCharCount.textContent = '0 caractères';
+      setTimeout(function() { location.reload(); }, 3000);
+    } else {
+      showAlert('❌ Erreur : ' + (d.error || 'Inconnue'), 'error');
+    }
+  })
+  .catch(function(e) {
+    if (progress) progress.classList.remove('show');
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="bi bi-send-fill"></i> Envoyer'; }
+    showAlert('Erreur réseau : ' + e.message, 'error');
+  });
+}
+
+function reuseCampaign(subject, content) {
+  if (nlSubject) nlSubject.value = subject;
+  if (nlContent) { nlContent.value = content; nlContent.dispatchEvent(new Event('input')); }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function askAI(prompt) {
+  if (typeof toggleAI === 'function') {
+    if (typeof aiOpen !== 'undefined' && !aiOpen) toggleAI();
+    if (typeof addMsg === 'function') addMsg('user', prompt);
+    if (typeof callAI === 'function') callAI(prompt);
+  } else {
+    window.open('/admin/', '_blank');
+  }
+}
+</script>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

@@ -575,6 +575,14 @@ def ai_publish(request):
             counter += 1
         return temp
 
+    author_id = body.get('author_id')
+    try:
+        author_id = int(author_id) if author_id else None
+    except (ValueError, TypeError):
+        author_id = None
+    if not author_id:
+        author_id = request.user.id
+
     try:
         if content_type == 'article':
             from articles.models import Article
@@ -585,6 +593,7 @@ def ai_publish(request):
                 excerpt=excerpt[:200] if excerpt else '',
                 status=pub_status,
                 slug=slug,
+                author_id=author_id,
             )
             admin_url = f'/admin/articles/article/{obj.pk}/change/'
             public_url = f'/articles/{obj.slug}/'
@@ -597,6 +606,7 @@ def ai_publish(request):
                 description=excerpt[:300] if excerpt else content[:300],
                 status=pub_status,
                 slug=slug,
+                author_id=author_id,
             )
             admin_url = f'/admin/projects/project/{obj.pk}/change/'
             public_url = f'/projets/{obj.slug}/'
@@ -610,6 +620,7 @@ def ai_publish(request):
                 excerpt=excerpt[:200] if excerpt else '',
                 status=pub_status,
                 slug=slug,
+                author_id=author_id,
             )
             admin_url = f'/admin/tips/tip/{obj.pk}/change/'
             public_url = f'/astuces/{obj.slug}/'
@@ -629,3 +640,16 @@ def ai_publish(request):
     except Exception as e:
         logger.error(f"ai_publish error: {e}")
         return JsonResponse({'error': f'Erreur lors de la publication: {str(e)}'}, status=500)
+
+
+@staff_member_required
+def get_admin_users(request):
+    """Return list of staff users for author selector."""
+    from django.contrib.auth.models import User
+    users = list(
+        User.objects.filter(is_staff=True).order_by('username')
+        .values('id', 'username', 'first_name', 'last_name')
+    )
+    for u in users:
+        u['display'] = (f"{u['first_name']} {u['last_name']}".strip()) or u['username']
+    return JsonResponse({'users': users})
