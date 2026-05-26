@@ -1,0 +1,399 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Diagnostic complet — Landry Net Admin{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;padding:4px 0;">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;border-radius:16px;padding:28px 32px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+    <div style="width:56px;height:56px;background:rgba(13,110,253,0.3);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🔧</div>
+    <div>
+      <h1 style="margin:0;font-size:1.4rem;font-weight:800;">Diagnostic complet du site</h1>
+      <p style="margin:4px 0 0;color:rgba(255,255,255,0.7);font-size:0.85rem;">Email · Newsletter · IA · Contenu · Comptes admin</p>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="/admin/" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:0.82rem;font-weight:600;">← Admin</a>
+      <a href="/admin/core/sitesettings/1/change/" style="background:linear-gradient(135deg,#0d6efd,#0dcaf0);color:white;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:0.82rem;font-weight:600;">⚙️ Paramètres</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- ===== EMAIL CONFIG ===== -->
+    <div class="col-12 col-lg-6">
+      <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;height:100%;">
+        <div style="background:linear-gradient(90deg,#0d6efd,#0dcaf0);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">📧</span>
+          <span style="color:white;font-weight:700;font-size:0.9rem;">Configuration Email SMTP</span>
+          {% if email_config.is_configured %}
+            <span style="margin-left:auto;background:rgba(255,255,255,0.2);color:white;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">Configuré</span>
+          {% else %}
+            <span style="margin-left:auto;background:#dc3545;color:white;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">⚠️ Incomplet</span>
+          {% endif %}
+        </div>
+        <div style="padding:20px;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+            {% with rows=email_config %}
+            <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#6c757d;width:45%;">Serveur SMTP</td><td style="font-weight:600;color:#212529;">{{ email_config.host }}:{{ email_config.port }}</td></tr>
+            <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#6c757d;">Chiffrement</td><td><span style="color:{% if email_config.use_tls %}#198754{% else %}#dc3545{% endif %};font-weight:600;">{% if email_config.use_tls %}✅ TLS/STARTTLS{% else %}❌ Aucun{% endif %}</span></td></tr>
+            <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#6c757d;">Compte Gmail</td><td style="font-weight:600;color:{% if '⚠️' in email_config.user %}#dc3545{% else %}#212529{% endif %};">{{ email_config.user }}</td></tr>
+            <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#6c757d;">Mot de passe app.</td><td>{% if email_config.password_set %}<span style="color:#198754;font-weight:600;">✅ Défini ({{ email_config.password_length }} chars)</span>{% else %}<span style="color:#dc3545;font-weight:600;">❌ Non défini</span>{% endif %}</td></tr>
+            <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#6c757d;">Email de contact</td><td style="font-weight:600;color:{% if '⚠️' in email_config.contact_email %}#dc3545{% else %}#212529{% endif %};">{{ email_config.contact_email }}</td></tr>
+            <tr><td style="padding:9px 0;color:#6c757d;">Type SMTP</td><td><span style="background:{% if email_config.is_gmail %}#e7f1ff{% else %}#f8f9fa{% endif %};color:{% if email_config.is_gmail %}#0d6efd{% else %}#6c757d{% endif %};padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;">{% if email_config.is_gmail %}Gmail{% else %}Autre{% endif %}</span></td></tr>
+            {% endwith %}
+          </table>
+
+          <!-- Check Gmail App Password hint -->
+          {% if email_config.is_gmail %}
+          <div style="background:#fff8e7;border:1px solid #ffd97d;border-radius:8px;padding:12px;margin-top:14px;font-size:0.78rem;color:#664d00;">
+            <strong>💡 Gmail — Mot de Passe d'Application requis</strong><br>
+            Allez sur <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#0d6efd;">myaccount.google.com/apppasswords</a> → créez un mot de passe pour "Mail". La vérification en 2 étapes doit être activée.
+          </div>
+          {% endif %}
+
+          <!-- Test buttons -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+            <button onclick="testSMTP()" id="btn-test-smtp" style="background:linear-gradient(135deg,#0d6efd,#0dcaf0);color:white;border:none;border-radius:8px;padding:10px 18px;font-size:0.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              🔌 Tester la connexion
+            </button>
+            <button onclick="openSendModal()" style="background:linear-gradient(135deg,#198754,#20c997);color:white;border:none;border-radius:8px;padding:10px 18px;font-size:0.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              📤 Envoyer un email de test
+            </button>
+          </div>
+
+          <!-- SMTP test result -->
+          <div id="smtp-result" style="display:none;margin-top:14px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AI CONFIG ===== -->
+    <div class="col-12 col-lg-6">
+      <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;">
+        <div style="background:linear-gradient(90deg,#7c3aed,#4f46e5);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">🤖</span>
+          <span style="color:white;font-weight:700;font-size:0.9rem;">Configuration IA</span>
+          {% if ai.active or ai.site_key_set %}
+            <span style="margin-left:auto;background:rgba(255,255,255,0.2);color:white;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">Active</span>
+          {% else %}
+            <span style="margin-left:auto;background:#dc3545;color:white;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">⚠️ Non configurée</span>
+          {% endif %}
+        </div>
+        <div style="padding:20px;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+            <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#6c757d;width:45%;">Configurations IA</td><td style="font-weight:600;">{{ ai.count }} configuration{{ ai.count|pluralize }}</td></tr>
+            <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#6c757d;">Config. active (AIConfig)</td>
+              <td>{% if ai.active %}<span style="color:#198754;font-weight:600;">✅ {{ ai.active.name }} [{{ ai.active.model }}]</span>{% else %}<span style="color:#6c757d;">Aucune</span>{% endif %}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#6c757d;">Clé API (SiteSettings)</td>
+              <td>{% if ai.site_key_set %}<span style="color:#198754;font-weight:600;">✅ Définie</span>{% else %}<span style="color:#6c757d;">Non définie (utilise AIConfig)</span>{% endif %}</td>
+            </tr>
+            <tr><td style="padding:9px 0;color:#6c757d;">Statut IA</td>
+              <td>{% if ai.enabled %}<span style="color:#198754;font-weight:600;">✅ Activée</span>{% else %}<span style="color:#dc3545;font-weight:600;">❌ Désactivée</span>{% endif %}</td>
+            </tr>
+          </table>
+
+          {% if not ai.active and not ai.site_key_set %}
+          <div style="background:#fff0f0;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin-top:14px;font-size:0.78rem;color:#7f1d1d;">
+            <strong>⚠️ IA non configurée</strong><br>
+            Ajoutez une configuration dans <a href="/admin/core/aiconfig/add/" style="color:#0d6efd;">Admin → Configurations IA</a> ou renseignez la clé API dans <a href="/admin/core/sitesettings/1/change/" style="color:#0d6efd;">Paramètres du site</a>.
+          </div>
+          {% endif %}
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+            <a href="/admin/core/aiconfig/" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border-radius:8px;padding:10px 18px;font-size:0.8rem;font-weight:700;text-decoration:none;">⚙️ Gérer les configs IA</a>
+            <a href="/admin/core/aiconfig/add/" style="background:linear-gradient(135deg,#198754,#20c997);color:white;border-radius:8px;padding:10px 18px;font-size:0.8rem;font-weight:700;text-decoration:none;">+ Ajouter une config</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Newsletter Stats -->
+      <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;margin-top:20px;">
+        <div style="background:linear-gradient(90deg,#7c3aed,#ec4899);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">💌</span>
+          <span style="color:white;font-weight:700;font-size:0.9rem;">Newsletter</span>
+          <span style="margin-left:auto;background:rgba(255,255,255,0.2);color:white;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">{{ newsletter.total }} abonnés</span>
+        </div>
+        <div style="padding:20px;">
+          <div class="row g-3" style="margin-bottom:16px;">
+            <div class="col-4">
+              <div style="text-align:center;padding:12px;background:#e7f1ff;border-radius:10px;">
+                <div style="font-size:1.5rem;font-weight:800;color:#0d6efd;">{{ newsletter.total }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:2px;">Total</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div style="text-align:center;padding:12px;background:#e6f9f0;border-radius:10px;">
+                <div style="font-size:1.5rem;font-weight:800;color:#198754;">{{ newsletter.active }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:2px;">Actifs</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div style="text-align:center;padding:12px;background:#fff8e7;border-radius:10px;">
+                <div style="font-size:1.5rem;font-weight:800;color:#ffc107;">{{ newsletter.unsubscribed }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:2px;">Désabonnés</div>
+              </div>
+            </div>
+          </div>
+
+          {% if newsletter.recent %}
+          <div style="font-size:0.78rem;font-weight:700;color:#374151;margin-bottom:8px;">Derniers abonnés</div>
+          <div style="max-height:160px;overflow-y:auto;">
+            {% for sub in newsletter.recent %}
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:7px;background:#f8f9fa;margin-bottom:5px;font-size:0.78rem;">
+              <span style="font-weight:600;color:#212529;">{{ sub.email }}</span>
+              <div style="display:flex;gap:5px;">
+                <span style="padding:2px 8px;border-radius:20px;font-size:0.68rem;font-weight:700;{% if sub.status == 'active' %}background:#d1fae5;color:#065f46;{% else %}background:#fee2e2;color:#7f1d1d;{% endif %}">{{ sub.status }}</span>
+                {% if sub.confirmed %}<span style="padding:2px 8px;border-radius:20px;font-size:0.68rem;background:#e7f1ff;color:#1e40af;font-weight:700;">✅ Confirmé</span>{% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p style="color:#6c757d;font-size:0.82rem;text-align:center;padding:20px 0;">Aucun abonné encore</p>
+          {% endif %}
+          <div style="margin-top:12px;">
+            <a href="/admin/newsletter/subscriber/" style="color:#0d6efd;font-size:0.78rem;font-weight:600;text-decoration:none;">Gérer les abonnés →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STATS CONTENU ===== -->
+    <div class="col-12">
+      <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;">
+        <div style="background:linear-gradient(90deg,#1a1a2e,#16213e);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">📊</span>
+          <span style="color:white;font-weight:700;font-size:0.9rem;">État du site — Tout en un coup d'œil</span>
+        </div>
+        <div style="padding:20px;">
+          <div class="row g-3">
+            <div class="col-6 col-md-4 col-lg-2">
+              <div style="text-align:center;padding:16px 12px;background:#e7f1ff;border-radius:12px;">
+                <div style="font-size:1.8rem;font-weight:800;color:#0d6efd;">{{ stats.articles_pub }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:3px;">Articles publiés</div>
+                <div style="font-size:0.68rem;color:#93c5fd;">({{ stats.articles }} total)</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div style="text-align:center;padding:16px 12px;background:#e6f9f0;border-radius:12px;">
+                <div style="font-size:1.8rem;font-weight:800;color:#198754;">{{ stats.projects }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:3px;">Projets</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div style="text-align:center;padding:16px 12px;background:#fff8e7;border-radius:12px;">
+                <div style="font-size:1.8rem;font-weight:800;color:#f59e0b;">{{ stats.tips }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:3px;">Astuces</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div style="text-align:center;padding:16px 12px;background:#{% if stats.comments_pending > 0 %}fff0f0{% else %}f0fdf4{% endif %};border-radius:12px;">
+                <div style="font-size:1.8rem;font-weight:800;color:#{% if stats.comments_pending > 0 %}dc3545{% else %}198754{% endif %};">{{ stats.comments_pending }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:3px;">Commentaires en attente</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div style="text-align:center;padding:16px 12px;background:#f5f0ff;border-radius:12px;">
+                <div style="font-size:1.8rem;font-weight:800;color:#7c3aed;">{{ stats.reactions }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:3px;">Réactions</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div style="text-align:center;padding:16px 12px;background:#e0f2fe;border-radius:12px;">
+                <div style="font-size:1.8rem;font-weight:800;color:#0891b2;">{{ stats.views_today }}</div>
+                <div style="font-size:0.72rem;color:#6c757d;margin-top:3px;">Vues aujourd'hui</div>
+                <div style="font-size:0.68rem;color:#7dd3fc;">({{ stats.views_7 }} cette semaine)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick links -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;">
+            <a href="/admin/articles/article/" style="background:#e7f1ff;color:#0d6efd;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:0.78rem;font-weight:600;">📝 Articles</a>
+            <a href="/admin/projects/project/" style="background:#e6f9f0;color:#198754;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:0.78rem;font-weight:600;">💼 Projets</a>
+            <a href="/admin/tips/tip/" style="background:#fff8e7;color:#f59e0b;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:0.78rem;font-weight:600;">💡 Astuces</a>
+            <a href="/admin/comments/comment/?is_approved__exact=0" style="background:#fff0f0;color:#dc3545;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:0.78rem;font-weight:600;">💬 Modération</a>
+            <a href="/admin/newsletter/subscriber/" style="background:#f5f0ff;color:#7c3aed;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:0.78rem;font-weight:600;">💌 Newsletter</a>
+            <a href="/admin/contact/contactmessage/" style="background:#e0f2fe;color:#0891b2;padding:7px 14px;border-radius:8px;text-decoration:none;font-size:0.78rem;font-weight:600;">📩 Contact</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== COMPTES ADMIN ===== -->
+    <div class="col-12 col-lg-6">
+      <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;">
+        <div style="background:linear-gradient(90deg,#1a1a2e,#16213e);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">👤</span>
+          <span style="color:white;font-weight:700;font-size:0.9rem;">Comptes administrateurs</span>
+          <span style="margin-left:auto;background:rgba(255,255,255,0.15);color:white;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">{{ admins|length }} compte{{ admins|length|pluralize }}</span>
+        </div>
+        <div style="padding:20px;">
+          {% for admin in admins %}
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f8f9fa;border-radius:10px;margin-bottom:8px;">
+            <div style="width:38px;height:38px;background:linear-gradient(135deg,#0d6efd,#0dcaf0);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.9rem;flex-shrink:0;">{{ admin.username|first|upper }}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:0.85rem;color:#212529;">{{ admin.username }}</div>
+              <div style="font-size:0.72rem;color:#6c757d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ admin.email }}</div>
+            </div>
+            <div style="display:flex;gap:5px;flex-shrink:0;">
+              {% if admin.is_superuser %}<span style="padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;background:#1a1a2e;color:white;">superadmin</span>{% endif %}
+              {% if admin.is_active %}<span style="padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;background:#d1fae5;color:#065f46;">actif</span>{% else %}<span style="padding:2px 8px;border-radius:20px;font-size:0.65rem;background:#fee2e2;color:#7f1d1d;">inactif</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+          <div style="margin-top:12px;">
+            <a href="/admin/auth/user/add/" style="color:#0d6efd;font-size:0.78rem;font-weight:600;text-decoration:none;">+ Créer un utilisateur →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CONTACTS ===== -->
+    <div class="col-12 col-lg-6">
+      <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;">
+        <div style="background:linear-gradient(90deg,#0891b2,#0d6efd);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">📩</span>
+          <span style="color:white;font-weight:700;font-size:0.9rem;">Messages de contact reçus</span>
+          <span style="margin-left:auto;background:rgba(255,255,255,0.2);color:white;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">{{ contacts.total }} total</span>
+        </div>
+        <div style="padding:20px;">
+          {% if contacts.recent %}
+            {% for c in contacts.recent %}
+            <div style="padding:10px 12px;background:#f8f9fa;border-radius:9px;margin-bottom:8px;font-size:0.8rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                <span style="font-weight:700;color:#212529;">{{ c.name }}</span>
+                <span style="font-size:0.7rem;color:#6c757d;">{{ c.created_at|date:"d/m/Y H:i" }}</span>
+              </div>
+              <div style="color:#0d6efd;font-size:0.75rem;">{{ c.email }}</div>
+              {% if c.subject %}<div style="color:#495057;margin-top:2px;font-style:italic;">{{ c.subject|truncatechars:60 }}</div>{% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div style="text-align:center;padding:30px;color:#6c757d;font-size:0.82rem;">
+              <div style="font-size:2rem;margin-bottom:8px;">📭</div>
+              Aucun message de contact reçu
+            </div>
+          {% endif %}
+          <div style="margin-top:12px;">
+            <a href="/admin/contact/contactmessage/" style="color:#0d6efd;font-size:0.78rem;font-weight:600;text-decoration:none;">Voir tous les messages →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end row -->
+</div>
+
+<!-- SEND TEST EMAIL MODAL -->
+<div id="send-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:none;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:28px;max-width:440px;width:90%;margin:16px;">
+    <h3 style="margin:0 0 16px;font-size:1rem;font-weight:700;">📤 Envoyer un email de test</h3>
+    <p style="color:#6c757d;font-size:0.83rem;margin:0 0 16px;">Un email HTML de test sera envoyé à l'adresse ci-dessous pour vérifier que votre configuration fonctionne.</p>
+    <input type="email" id="test-email-input" placeholder="{{ email_config.contact_email }}" value="{{ email_config.contact_email }}"
+      style="width:100%;padding:10px 14px;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.875rem;box-sizing:border-box;margin-bottom:14px;">
+    <div id="send-result" style="display:none;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeSendModal()" style="background:#f8f9fa;border:1px solid #dee2e6;color:#495057;padding:9px 20px;border-radius:8px;cursor:pointer;font-size:0.83rem;">Annuler</button>
+      <button onclick="doSendTestEmail()" id="btn-send-email" style="background:linear-gradient(135deg,#198754,#20c997);color:white;border:none;border-radius:8px;padding:9px 20px;font-size:0.83rem;font-weight:700;cursor:pointer;">Envoyer le test</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function getCsrf() {
+  var c = document.cookie.split(';').find(function(x) { return x.trim().startsWith('csrftoken='); });
+  return c ? c.trim().split('=')[1] : '';
+}
+
+function testSMTP() {
+  var btn = document.getElementById('btn-test-smtp');
+  var res = document.getElementById('smtp-result');
+  btn.textContent = '⏳ Test en cours...';
+  btn.disabled = true;
+  res.style.display = 'none';
+
+  fetch('/admin-ai/test-smtp/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+    credentials: 'same-origin'
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.innerHTML = '🔌 Tester la connexion';
+    btn.disabled = false;
+    res.style.display = 'block';
+
+    var html = '<div style="border-radius:10px;overflow:hidden;border:1px solid #dee2e6;">';
+    data.steps.forEach(function(step) {
+      var isOk = step.status === 'ok';
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid #f0f0f0;background:' +
+        (isOk ? '#f0fdf4' : '#fff5f5') + ';">' +
+        '<span style="font-size:1rem;flex-shrink:0;">' + (isOk ? '✅' : '❌') + '</span>' +
+        '<div><div style="font-weight:600;font-size:0.8rem;color:' + (isOk ? '#065f46' : '#7f1d1d') + ';">' + step.step + '</div>' +
+        '<div style="font-size:0.75rem;color:' + (isOk ? '#059669' : '#dc2626') + ';margin-top:2px;">' + step.msg + '</div></div></div>';
+    });
+    html += '<div style="padding:12px 14px;background:' + (data.success ? '#d1fae5' : '#fee2e2') + ';font-weight:700;font-size:0.82rem;color:' + (data.success ? '#065f46' : '#7f1d1d') + ';">' +
+      (data.success ? '🎉 Connexion SMTP parfaitement opérationnelle !' : '⚠️ La connexion a échoué — vérifiez les étapes ci-dessus') + '</div>';
+    html += '</div>';
+    res.innerHTML = html;
+  })
+  .catch(function(e) {
+    btn.innerHTML = '🔌 Tester la connexion';
+    btn.disabled = false;
+    res.style.display = 'block';
+    res.innerHTML = '<div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:12px;color:#7f1d1d;font-size:0.8rem;">❌ Erreur réseau : ' + e.message + '</div>';
+  });
+}
+
+function openSendModal() {
+  document.getElementById('send-modal').style.display = 'flex';
+  document.getElementById('send-result').style.display = 'none';
+}
+function closeSendModal() {
+  document.getElementById('send-modal').style.display = 'none';
+}
+
+function doSendTestEmail() {
+  var emailInput = document.getElementById('test-email-input');
+  var btn = document.getElementById('btn-send-email');
+  var res = document.getElementById('send-result');
+  btn.textContent = '⏳ Envoi...';
+  btn.disabled = true;
+  res.style.display = 'none';
+
+  fetch('/admin-ai/send-test-email/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: emailInput.value }),
+    credentials: 'same-origin'
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.textContent = 'Envoyer le test';
+    btn.disabled = false;
+    res.style.display = 'block';
+    var isOk = data.success;
+    res.innerHTML = '<div style="padding:12px 14px;background:' + (isOk ? '#d1fae5' : '#fee2e2') + ';border-radius:8px;font-size:0.82rem;color:' + (isOk ? '#065f46' : '#7f1d1d') + ';white-space:pre-line;">' + data.msg + '</div>';
+    if (isOk) {
+      setTimeout(closeSendModal, 3000);
+    }
+  })
+  .catch(function(e) {
+    btn.textContent = 'Envoyer le test';
+    btn.disabled = false;
+    res.style.display = 'block';
+    res.innerHTML = '<div style="padding:12px;background:#fee2e2;border-radius:8px;font-size:0.8rem;color:#7f1d1d;">Erreur réseau: ' + e.message + '</div>';
+  });
+}
+
+// Close modal on overlay click
+document.getElementById('send-modal').onclick = function(e) {
+  if (e.target === this) closeSendModal();
+};
+</script>
+{% endblock %}

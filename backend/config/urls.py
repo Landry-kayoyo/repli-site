@@ -35,6 +35,9 @@ urlpatterns = [
     path('admin-ai/suggest/', __import__('core.ai_views', fromlist=['ai_suggest']).ai_suggest, name='admin-ai-suggest'),
     path('admin-ai/analyze/', __import__('core.ai_views', fromlist=['ai_analyze']).ai_analyze, name='admin-ai-analyze'),
     path('admin-ai/publish/', __import__('core.ai_views', fromlist=['ai_publish']).ai_publish, name='admin-ai-publish'),
+    path('admin-ai/diagnostic/', __import__('core.diagnostic_views', fromlist=['diagnostic_page']).diagnostic_page, name='admin-ai-diagnostic'),
+    path('admin-ai/test-smtp/', __import__('core.diagnostic_views', fromlist=['test_smtp_connection']).test_smtp_connection, name='admin-ai-test-smtp'),
+    path('admin-ai/send-test-email/', __import__('core.diagnostic_views', fromlist=['send_test_email']).send_test_email, name='admin-ai-send-test-email'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('rss/', include('core.feeds_urls')),
 
