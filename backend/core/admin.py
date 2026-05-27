@@ -73,52 +73,114 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 _ICON_SEARCH_JS = """
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-#bi-search-wrap{margin-top:8px;padding:14px;background:#f8f7ff;border-radius:10px;border:1px solid #e0e7ff;}
-#bi-search-input{width:100%;padding:8px 12px;border-radius:8px;border:1.5px solid #c7d2fe;font-size:14px;outline:none;font-family:inherit;}
-#bi-search-input:focus{border-color:#4F46E5;}
-#bi-search-results{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:220px;overflow-y:auto;}
-.bi-search-item{display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:8px;border:1.5px solid #e0e7ff;cursor:pointer;transition:all 0.15s;background:#fff;min-width:64px;}
-.bi-search-item:hover{border-color:#4F46E5;background:#eef2ff;}
-.bi-search-item i{font-size:1.4rem;color:#4F46E5;}
-.bi-search-item span{font-size:10px;color:#6b7280;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#bi-current-preview{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:#4b5563;}
-#bi-current-preview i{font-size:1.6rem;}
+#bi-search-wrap{margin-top:8px;padding:16px;background:#f8f7ff;border-radius:12px;border:1px solid #e0e7ff;}
+#bi-search-input{width:100%;padding:9px 14px;border-radius:8px;border:1.5px solid #c7d2fe;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;}
+#bi-search-input:focus{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,0.1);}
+#bi-cat-bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;}
+.bi-cat-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;border:1.5px solid #e0e7ff;background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:#6b7280;transition:all 0.15s;white-space:nowrap;}
+.bi-cat-btn:hover{border-color:#4F46E5;color:#4F46E5;background:#eef2ff;}
+.bi-cat-btn.active{border-color:#4F46E5;background:#4F46E5;color:#fff;}
+#bi-search-results{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;max-height:240px;overflow-y:auto;padding-right:2px;}
+#bi-search-results::-webkit-scrollbar{width:4px;}
+#bi-search-results::-webkit-scrollbar-track{background:#f0f2ff;border-radius:4px;}
+#bi-search-results::-webkit-scrollbar-thumb{background:#c7d2fe;border-radius:4px;}
+.bi-search-item{display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:8px;border:1.5px solid #e0e7ff;cursor:pointer;transition:all 0.15s;background:#fff;min-width:68px;max-width:80px;}
+.bi-search-item:hover{border-color:#4F46E5;background:#eef2ff;transform:translateY(-1px);}
+.bi-search-item i{font-size:1.5rem;color:#4F46E5;}
+.bi-search-item span{font-size:10px;color:#6b7280;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;}
+#bi-current-preview{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px;background:#eef2ff;border-radius:8px;font-size:13px;color:#4b5563;}
+#bi-current-preview i{font-size:1.8rem;color:#4F46E5;}
+#bi-result-count{font-size:11px;color:#9ca3af;margin-top:6px;}
 </style>
 <div id="bi-search-wrap">
   <b style="font-size:13px;color:#4F46E5;">🔍 Recherche Bootstrap Icons</b>
-  <div style="font-size:12px;color:#6b7280;margin:4px 0 8px;">Tapez pour chercher une icône (ex: code, database, python, react…)</div>
-  <input id="bi-search-input" type="text" placeholder="Rechercher une icône Bootstrap Icons…">
-  <div id="bi-current-preview"></div>
+  <div style="font-size:12px;color:#6b7280;margin:4px 0 8px;">Tapez un mot-clé ou sélectionnez une catégorie ci-dessous</div>
+  <input id="bi-search-input" type="text" placeholder="Ex : code, database, cloud, star, person…">
+  <div id="bi-cat-bar"></div>
+  <div id="bi-current-preview" style="display:none;"></div>
+  <div id="bi-result-count"></div>
   <div id="bi-search-results"></div>
 </div>
 <script>
 (function(){
-  var ICONS=['bi-code-slash','bi-code-square','bi-code','bi-code-dot','bi-filetype-py','bi-filetype-js','bi-filetype-tsx','bi-filetype-ts','bi-filetype-html','bi-filetype-css','bi-filetype-json','bi-filetype-php','bi-filetype-java','bi-filetype-cs','bi-filetype-rb','bi-filetype-sql','bi-filetype-xml','bi-filetype-go','bi-filetype-sh','bi-filetype-yml','bi-database','bi-database-fill','bi-database-check','bi-server','bi-hdd-network','bi-hdd-rack','bi-cloud','bi-cloud-fill','bi-cloud-upload','bi-cloud-download','bi-git','bi-github','bi-gitlab','bi-terminal','bi-terminal-fill','bi-laptop','bi-pc-display','bi-phone','bi-tablet','bi-cpu','bi-memory','bi-gpu-card','bi-wifi','bi-lock','bi-shield','bi-shield-check','bi-key','bi-gear','bi-gear-fill','bi-tools','bi-wrench','bi-box','bi-boxes','bi-layers','bi-stack','bi-diagram-3','bi-diagram-2','bi-flow','bi-grid','bi-table','bi-list','bi-kanban','bi-graph-up','bi-bar-chart','bi-pie-chart','bi-activity','bi-lightning','bi-lightning-fill','bi-fire','bi-rocket','bi-rocket-fill','bi-star','bi-star-fill','bi-heart','bi-bookmark','bi-tag','bi-tags','bi-chat','bi-envelope','bi-globe','bi-globe2','bi-link','bi-link-45deg','bi-search','bi-eye','bi-pencil','bi-trash','bi-plus','bi-dash','bi-x','bi-check','bi-arrow-right','bi-arrow-up','bi-download','bi-upload','bi-share','bi-person','bi-people','bi-building','bi-briefcase','bi-journal','bi-book','bi-newspaper','bi-camera','bi-image','bi-music-note','bi-play','bi-video','bi-mic','bi-headphones','bi-currency-bitcoin','bi-currency-euro','bi-currency-dollar','bi-paypal','bi-stripe','bi-android2','bi-apple','bi-windows','bi-linux','bi-ubuntu','bi-discord','bi-slack','bi-twitter','bi-linkedin','bi-facebook','bi-instagram','bi-youtube','bi-twitch','bi-whatsapp','bi-telegram','bi-pinterest','bi-reddit','bi-wordpress','bi-shopify','bi-google','bi-microsoft','bi-amazon','bi-docker','bi-kubernetes','bi-nginx','bi-apache'];
+  var CATS={
+    'Tout':['bi-code-slash','bi-code-square','bi-code','bi-code-dot','bi-filetype-py','bi-filetype-js','bi-filetype-tsx','bi-filetype-ts','bi-filetype-html','bi-filetype-css','bi-filetype-json','bi-filetype-php','bi-filetype-java','bi-filetype-cs','bi-filetype-rb','bi-filetype-sql','bi-filetype-xml','bi-filetype-go','bi-filetype-sh','bi-filetype-yml','bi-database','bi-database-fill','bi-database-check','bi-database-add','bi-server','bi-hdd-network','bi-hdd-rack','bi-cloud','bi-cloud-fill','bi-cloud-upload','bi-cloud-download','bi-cloud-check','bi-cloud-arrow-up','bi-git','bi-github','bi-gitlab','bi-terminal','bi-terminal-fill','bi-laptop','bi-pc-display','bi-phone','bi-tablet','bi-cpu','bi-cpu-fill','bi-memory','bi-gpu-card','bi-wifi','bi-wifi-off','bi-bluetooth','bi-usb','bi-lock','bi-lock-fill','bi-unlock','bi-shield','bi-shield-check','bi-shield-fill','bi-key','bi-key-fill','bi-gear','bi-gear-fill','bi-gear-wide','bi-tools','bi-wrench','bi-wrench-adjustable','bi-box','bi-boxes','bi-layers','bi-stack','bi-diagram-3','bi-diagram-2','bi-flow','bi-grid','bi-grid-fill','bi-table','bi-list','bi-list-ul','bi-list-check','bi-kanban','bi-kanban-fill','bi-graph-up','bi-graph-down','bi-bar-chart','bi-bar-chart-fill','bi-pie-chart','bi-pie-chart-fill','bi-activity','bi-lightning','bi-lightning-fill','bi-lightning-charge','bi-fire','bi-rocket','bi-rocket-fill','bi-rocket-takeoff','bi-star','bi-star-fill','bi-star-half','bi-heart','bi-heart-fill','bi-bookmark','bi-bookmark-fill','bi-tag','bi-tag-fill','bi-tags','bi-tags-fill','bi-chat','bi-chat-fill','bi-chat-dots','bi-chat-left','bi-envelope','bi-envelope-fill','bi-envelope-open','bi-globe','bi-globe2','bi-link','bi-link-45deg','bi-search','bi-eye','bi-eye-fill','bi-eye-slash','bi-pencil','bi-pencil-fill','bi-pencil-square','bi-trash','bi-trash-fill','bi-trash3','bi-plus','bi-plus-circle','bi-plus-circle-fill','bi-dash','bi-x','bi-x-circle','bi-check','bi-check-circle','bi-check-circle-fill','bi-check2','bi-arrow-right','bi-arrow-left','bi-arrow-up','bi-arrow-down','bi-arrow-right-circle','bi-arrows-expand','bi-chevron-right','bi-chevron-left','bi-download','bi-upload','bi-share','bi-share-fill','bi-person','bi-person-fill','bi-person-circle','bi-people','bi-people-fill','bi-person-badge','bi-building','bi-building-fill','bi-briefcase','bi-briefcase-fill','bi-journal','bi-journal-code','bi-journal-text','bi-book','bi-book-fill','bi-newspaper','bi-newspaper-fill','bi-camera','bi-camera-fill','bi-camera-video','bi-image','bi-image-fill','bi-images','bi-music-note','bi-music-note-beamed','bi-play','bi-play-fill','bi-play-circle','bi-pause','bi-stop','bi-video','bi-video-fill','bi-mic','bi-mic-fill','bi-headphones','bi-speaker','bi-volume-up','bi-currency-bitcoin','bi-currency-ethereum','bi-currency-euro','bi-currency-dollar','bi-currency-pound','bi-paypal','bi-stripe','bi-credit-card','bi-credit-card-fill','bi-wallet','bi-wallet-fill','bi-cash','bi-cash-coin','bi-android2','bi-apple','bi-windows','bi-linux','bi-ubuntu','bi-discord','bi-slack','bi-twitter','bi-twitter-x','bi-linkedin','bi-facebook','bi-instagram','bi-youtube','bi-twitch','bi-whatsapp','bi-telegram','bi-pinterest','bi-reddit','bi-tiktok','bi-wordpress','bi-shopify','bi-google','bi-microsoft','bi-amazon','bi-docker','bi-kubernetes','bi-nginx','bi-apache','bi-trello','bi-github','bi-gitlab','bi-stack-overflow','bi-hash','bi-at','bi-trophy','bi-trophy-fill','bi-award','bi-award-fill','bi-flag','bi-flag-fill','bi-map','bi-map-fill','bi-geo-alt','bi-geo-alt-fill','bi-house','bi-house-fill','bi-shop','bi-cart','bi-cart-fill','bi-bag','bi-bag-fill','bi-box-seam','bi-truck','bi-send','bi-send-fill','bi-bell','bi-bell-fill','bi-alarm','bi-calendar','bi-calendar-fill','bi-calendar-check','bi-clock','bi-clock-fill','bi-hourglass','bi-info-circle','bi-info-circle-fill','bi-question-circle','bi-question-circle-fill','bi-exclamation-triangle','bi-exclamation-circle','bi-moon','bi-sun','bi-brightness-high','bi-toggle-on','bi-toggle-off','bi-sliders','bi-filter','bi-funnel','bi-sort-down','bi-sort-up','bi-layout-sidebar','bi-layout-text-window','bi-display','bi-printer','bi-file-earmark','bi-file-earmark-code','bi-file-earmark-text','bi-file-earmark-pdf','bi-file-earmark-zip','bi-folder','bi-folder-fill','bi-folder-open','bi-clipboard','bi-clipboard-fill','bi-clipboard-check','bi-qr-code','bi-upc','bi-robot','bi-cpu','bi-magic','bi-bezier','bi-bezier2','bi-palette','bi-palette-fill','bi-brush','bi-pen','bi-eraser','bi-scissors','bi-textarea','bi-input-cursor','bi-app','bi-app-indicator','bi-grid-1x2','bi-columns','bi-layout-three-columns','bi-textarea-resize','bi-zoom-in','bi-zoom-out','bi-fullscreen','bi-fullscreen-exit','bi-pip','bi-badge-ad','bi-badge-ar','bi-badge-cc','bi-badge-hd','bi-badge-vr','bi-badge-wc','bi-badge-4k','bi-badge-8k'],
+    'Code':['bi-code-slash','bi-code-square','bi-code','bi-code-dot','bi-filetype-py','bi-filetype-js','bi-filetype-tsx','bi-filetype-ts','bi-filetype-html','bi-filetype-css','bi-filetype-json','bi-filetype-php','bi-filetype-java','bi-filetype-cs','bi-filetype-rb','bi-filetype-sql','bi-filetype-xml','bi-filetype-go','bi-filetype-sh','bi-filetype-yml','bi-terminal','bi-terminal-fill','bi-git','bi-github','bi-gitlab','bi-journal-code','bi-file-earmark-code','bi-braces','bi-braces-asterisk','bi-bug','bi-bug-fill','bi-textarea','bi-input-cursor','bi-hash'],
+    'Cloud & Data':['bi-database','bi-database-fill','bi-database-check','bi-database-add','bi-server','bi-hdd-network','bi-hdd-rack','bi-cloud','bi-cloud-fill','bi-cloud-upload','bi-cloud-download','bi-cloud-check','bi-cloud-arrow-up','bi-docker','bi-kubernetes','bi-nginx','bi-apache','bi-amazon','bi-google','bi-microsoft','bi-diagram-3','bi-diagram-2','bi-flow','bi-graph-up','bi-graph-down','bi-bar-chart','bi-bar-chart-fill','bi-pie-chart','bi-pie-chart-fill','bi-activity'],
+    'UI & Actions':['bi-search','bi-eye','bi-eye-fill','bi-eye-slash','bi-pencil','bi-pencil-fill','bi-pencil-square','bi-trash','bi-trash-fill','bi-trash3','bi-plus','bi-plus-circle','bi-plus-circle-fill','bi-dash','bi-x','bi-x-circle','bi-check','bi-check-circle','bi-check-circle-fill','bi-check2','bi-arrow-right','bi-arrow-left','bi-arrow-up','bi-arrow-down','bi-arrow-right-circle','bi-arrows-expand','bi-chevron-right','bi-chevron-left','bi-download','bi-upload','bi-share','bi-share-fill','bi-filter','bi-funnel','bi-sort-down','bi-sort-up','bi-sliders','bi-gear','bi-gear-fill','bi-gear-wide','bi-grid','bi-grid-fill','bi-list','bi-list-ul','bi-list-check','bi-table','bi-kanban','bi-kanban-fill','bi-layout-sidebar','bi-columns','bi-zoom-in','bi-zoom-out','bi-fullscreen','bi-bell','bi-bell-fill','bi-toggle-on','bi-toggle-off','bi-send','bi-send-fill','bi-bookmark','bi-bookmark-fill','bi-tag','bi-tag-fill','bi-tags','bi-flag','bi-flag-fill','bi-star','bi-star-fill','bi-heart','bi-heart-fill','bi-link','bi-link-45deg','bi-globe','bi-globe2','bi-clipboard','bi-clipboard-fill','bi-clipboard-check','bi-qr-code','bi-display','bi-printer'],
+    'Médias':['bi-camera','bi-camera-fill','bi-camera-video','bi-image','bi-image-fill','bi-images','bi-music-note','bi-music-note-beamed','bi-play','bi-play-fill','bi-play-circle','bi-pause','bi-stop','bi-video','bi-video-fill','bi-mic','bi-mic-fill','bi-headphones','bi-speaker','bi-volume-up','bi-youtube','bi-twitch','bi-spotify','bi-file-earmark-pdf','bi-file-earmark-zip','bi-file-earmark-text','bi-file-earmark'],
+    'Personnes':['bi-person','bi-person-fill','bi-person-circle','bi-people','bi-people-fill','bi-person-badge','bi-person-check','bi-person-plus','bi-person-x','bi-building','bi-building-fill','bi-briefcase','bi-briefcase-fill','bi-house','bi-house-fill','bi-geo-alt','bi-geo-alt-fill','bi-map','bi-map-fill','bi-award','bi-award-fill','bi-trophy','bi-trophy-fill'],
+    'Finance':['bi-currency-bitcoin','bi-currency-ethereum','bi-currency-euro','bi-currency-dollar','bi-currency-pound','bi-paypal','bi-stripe','bi-credit-card','bi-credit-card-fill','bi-wallet','bi-wallet-fill','bi-cash','bi-cash-coin','bi-cart','bi-cart-fill','bi-bag','bi-bag-fill','bi-shop','bi-truck','bi-box-seam'],
+    'Réseaux sociaux':['bi-discord','bi-slack','bi-twitter','bi-twitter-x','bi-linkedin','bi-facebook','bi-instagram','bi-youtube','bi-twitch','bi-whatsapp','bi-telegram','bi-pinterest','bi-reddit','bi-tiktok','bi-wordpress','bi-shopify','bi-google','bi-github','bi-gitlab','bi-stack-overflow'],
+    'Système':['bi-cpu','bi-cpu-fill','bi-memory','bi-gpu-card','bi-laptop','bi-pc-display','bi-phone','bi-tablet','bi-wifi','bi-wifi-off','bi-bluetooth','bi-lock','bi-lock-fill','bi-unlock','bi-shield','bi-shield-check','bi-shield-fill','bi-key','bi-key-fill','bi-tools','bi-wrench','bi-wrench-adjustable','bi-android2','bi-apple','bi-windows','bi-linux','bi-ubuntu','bi-robot','bi-magic','bi-moon','bi-sun','bi-brightness-high','bi-clock','bi-clock-fill','bi-calendar','bi-calendar-fill','bi-calendar-check','bi-alarm','bi-hourglass','bi-info-circle','bi-question-circle','bi-exclamation-triangle','bi-exclamation-circle']
+  };
+  var catNames=Object.keys(CATS);
+  var activeCat='Tout';
+  var catBar=document.getElementById('bi-cat-bar');
   var input=document.getElementById('bi-search-input');
   var results=document.getElementById('bi-search-results');
   var preview=document.getElementById('bi-current-preview');
+  var countEl=document.getElementById('bi-result-count');
   var iconField=document.getElementById('id_icon');
+
   function updatePreview(){
     var val=iconField?iconField.value.trim():'';
     if(val.startsWith('bi-')){
-      preview.innerHTML='<span>Aperçu actuel :</span><i class="bi '+val+'"></i><code style="font-size:12px;background:#eef2ff;padding:2px 8px;border-radius:4px;">'+val+'</code>';
+      preview.style.display='flex';
+      preview.innerHTML='<i class="bi '+val+'"></i><div><div style="font-size:12px;color:#9ca3af;">Icône sélectionnée</div><code style="font-size:13px;background:#fff;padding:2px 8px;border-radius:4px;color:#4F46E5;font-weight:700;">'+val+'</code></div>';
     } else if(val){
-      preview.innerHTML='<span>Aperçu actuel :</span><span style="font-size:1.6rem;">'+val+'</span>';
+      preview.style.display='flex';
+      preview.innerHTML='<span style="font-size:1.8rem;">'+val+'</span><div><div style="font-size:12px;color:#9ca3af;">Emoji sélectionné</div><code style="font-size:13px;background:#fff;padding:2px 8px;border-radius:4px;color:#4F46E5;font-weight:700;">'+val+'</code></div>';
     } else {
-      preview.innerHTML='';
+      preview.style.display='none';preview.innerHTML='';
     }
   }
   if(iconField){iconField.addEventListener('input',updatePreview);updatePreview();}
+
+  function selectIcon(ic){
+    if(iconField)iconField.value=ic;
+    input.value='';
+    results.innerHTML='';
+    countEl.innerHTML='';
+    setActiveBtn(activeCat);
+    updatePreview();
+  }
+
   function render(list){
-    if(!list.length){results.innerHTML='<span style="font-size:12px;color:#9ca3af;">Aucun résultat. Essayez: code, database, cloud, git, server…</span>';return;}
-    results.innerHTML=list.slice(0,60).map(function(ic){
-      return '<div class="bi-search-item" onclick="document.getElementById(\'id_icon\').value=\''+ic+'\';document.getElementById(\'bi-search-input\').value=\'\';document.getElementById(\'bi-search-results\').innerHTML=\'\';(function(){var v=\''+ic+'\';var p=document.getElementById(\'bi-current-preview\');p.innerHTML=\'<span>Aperçu actuel :</span><i class="bi \'+v+\'"></i><code style="font-size:12px;background:#eef2ff;padding:2px 8px;border-radius:4px;">\'+v+\'</code>\';})();"><i class="bi '+ic+'"></i><span>'+ic.replace('bi-','')+'</span></div>';
+    if(!list.length){results.innerHTML='<span style="font-size:12px;color:#9ca3af;padding:8px 0;">Aucun résultat. Essayez un autre mot-clé.</span>';countEl.innerHTML='';return;}
+    var shown=list.slice(0,80);
+    countEl.innerHTML='<span>'+shown.length+(list.length>80?' / '+list.length:'')+' icône'+(shown.length>1?'s':'')+'</span>';
+    results.innerHTML=shown.map(function(ic){
+      var label=ic.replace(/^bi-/,'');
+      return '<div class="bi-search-item" title="'+ic+'" onclick="(function(){var ic=\''+ic+'\';var f=document.getElementById(\'id_icon\');if(f)f.value=ic;document.getElementById(\'bi-search-input\').value=\'\';document.getElementById(\'bi-search-results\').innerHTML=\'\';document.getElementById(\'bi-result-count\').innerHTML=\'\';var p=document.getElementById(\'bi-current-preview\');p.style.display=\'flex\';p.innerHTML=\'<i class=\\"bi \'+ic+\'\\"></i><div><div style=\\"font-size:12px;color:#9ca3af;\\">Icône sélectionnée</div><code style=\\"font-size:13px;background:#fff;padding:2px 8px;border-radius:4px;color:#4F46E5;font-weight:700;\\">\'+ic+\'</code></div>\';})()"><i class="bi '+ic+'"></i><span>'+label+'</span></div>';
     }).join('');
   }
+
+  function setActiveBtn(cat){
+    activeCat=cat;
+    document.querySelectorAll('.bi-cat-btn').forEach(function(b){
+      b.classList.toggle('active',b.dataset.cat===cat);
+    });
+    if(!input.value.trim()){render(CATS[cat]);}
+  }
+
+  catNames.forEach(function(cat){
+    var emojis={'Tout':'✦','Code':'💻','Cloud & Data':'☁️','UI & Actions':'🖱️','Médias':'🎬','Personnes':'👤','Finance':'💰','Réseaux sociaux':'📱','Système':'⚙️'};
+    var btn=document.createElement('div');
+    btn.className='bi-cat-btn'+(cat==='Tout'?' active':'');
+    btn.dataset.cat=cat;
+    btn.innerHTML=(emojis[cat]||'📦')+' '+cat;
+    btn.onclick=function(){input.value='';setActiveBtn(cat);};
+    catBar.appendChild(btn);
+  });
+
+  render(CATS['Tout']);
+
   input.addEventListener('input',function(){
     var q=this.value.toLowerCase().trim();
-    if(!q){results.innerHTML='';return;}
-    var matches=ICONS.filter(function(ic){return ic.indexOf(q)>=0;});
+    if(!q){render(CATS[activeCat]);return;}
+    var pool=CATS['Tout'];
+    var matches=pool.filter(function(ic){return ic.indexOf(q)>=0;});
     render(matches);
   });
 })();
