@@ -20,9 +20,9 @@ git add -A
 if git diff --cached --quiet; then
   echo "✅ Rien à committer — tout est déjà à jour."
 else
-  git commit -m "fix: icônes admin, emails sans IP, beau titre, logo site, URLs production"
+  git commit -m "chore: synchronisation automatique vers GitHub"
 fi
 
-git push origin main
+git push "$REPO_URL" HEAD:main
 
 echo "✅ Push GitHub réussi !"
