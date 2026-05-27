@@ -1,8 +1,6 @@
 #!/bin/bash
 # Script de push vers GitHub — utilise GITHUB_PERSONAL_ACCESS_TOKEN
 
-set -e
-
 if [ -z "$GITHUB_PERSONAL_ACCESS_TOKEN" ]; then
   echo "❌ GITHUB_PERSONAL_ACCESS_TOKEN non défini."
   exit 1
@@ -23,6 +21,16 @@ else
   git commit -m "chore: synchronisation automatique vers GitHub"
 fi
 
-git push "$REPO_URL" HEAD:main
+# Récupérer les éventuels commits distants avant de pousser
+if ! git pull --rebase "$REPO_URL" main 2>&1; then
+  echo "⚠️  Échec du pull --rebase. Annulation du rebase."
+  git rebase --abort 2>/dev/null || true
+  exit 1
+fi
 
-echo "✅ Push GitHub réussi !"
+if git push "$REPO_URL" HEAD:main 2>&1; then
+  echo "✅ Push GitHub réussi !"
+else
+  echo "⚠️  Échec du push vers GitHub."
+  exit 1
+fi
