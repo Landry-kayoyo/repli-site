@@ -33,6 +33,7 @@ urlpatterns = [
 
     path('admin-ai/chat/', __import__('core.ai_views', fromlist=['ai_chat']).ai_chat, name='admin-ai-chat'),
     path('admin-ai/suggest/', __import__('core.ai_views', fromlist=['ai_suggest']).ai_suggest, name='admin-ai-suggest'),
+    path('admin-ai/inline-suggest/', __import__('core.ai_views', fromlist=['ai_inline_suggest']).ai_inline_suggest, name='admin-ai-inline-suggest'),
     path('admin-ai/analyze/', __import__('core.ai_views', fromlist=['ai_analyze']).ai_analyze, name='admin-ai-analyze'),
     path('admin-ai/publish/', __import__('core.ai_views', fromlist=['ai_publish']).ai_publish, name='admin-ai-publish'),
     path('admin-ai/diagnostic/', __import__('core.diagnostic_views', fromlist=['diagnostic_page']).diagnostic_page, name='admin-ai-diagnostic'),

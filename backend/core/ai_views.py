@@ -462,6 +462,97 @@ def ai_suggest(request):
 @staff_member_required
 @csrf_exempt
 @require_POST
+def ai_inline_suggest(request):
+    """Endpoint suggestions IA en temps réel pour les formulaires admin (article/projet/astuce)."""
+    try:
+        body = json.loads(request.body)
+        title = body.get('title', '').strip()
+        content_type = body.get('content_type', 'article')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    if not title or len(title) < 4:
+        return JsonResponse({'error': 'Titre trop court'}, status=400)
+
+    api_key, base_url, model, ai_enabled = _get_ai_credentials()
+    if not ai_enabled or not api_key:
+        return JsonResponse({'error': 'IA non configurée — allez dans Paramètres du site → Configuration IA'}, status=403)
+
+    settings = _get_ai_settings()
+
+    type_labels = {
+        'article': 'article de blog tech',
+        'project': 'projet technique',
+        'tip': 'astuce / tutoriel pratique',
+    }
+    type_label = type_labels.get(content_type, 'article de blog')
+
+    excerpt_key = 'excerpt' if content_type in ('article', 'tip') else 'description'
+    extra_field = ''
+    if content_type == 'tip':
+        extra_field = '\n- difficulty: exactement une de ces valeurs: "débutant", "intermédiaire" ou "avancé"'
+
+    prompt = (
+        f'Pour un {type_label} intitulé : "{title}"\n\n'
+        f'Génère un JSON strict avec exactement ces clés :\n'
+        f'- subtitle: sous-titre accrocheur (max 120 caractères)\n'
+        f'- {excerpt_key}: description courte percutante (2 phrases, max 180 caractères)\n'
+        f'- tags: tableau JSON de 6 tags courts en minuscules sans accents (ex: ["python","django","api"])\n'
+        f'- meta_title: titre SEO (max 60 caractères, mot-clé principal en premier)\n'
+        f'- meta_description: description SEO avec appel à l\'action (max 160 caractères)'
+        f'{extra_field}\n\n'
+        f'Réponds UNIQUEMENT avec le JSON brut. Pas de ```json, pas d\'explication, juste le JSON.'
+    )
+
+    try:
+        reply = _call_ai(
+            api_key=api_key,
+            base_url=base_url or 'https://api.chatanywhere.tech/v1',
+            model=model or 'gpt-3.5-turbo',
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        f"Tu es un expert SEO et rédacteur pour {settings.site_name or 'Landry Net'}. "
+                        "Tu réponds UNIQUEMENT en JSON valide, sans aucun texte autour, sans backticks, sans commentaire."
+                    )
+                },
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=450,
+        )
+
+        clean = reply.strip()
+        if clean.startswith('```'):
+            clean = clean.split('\n', 1)[1] if '\n' in clean else clean[3:]
+        if clean.endswith('```'):
+            clean = clean.rsplit('```', 1)[0]
+        clean = clean.strip()
+
+        data = json.loads(clean)
+        data['ok'] = True
+        data['content_type'] = content_type
+        data['excerpt_key'] = excerpt_key
+        return JsonResponse(data)
+
+    except json.JSONDecodeError as e:
+        logger.error(f"ai_inline_suggest JSON parse error: {e} — reply: {reply[:300]}")
+        return JsonResponse({'error': 'Réponse IA invalide, réessayez.'}, status=200)
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            return JsonResponse({'error': 'Clé API invalide.'}, status=200)
+        elif e.code == 429:
+            return JsonResponse({'error': 'Quota API dépassé. Réessayez dans quelques secondes.'}, status=200)
+        return JsonResponse({'error': f'Erreur API ({e.code})'}, status=200)
+    except urllib.error.URLError:
+        return JsonResponse({'error': "Impossible de contacter l'API IA."}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=200)
+
+
+@staff_member_required
+@csrf_exempt
+@require_POST
 def ai_analyze(request):
     """Analytics-aware AI analysis endpoint."""
     try:
