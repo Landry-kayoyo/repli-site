@@ -27,11 +27,19 @@ while true; do
   else
     CHANGED=$(git diff --cached --name-only | head -5 | tr '\n' ', ')
     git commit -m "chore: synchronisation automatique [$TIMESTAMP]"
+    echo "[$TIMESTAMP] 📦 Commit créé — fichiers: $CHANGED"
+  fi
+
+  # Synchronisation avec le dépôt distant (pull rebase + push)
+  if git pull --rebase "$REPO_URL" main 2>&1; then
     if git push "$REPO_URL" HEAD:main 2>&1; then
-      echo "[$TIMESTAMP] 🚀 Push GitHub réussi — fichiers: $CHANGED"
+      echo "[$TIMESTAMP] 🚀 Push GitHub réussi."
     else
       echo "[$TIMESTAMP] ⚠️  Échec du push GitHub."
     fi
+  else
+    echo "[$TIMESTAMP] ⚠️  Conflit lors du pull — push annulé."
+    git rebase --abort 2>/dev/null || true
   fi
 
   sleep "$INTERVAL"
