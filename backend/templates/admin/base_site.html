@@ -547,6 +547,152 @@ input:focus, textarea:focus, select:focus {
 .dm .ln-suggest-value { color: #cbd5e1; }
 .dm .ln-suggest-tag { background:#1e3a5f; border-color:#334155; color:#93c5fd; }
 .dm .ln-suggest-error { background:#2d1515; border-color:#7f1d1d; color:#f87171; }
+
+/* ===== BARRE D'OUTILS IA (6 fonctionnalités) ===== */
+#ln-ai-toolbar {
+  display:flex; flex-wrap:wrap; gap:7px; align-items:center;
+  margin:10px 0 4px; padding:10px 12px;
+  background:linear-gradient(135deg,#eef2ff,#f5f3ff);
+  border:1px solid #c7d2fe; border-radius:10px;
+  box-sizing:border-box; width:100%;
+}
+.dm #ln-ai-toolbar { background:linear-gradient(135deg,#1e1b4b,#1a1a2e); border-color:#3730a3; }
+#ln-ai-toolbar-label {
+  font-size:11px; font-weight:700; color:#6366f1; letter-spacing:.5px;
+  text-transform:uppercase; margin-right:4px; white-space:nowrap;
+}
+.dm #ln-ai-toolbar-label { color:#a5b4fc; }
+.ln-tb-btn {
+  display:inline-flex; align-items:center; gap:5px; padding:5px 11px;
+  font-size:12px; font-weight:600; border:none; border-radius:7px; cursor:pointer;
+  transition:all .18s; white-space:nowrap;
+}
+.ln-tb-btn-gen  { background:#6366f1; color:#fff; }
+.ln-tb-btn-gen:hover  { background:#4f46e5; transform:translateY(-1px); }
+.ln-tb-btn-opt  { background:#0ea5e9; color:#fff; }
+.ln-tb-btn-opt:hover  { background:#0284c7; transform:translateY(-1px); }
+.ln-tb-btn-links{ background:#10b981; color:#fff; }
+.ln-tb-btn-links:hover{ background:#059669; transform:translateY(-1px); }
+.ln-tb-btn-exc  { background:#f59e0b; color:#fff; }
+.ln-tb-btn-exc:hover  { background:#d97706; transform:translateY(-1px); }
+.ln-tb-btn-img  { background:#8b5cf6; color:#fff; }
+.ln-tb-btn-img:hover  { background:#7c3aed; transform:translateY(-1px); }
+
+/* Indicateur doublon (titre) */
+#ln-dup-indicator {
+  display:none; margin-top:5px; padding:7px 11px;
+  border-radius:8px; font-size:12px; font-weight:600; width:100%;
+  box-sizing:border-box; animation:lnFadeIn .25s;
+}
+#ln-dup-indicator.ok   { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
+#ln-dup-indicator.warn { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
+.dm #ln-dup-indicator.ok   { background:#14532d; color:#bbf7d0; border-color:#166534; }
+.dm #ln-dup-indicator.warn { background:#451a03; color:#fde68a; border-color:#854d0e; }
+
+/* Panneau générique IA (generate / cover / excerpt) */
+#ln-ai-modal-overlay {
+  display:none; position:fixed; inset:0; z-index:99998;
+  background:rgba(0,0,0,.45); align-items:center; justify-content:center;
+}
+#ln-ai-modal-overlay.open { display:flex; }
+#ln-ai-modal {
+  background:#fff; border-radius:14px; padding:24px;
+  width:min(680px,95vw); max-height:80vh; overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.3); position:relative;
+  animation:lnFadeIn .2s;
+}
+.dm #ln-ai-modal { background:#1e293b; color:#e2e8f0; }
+#ln-ai-modal-close {
+  position:absolute; top:12px; right:14px; background:none;
+  border:none; font-size:20px; cursor:pointer; color:#64748b;
+}
+.dm #ln-ai-modal-close { color:#94a3b8; }
+#ln-ai-modal-title { font-size:16px; font-weight:700; margin-bottom:14px; color:#1e293b; }
+.dm #ln-ai-modal-title { color:#e2e8f0; }
+.ln-modal-loading { text-align:center; padding:30px; color:#6366f1; font-size:14px; }
+.ln-modal-error   { padding:12px; border-radius:8px; background:#fee2e2; color:#991b1b; font-size:13px; }
+.dm .ln-modal-error { background:#3b0f0f; color:#fca5a5; }
+
+/* Panneau optimisation SEO */
+#ln-opt-panel {
+  display:none; margin-top:10px; padding:16px;
+  background:#fff; border:1px solid #c7d2fe; border-radius:12px;
+  animation:lnFadeIn .25s;
+}
+.dm #ln-opt-panel { background:#1e293b; border-color:#334155; }
+.ln-opt-scores   { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+.ln-opt-score-card {
+  flex:1; min-width:110px; padding:12px; border-radius:10px;
+  text-align:center; background:#f8fafc; border:1px solid #e2e8f0;
+}
+.dm .ln-opt-score-card { background:#0f172a; border-color:#334155; }
+.ln-opt-score-num  { font-size:28px; font-weight:800; line-height:1; }
+.ln-opt-score-label{ font-size:11px; color:#64748b; margin-top:3px; }
+.score-good  { color:#16a34a; }
+.score-med   { color:#d97706; }
+.score-bad   { color:#dc2626; }
+.ln-opt-section { margin-bottom:12px; }
+.ln-opt-section-title { font-size:12px; font-weight:700; color:#374151; margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+.dm .ln-opt-section-title { color:#94a3b8; }
+.ln-opt-item {
+  display:flex; align-items:flex-start; gap:7px; padding:6px 8px;
+  margin-bottom:4px; border-radius:7px; font-size:13px;
+  background:#f8fafc; border:1px solid #e2e8f0;
+}
+.dm .ln-opt-item { background:#0f172a; border-color:#1e3a5f; }
+.ln-opt-badge {
+  padding:2px 6px; border-radius:4px; font-size:10px;
+  font-weight:700; white-space:nowrap; flex-shrink:0; margin-top:1px;
+}
+.badge-haute    { background:#fee2e2; color:#991b1b; }
+.badge-moyenne  { background:#fef9c3; color:#854d0e; }
+.badge-basse    { background:#dcfce7; color:#166534; }
+.dm .badge-haute   { background:#450a0a; color:#fca5a5; }
+.dm .badge-moyenne { background:#422006; color:#fde68a; }
+.dm .badge-basse   { background:#052e16; color:#86efac; }
+.ln-opt-kw { display:inline-flex; align-items:center; padding:3px 9px; margin:3px;
+  background:#ede9fe; border:1px solid #c4b5fd; color:#6d28d9; border-radius:20px; font-size:12px; }
+.dm .ln-opt-kw { background:#2e1065; border-color:#7c3aed; color:#c4b5fd; }
+
+/* Panneau liens internes */
+#ln-links-panel {
+  display:none; margin-top:10px; padding:16px;
+  background:#fff; border:1px solid #a7f3d0; border-radius:12px;
+  animation:lnFadeIn .25s;
+}
+.dm #ln-links-panel { background:#1e293b; border-color:#065f46; }
+.ln-link-item {
+  display:flex; align-items:flex-start; gap:10px; padding:10px 10px;
+  border-radius:8px; margin-bottom:8px; background:#f0fdf4; border:1px solid #bbf7d0;
+}
+.dm .ln-link-item { background:#022c22; border-color:#065f46; }
+.ln-link-badge {
+  padding:2px 7px; border-radius:12px; font-size:10px; font-weight:700;
+  flex-shrink:0; margin-top:2px;
+}
+.lbadge-article { background:#dbeafe; color:#1e40af; }
+.lbadge-projet  { background:#ede9fe; color:#5b21b6; }
+.lbadge-astuce  { background:#fef9c3; color:#854d0e; }
+.dm .lbadge-article { background:#1e3a5f; color:#93c5fd; }
+.dm .lbadge-projet  { background:#2e1065; color:#c4b5fd; }
+.dm .lbadge-astuce  { background:#422006; color:#fde68a; }
+.ln-link-info  { flex:1; }
+.ln-link-title { font-size:13px; font-weight:600; color:#0f172a; }
+.dm .ln-link-title { color:#e2e8f0; }
+.ln-link-reason{ font-size:12px; color:#475569; margin-top:2px; }
+.dm .ln-link-reason { color:#94a3b8; }
+.ln-link-btns  { display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
+.ln-link-copy, .ln-link-insert {
+  padding:4px 9px; font-size:11px; font-weight:600; border:none;
+  border-radius:5px; cursor:pointer; white-space:nowrap;
+}
+.ln-link-copy   { background:#e0e7ff; color:#3730a3; }
+.ln-link-insert { background:#6366f1; color:#fff; }
+.ln-link-copy:hover   { background:#c7d2fe; }
+.ln-link-insert:hover { background:#4f46e5; }
+.dm .ln-link-copy { background:#1e1b4b; color:#a5b4fc; }
+
+@keyframes lnFadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 </style>
 {% endblock %}
 
@@ -1526,6 +1672,450 @@ loadHistory();
     document.addEventListener('DOMContentLoaded', init);
   } else {
     setTimeout(init, 500);
+  }
+})();
+</script>
+
+<!-- ===== SCRIPT : 6 FONCTIONNALITÉS IA ===== -->
+<script>
+(function() {
+  'use strict';
+
+  // ── Helpers CKEditor ──────────────────────────────────────────────────────
+  function getCKContent() {
+    if (typeof CKEDITOR !== 'undefined') {
+      var inst = CKEDITOR.instances['id_content'];
+      if (inst) return inst.getData();
+    }
+    var el = document.getElementById('id_content');
+    return el ? el.value : '';
+  }
+
+  function setCKContent(html) {
+    if (typeof CKEDITOR !== 'undefined') {
+      var inst = CKEDITOR.instances['id_content'];
+      if (inst) { inst.setData(html); return; }
+      CKEDITOR.on('instanceReady', function(ev) {
+        if (ev.editor.name === 'id_content') ev.editor.setData(html);
+      });
+      return;
+    }
+    var el = document.getElementById('id_content');
+    if (el) el.value = html;
+  }
+
+  function insertLinkInCK(linkHtml) {
+    if (typeof CKEDITOR !== 'undefined') {
+      var inst = CKEDITOR.instances['id_content'];
+      if (inst) { inst.insertHtml(linkHtml); return; }
+    }
+    var el = document.getElementById('id_content');
+    if (el) el.value += '\n' + linkHtml;
+  }
+
+  function getCtInfo() {
+    var url = window.location.pathname;
+    if (url.indexOf('/admin/articles/article/') !== -1) return {type:'article', excerptId:'id_excerpt'};
+    if (url.indexOf('/admin/projects/project/') !== -1) return {type:'project', excerptId:'id_description'};
+    if (url.indexOf('/admin/tips/tip/') !== -1)         return {type:'tip',     excerptId:'id_excerpt'};
+    return null;
+  }
+
+  function getTitle()    { var e=document.getElementById('id_title');    return e?e.value.trim():''; }
+  function getSubtitle() { var e=document.getElementById('id_subtitle'); return e?e.value.trim():''; }
+  function getExcerpt(ctInfo) {
+    if (!ctInfo) return '';
+    var e=document.getElementById(ctInfo.excerptId);
+    return e?e.value.trim():'';
+  }
+
+  // ── Modal générique ───────────────────────────────────────────────────────
+  var overlay, modal, modalTitle, modalBody;
+
+  function ensureModal() {
+    if (document.getElementById('ln-ai-modal-overlay')) return;
+    overlay = document.createElement('div');
+    overlay.id = 'ln-ai-modal-overlay';
+    overlay.innerHTML =
+      '<div id="ln-ai-modal">' +
+        '<button id="ln-ai-modal-close" onclick="document.getElementById(\'ln-ai-modal-overlay\').classList.remove(\'open\')" title="Fermer">×</button>' +
+        '<div id="ln-ai-modal-title"></div>' +
+        '<div id="ln-ai-modal-body"></div>' +
+      '</div>';
+    overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.classList.remove('open'); });
+    document.body.appendChild(overlay);
+    modal      = document.getElementById('ln-ai-modal');
+    modalTitle = document.getElementById('ln-ai-modal-title');
+    modalBody  = document.getElementById('ln-ai-modal-body');
+  }
+
+  function openModal(title, bodyHtml) {
+    ensureModal();
+    document.getElementById('ln-ai-modal-title').textContent = title;
+    document.getElementById('ln-ai-modal-body').innerHTML = bodyHtml;
+    document.getElementById('ln-ai-modal-overlay').classList.add('open');
+  }
+
+  function setModalBody(html) {
+    var el = document.getElementById('ln-ai-modal-body');
+    if (el) el.innerHTML = html;
+  }
+
+  function scoreClass(n) {
+    return n >= 70 ? 'score-good' : n >= 45 ? 'score-med' : 'score-bad';
+  }
+
+  // ── CSRF ─────────────────────────────────────────────────────────────────
+  function getCookie(name) {
+    var val = null;
+    document.cookie.split(';').forEach(function(c) {
+      var p = c.trim().split('=');
+      if (p[0]===name) val = decodeURIComponent(p[1]);
+    });
+    return val;
+  }
+
+  function apiFetch(url, data, onSuccess, onError) {
+    fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')||''},
+      body: JSON.stringify(data)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.error) onError(d.error);
+      else onSuccess(d);
+    })
+    .catch(function(e){ onError(e.message||'Erreur réseau'); });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FONCTIONNALITÉ 1 — Génération du contenu complet
+  // ═══════════════════════════════════════════════════════════════════════════
+  function lnGenerateContent(ctInfo) {
+    var title = getTitle();
+    if (!title) { alert('Remplis le titre avant de générer le contenu.'); return; }
+
+    openModal('✨ Génération du contenu en cours…',
+      '<div class="ln-modal-loading"><div class="ln-spin"></div><p style="margin-top:12px">L\'IA rédige votre ' +
+      (ctInfo.type==='tip'?'astuce':ctInfo.type==='project'?'projet':'article') +
+      '…<br><small style="color:#94a3b8">Cela peut prendre 20-40 secondes</small></p></div>'
+    );
+
+    apiFetch('/admin-ai/generate-content/', {
+      title: title,
+      content_type: ctInfo.type,
+      subtitle: getSubtitle(),
+      excerpt: getExcerpt(ctInfo)
+    }, function(d) {
+      setModalBody(
+        '<p style="font-size:13px;color:#475569;margin-bottom:14px">Prévisualisation du contenu généré :</p>' +
+        '<div style="max-height:300px;overflow-y:auto;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;line-height:1.6">' +
+          d.content.substring(0,800) + (d.content.length>800?'…':'') +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">' +
+          '<button onclick="document.getElementById(\'ln-ai-modal-overlay\').classList.remove(\'open\')" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:7px;background:#fff;cursor:pointer;font-size:13px">Annuler</button>' +
+          '<button id="ln-apply-content-btn" style="padding:8px 18px;background:#6366f1;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;font-size:13px">✅ Insérer dans l\'éditeur</button>' +
+        '</div>'
+      );
+      var applyBtn = document.getElementById('ln-apply-content-btn');
+      var html = d.content;
+      applyBtn.onclick = function() {
+        setCKContent(html);
+        document.getElementById('ln-ai-modal-overlay').classList.remove('open');
+      };
+    }, function(err) {
+      setModalBody('<div class="ln-modal-error">❌ ' + err + '</div>');
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FONCTIONNALITÉ 2 — Optimisation SEO du contenu
+  // ═══════════════════════════════════════════════════════════════════════════
+  function lnOptimizeContent(ctInfo) {
+    var content = getCKContent();
+    if (!content || content.length < 80) {
+      alert('Le contenu est trop court. Rédige ou génère d\'abord le contenu.'); return;
+    }
+    var optPanel = document.getElementById('ln-opt-panel');
+    if (!optPanel) return;
+    optPanel.style.display = 'block';
+    optPanel.innerHTML = '<div class="ln-modal-loading" style="padding:16px;text-align:center"><div class="ln-spin"></div><p style="margin-top:8px;font-size:13px">Analyse SEO en cours…</p></div>';
+
+    apiFetch('/admin-ai/optimize-content/', {
+      title: getTitle(),
+      content: content,
+      content_type: ctInfo.type
+    }, function(d) {
+      var seoClass  = scoreClass(d.seo_score||0);
+      var readClass = scoreClass(d.readability_score||0);
+      var html = '<div class="ln-opt-scores">' +
+        '<div class="ln-opt-score-card"><div class="ln-opt-score-num ' + seoClass + '">' + (d.seo_score||0) + '</div><div class="ln-opt-score-label">Score SEO</div></div>' +
+        '<div class="ln-opt-score-card"><div class="ln-opt-score-num ' + readClass + '">' + (d.readability_score||0) + '</div><div class="ln-opt-score-label">Lisibilité</div></div>' +
+        '<div class="ln-opt-score-card"><div class="ln-opt-score-num" style="color:#6366f1">' + (d.word_count||0) + '</div><div class="ln-opt-score-label">Mots</div></div>' +
+      '</div>';
+
+      if (d.strengths && d.strengths.length) {
+        html += '<div class="ln-opt-section"><div class="ln-opt-section-title">✅ Points forts</div>';
+        d.strengths.forEach(function(s){
+          html += '<div class="ln-opt-item"><span>✓</span><span>' + s + '</span></div>';
+        });
+        html += '</div>';
+      }
+
+      if (d.improvements && d.improvements.length) {
+        html += '<div class="ln-opt-section"><div class="ln-opt-section-title">🔧 Améliorations</div>';
+        d.improvements.forEach(function(imp){
+          var badgeClass = imp.priority==='haute'?'badge-haute':imp.priority==='moyenne'?'badge-moyenne':'badge-basse';
+          html += '<div class="ln-opt-item"><span class="ln-opt-badge ' + badgeClass + '">' + (imp.priority||'') + '</span>' +
+            '<div><strong>' + imp.suggestion + '</strong><div style="font-size:12px;color:#64748b;margin-top:2px">' + (imp.reason||'') + '</div></div></div>';
+        });
+        html += '</div>';
+      }
+
+      if (d.missing_keywords && d.missing_keywords.length) {
+        html += '<div class="ln-opt-section"><div class="ln-opt-section-title">🔍 Mots-clés manquants</div><div>';
+        d.missing_keywords.forEach(function(kw){
+          html += '<span class="ln-opt-kw">' + kw + '</span>';
+        });
+        html += '</div></div>';
+      }
+
+      if (d.structure_issues && d.structure_issues.length) {
+        html += '<div class="ln-opt-section"><div class="ln-opt-section-title">⚠️ Structure</div>';
+        d.structure_issues.forEach(function(s){
+          html += '<div class="ln-opt-item"><span>⚠</span><span>' + s + '</span></div>';
+        });
+        html += '</div>';
+      }
+
+      optPanel.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+        '<strong style="font-size:14px">📊 Analyse SEO & Lisibilité</strong>' +
+        '<button onclick="document.getElementById(\'ln-opt-panel\').style.display=\'none\'" style="background:none;border:none;cursor:pointer;font-size:16px;color:#94a3b8" title="Fermer">×</button>' +
+      '</div>' + html;
+    }, function(err) {
+      optPanel.innerHTML = '<div class="ln-modal-error">❌ ' + err + '</div>';
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FONCTIONNALITÉ 3 — Liens internes
+  // ═══════════════════════════════════════════════════════════════════════════
+  function lnInternalLinks(ctInfo) {
+    var linksPanel = document.getElementById('ln-links-panel');
+    if (!linksPanel) return;
+    linksPanel.style.display = 'block';
+    linksPanel.innerHTML = '<div class="ln-modal-loading" style="padding:14px;text-align:center"><div class="ln-spin"></div><p style="margin-top:8px;font-size:13px">Recherche de liens pertinents…</p></div>';
+
+    apiFetch('/admin-ai/internal-links/', {
+      title: getTitle(),
+      content: getCKContent(),
+      content_type: ctInfo.type
+    }, function(d) {
+      if (!d.links || !d.links.length) {
+        linksPanel.innerHTML = '<p style="font-size:13px;color:#64748b;padding:10px">Aucun lien interne trouvé. Publie d\'abord d\'autres contenus.</p>';
+        return;
+      }
+      var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<strong style="font-size:14px">🔗 Liens internes suggérés</strong>' +
+        '<button onclick="document.getElementById(\'ln-links-panel\').style.display=\'none\'" style="background:none;border:none;cursor:pointer;font-size:16px;color:#94a3b8" title="Fermer">×</button>' +
+      '</div>';
+      d.links.forEach(function(link) {
+        var typeClass = 'lbadge-' + (link.type||'article');
+        var safeTitle = (link.title||'').replace(/"/g,'&quot;');
+        var safeUrl   = (link.url||'').replace(/"/g,'&quot;');
+        html += '<div class="ln-link-item">' +
+          '<span class="ln-link-badge ' + typeClass + '">' + (link.type||'') + '</span>' +
+          '<div class="ln-link-info">' +
+            '<div class="ln-link-title">' + (link.title||'') + '</div>' +
+            '<div class="ln-link-reason">' + (link.reason||'') + '</div>' +
+          '</div>' +
+          '<div class="ln-link-btns">' +
+            '<button class="ln-link-copy" onclick="navigator.clipboard.writeText(\'' + safeUrl + '\');this.textContent=\'✓ Copié\'">📋 Copier</button>' +
+            '<button class="ln-link-insert" onclick="lnInsertLink(\'' + safeTitle + '\',\'' + safeUrl + '\')">⬅ Insérer</button>' +
+          '</div>' +
+        '</div>';
+      });
+      linksPanel.innerHTML = html;
+    }, function(err) {
+      linksPanel.innerHTML = '<div class="ln-modal-error">❌ ' + err + '</div>';
+    });
+  }
+
+  window.lnInsertLink = function(title, url) {
+    var html = ' <a href="' + url + '">' + title + '</a>';
+    insertLinkInCK(html);
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FONCTIONNALITÉ 4 — Résumé automatique depuis le contenu
+  // ═══════════════════════════════════════════════════════════════════════════
+  function lnAutoExcerpt(ctInfo) {
+    var content = getCKContent();
+    if (!content || content.length < 80) {
+      alert('Rédige ou génère d\'abord le contenu de l\'article.'); return;
+    }
+    var excerptEl = document.getElementById(ctInfo.excerptId);
+    if (!excerptEl) return;
+
+    var origPlaceholder = excerptEl.placeholder;
+    excerptEl.disabled = true;
+    excerptEl.placeholder = '⏳ Génération du résumé…';
+
+    apiFetch('/admin-ai/suggest/', {
+      action: 'auto_excerpt',
+      data: { title: getTitle(), content: content, content_type: ctInfo.type }
+    }, function(d) {
+      excerptEl.disabled = false;
+      excerptEl.placeholder = origPlaceholder;
+      excerptEl.value = d.reply || '';
+      excerptEl.style.borderColor = '#10b981';
+      setTimeout(function(){ excerptEl.style.borderColor = ''; }, 2500);
+    }, function(err) {
+      excerptEl.disabled = false;
+      excerptEl.placeholder = origPlaceholder;
+      alert('Erreur : ' + err);
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FONCTIONNALITÉ 5 — Suggestion d'image de couverture
+  // ═══════════════════════════════════════════════════════════════════════════
+  function lnCoverPrompt(ctInfo) {
+    var title = getTitle();
+    if (!title) { alert('Remplis le titre avant de générer une suggestion d\'image.'); return; }
+
+    openModal('🖼️ Suggestion d\'image de couverture',
+      '<div class="ln-modal-loading"><div class="ln-spin"></div><p style="margin-top:12px;font-size:13px">Génération de la description d\'image…</p></div>'
+    );
+
+    apiFetch('/admin-ai/suggest/', {
+      action: 'cover_prompt',
+      data: { title: title, content_type: ctInfo.type }
+    }, function(d) {
+      var text = (d.reply||'').replace(/\n/g,'<br>');
+      // Extract the Midjourney prompt part if present
+      var parts = (d.reply||'').split(/Prompt IA\s*:/i);
+      var descHtml = parts[0].trim().replace(/\n/g,'<br>');
+      var promptText = parts[1] ? parts[1].trim() : '';
+
+      var html = '<div style="font-size:13px;line-height:1.7;color:#374151;margin-bottom:14px">' + descHtml + '</div>';
+      if (promptText) {
+        html += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:14px">' +
+          '<div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:6px;text-transform:uppercase">Prompt IA (Midjourney / DALL-E)</div>' +
+          '<div id="ln-cover-prompt-text" style="font-size:13px;font-family:monospace;color:#1e293b">' + promptText + '</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<button onclick="navigator.clipboard.writeText(document.getElementById(\'ln-cover-prompt-text\').textContent);this.textContent=\'✓ Copié!\'" style="padding:7px 14px;background:#6366f1;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600">📋 Copier le prompt</button>' +
+        '</div>';
+      } else {
+        html = '<div style="font-size:13px;line-height:1.7">' + text + '</div>';
+      }
+      setModalBody(html);
+    }, function(err) {
+      setModalBody('<div class="ln-modal-error">❌ ' + err + '</div>');
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FONCTIONNALITÉ 6 — Détection de doublons
+  // ═══════════════════════════════════════════════════════════════════════════
+  var dupTimer = null;
+  function lnCheckDuplicate(title) {
+    if (!title || title.length < 5) return;
+    clearTimeout(dupTimer);
+    dupTimer = setTimeout(function() {
+      var ind = document.getElementById('ln-dup-indicator');
+      if (!ind) return;
+      ind.className = '';
+      ind.style.display = 'none';
+
+      apiFetch('/admin-ai/check-duplicate/', { title: title }, function(d) {
+        ind.style.display = 'block';
+        if (!d.duplicates || d.duplicates.length === 0) {
+          ind.className = 'ok';
+          ind.innerHTML = '✅ Aucun contenu similaire trouvé — le titre est unique.';
+        } else {
+          ind.className = 'warn';
+          var links = d.duplicates.slice(0,3).map(function(dup){
+            return '<a href="' + dup.url + '" target="_blank" style="color:inherit;font-weight:600">' + dup.title + '</a> (' + dup.type + ')';
+          }).join(' · ');
+          ind.innerHTML = '⚠️ ' + d.duplicates.length + ' contenu(s) similaire(s) : ' + links;
+        }
+      }, function(){
+        // silence errors on duplicate check
+      });
+    }, 1200);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // INITIALISATION — Barre d'outils + Indicateur doublon
+  // ═══════════════════════════════════════════════════════════════════════════
+  function initAIToolbar() {
+    var ctInfo = getCtInfo();
+    if (!ctInfo) return;
+
+    // ── Barre d'outils sous le CKEditor ─────────────────────────────────
+    var contentField = document.querySelector('.field-content, .field-description, [class*="field-content"]');
+    if (!contentField) {
+      // fallback: find CKEditor wrapper
+      contentField = document.querySelector('.cke');
+      if (contentField) contentField = contentField.parentNode;
+    }
+
+    if (contentField) {
+      var toolbar = document.createElement('div');
+      toolbar.id = 'ln-ai-toolbar';
+      toolbar.innerHTML =
+        '<span id="ln-ai-toolbar-label">✨ IA</span>' +
+        '<button type="button" class="ln-tb-btn ln-tb-btn-gen"  onclick="lnDoGenerate()">✨ Générer le contenu</button>' +
+        '<button type="button" class="ln-tb-btn ln-tb-btn-opt"  onclick="lnDoOptimize()">📊 Analyser & SEO</button>' +
+        '<button type="button" class="ln-tb-btn ln-tb-btn-links" onclick="lnDoLinks()">🔗 Liens internes</button>' +
+        '<button type="button" class="ln-tb-btn ln-tb-btn-exc"  onclick="lnDoExcerpt()">📝 Résumé auto</button>' +
+        '<button type="button" class="ln-tb-btn ln-tb-btn-img"  onclick="lnDoCover()">🖼️ Image couverture</button>';
+
+      // Optimization panel (inline, below toolbar)
+      var optPanel = document.createElement('div');
+      optPanel.id = 'ln-opt-panel';
+
+      // Links panel (inline, below toolbar)
+      var linksPanel = document.createElement('div');
+      linksPanel.id = 'ln-links-panel';
+
+      contentField.appendChild(toolbar);
+      contentField.appendChild(optPanel);
+      contentField.appendChild(linksPanel);
+    }
+
+    // ── Indicateur doublon sous le titre ────────────────────────────────
+    var titleEl = document.getElementById('id_title');
+    if (titleEl) {
+      var dupInd = document.createElement('div');
+      dupInd.id = 'ln-dup-indicator';
+      titleEl.parentNode.insertBefore(dupInd, titleEl.nextSibling);
+
+      titleEl.addEventListener('input', function() {
+        lnCheckDuplicate(this.value.trim());
+      });
+    }
+
+    // Expose handlers via window (used by inline onclick)
+    window.lnDoGenerate = function() { lnGenerateContent(ctInfo); };
+    window.lnDoOptimize = function() { lnOptimizeContent(ctInfo); };
+    window.lnDoLinks    = function() { lnInternalLinks(ctInfo); };
+    window.lnDoExcerpt  = function() { lnAutoExcerpt(ctInfo); };
+    window.lnDoCover    = function() { lnCoverPrompt(ctInfo); };
+  }
+
+  // Spinner style
+  var spinStyle = document.createElement('style');
+  spinStyle.textContent = '.ln-spin{display:inline-block;width:28px;height:28px;border:3px solid #e0e7ff;border-top-color:#6366f1;border-radius:50%;animation:lnSpin .8s linear infinite} @keyframes lnSpin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(spinStyle);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(initAIToolbar, 800); });
+  } else {
+    setTimeout(initAIToolbar, 800);
   }
 })();
 </script>

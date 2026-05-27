@@ -426,6 +426,17 @@ def ai_suggest(request):
         'improve': f"Améliore ce texte en le rendant plus percutant, clair et SEO-friendly (garde la même longueur). Sans Markdown:\n\n{data.get('content', '')[:500]}",
         'structure': f"Propose un plan détaillé pour un article sur: '{data.get('topic', '')}'. Utilise des emojis et numérotation. Sans Markdown (##, **, *).",
         'full_content': f"Génère un article COMPLET en HTML pour:\nTitre: {data.get('title', '')}\nSujet: {data.get('topic', '')}\n\nFournis: contenu HTML complet (800-1200 mots), structuré avec h2/h3/p/ul/code. Prêt à coller dans l'éditeur.",
+        'auto_excerpt': (
+            f"À partir de ce contenu, génère un extrait/description courte de 2 phrases maximum (180 caractères max), "
+            f"percutante et optimisée SEO. Réponds UNIQUEMENT avec l'extrait, sans guillemets, sans explication.\n\n"
+            f"Titre: {data.get('title', '')}\nContenu: {data.get('content', '')[:1200]}"
+        ),
+        'cover_prompt': (
+            f"Pour un contenu intitulé \"{data.get('title', '')}\" (type: {data.get('content_type', 'article')}), "
+            f"décris l'image de couverture idéale en 3 phrases (sujet, style, couleurs, ambiance). "
+            f"Puis fournis un prompt optimisé pour Midjourney/DALL-E en anglais (1 ligne, après «Prompt IA :»). "
+            f"Sans Markdown."
+        ),
     }
 
     if action not in prompts:
@@ -455,6 +466,270 @@ def ai_suggest(request):
         elif e.code == 429:
             return JsonResponse({'error': 'Quota API dépassé.'}, status=200)
         return JsonResponse({'error': f'Erreur API ({e.code})'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=200)
+
+
+@staff_member_required
+@csrf_exempt
+@require_POST
+def ai_generate_content(request):
+    """Génère le contenu HTML complet pour CKEditor à partir du titre."""
+    try:
+        body = json.loads(request.body)
+        title = body.get('title', '').strip()
+        content_type = body.get('content_type', 'article')
+        subtitle = body.get('subtitle', '').strip()
+        excerpt = body.get('excerpt', '').strip()
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    if not title or len(title) < 4:
+        return JsonResponse({'error': 'Titre requis (minimum 4 caractères)'}, status=400)
+
+    api_key, base_url, model, ai_enabled = _get_ai_credentials()
+    if not ai_enabled or not api_key:
+        return JsonResponse({'error': 'IA non configurée'}, status=403)
+
+    settings = _get_ai_settings()
+
+    type_specs = {
+        'article': '800-1400 mots — article de blog technique complet',
+        'project': '500-800 mots — présentation de projet avec résultats et défis',
+        'tip':     '300-600 mots — astuce/tutoriel pratique étape par étape',
+    }
+    spec = type_specs.get(content_type, type_specs['article'])
+
+    extra = ''
+    if subtitle:
+        extra += f'\nSous-titre : {subtitle}'
+    if excerpt:
+        extra += f'\nContexte : {excerpt}'
+
+    prompt = (
+        f'Écris un {spec} en HTML pour :\n'
+        f'Titre : "{title}"{extra}\n\n'
+        f'RÈGLES :\n'
+        f'- HTML propre uniquement : <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <pre><code>\n'
+        f'- Introduction engageante (1-2 paragraphes)\n'
+        f'- 4-6 sections bien développées avec exemples concrets\n'
+        f'- Code : <pre><code class="language-...">...</code></pre>\n'
+        f'- Conclusion avec appel à l\'action\n'
+        f'- JAMAIS de <html>, <body>, <head>\n'
+        f'- JAMAIS de Markdown (**, ##, *)\n'
+        f'- Réponds UNIQUEMENT avec le HTML, rien d\'autre'
+    )
+
+    try:
+        reply = _call_ai(
+            api_key=api_key,
+            base_url=base_url or 'https://api.chatanywhere.tech/v1',
+            model=model or 'gpt-3.5-turbo',
+            messages=[
+                {"role": "system", "content": f"Tu es un expert rédacteur web pour {settings.site_name or 'Landry Net'}. Tu génères du contenu HTML professionnel de haute qualité. Réponds UNIQUEMENT avec le HTML, sans aucun texte avant ou après."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=2500,
+        )
+        clean = reply.strip()
+        for prefix in ('```html\n', '```html', '```\n', '```'):
+            if clean.startswith(prefix):
+                clean = clean[len(prefix):]
+                break
+        if clean.endswith('```'):
+            clean = clean[:-3]
+        return JsonResponse({'content': clean.strip(), 'ok': True})
+    except urllib.error.HTTPError as e:
+        code_map = {401: 'Clé API invalide.', 429: 'Quota API dépassé.'}
+        return JsonResponse({'error': code_map.get(e.code, f'Erreur API ({e.code})')}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=200)
+
+
+@staff_member_required
+@csrf_exempt
+@require_POST
+def ai_optimize_content(request):
+    """Analyse le contenu existant et retourne des suggestions d'optimisation SEO + lisibilité."""
+    import re as _re
+    try:
+        body = json.loads(request.body)
+        content = body.get('content', '').strip()
+        title = body.get('title', '').strip()
+        content_type = body.get('content_type', 'article')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    if not content or len(content) < 80:
+        return JsonResponse({'error': 'Contenu trop court (minimum 80 caractères)'}, status=400)
+
+    api_key, base_url, model, ai_enabled = _get_ai_credentials()
+    if not ai_enabled or not api_key:
+        return JsonResponse({'error': 'IA non configurée'}, status=403)
+
+    text_only = _re.sub(r'<[^>]+>', ' ', content)
+    word_count = len(text_only.split())
+
+    prompt = (
+        f'Analyse ce contenu et retourne UNIQUEMENT un JSON valide (sans markdown, sans backticks) :\n\n'
+        f'Titre : "{title}"\nType : {content_type}\nMots : {word_count}\n'
+        f'Contenu (extrait) : {content[:2000]}\n\n'
+        f'Format JSON attendu :\n'
+        f'{{\n'
+        f'  "seo_score": <0-100>,\n'
+        f'  "readability_score": <0-100>,\n'
+        f'  "strengths": ["point fort 1", "point fort 2"],\n'
+        f'  "improvements": [\n'
+        f'    {{"priority": "haute", "suggestion": "...", "reason": "..."}}\n'
+        f'  ],\n'
+        f'  "missing_keywords": ["mot-clé 1", "mot-clé 2"],\n'
+        f'  "structure_issues": ["problème 1"]\n'
+        f'}}'
+    )
+
+    try:
+        reply = _call_ai(
+            api_key=api_key,
+            base_url=base_url or 'https://api.chatanywhere.tech/v1',
+            model=model or 'gpt-3.5-turbo',
+            messages=[
+                {"role": "system", "content": "Tu es un expert SEO et rédaction web. Tu réponds UNIQUEMENT en JSON valide, sans backticks, sans texte autour."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=900,
+        )
+        clean = reply.strip()
+        if clean.startswith('```'):
+            clean = clean.split('\n', 1)[1] if '\n' in clean else clean[3:]
+        if clean.endswith('```'):
+            clean = clean.rsplit('```', 1)[0]
+        data = json.loads(clean.strip())
+        data['ok'] = True
+        data['word_count'] = word_count
+        return JsonResponse(data)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Réponse IA invalide, réessayez.'}, status=200)
+    except urllib.error.HTTPError as e:
+        code_map = {401: 'Clé API invalide.', 429: 'Quota API dépassé.'}
+        return JsonResponse({'error': code_map.get(e.code, f'Erreur API ({e.code})')}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=200)
+
+
+@staff_member_required
+@csrf_exempt
+@require_POST
+def ai_internal_links(request):
+    """Suggère des liens internes pertinents basés sur le contenu en cours de rédaction."""
+    import re as _re
+    try:
+        body = json.loads(request.body)
+        title = body.get('title', '').strip()
+        content = body.get('content', '').strip()
+        content_type = body.get('content_type', 'article')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    if not title:
+        return JsonResponse({'error': 'Titre requis'}, status=400)
+
+    api_key, base_url, model, ai_enabled = _get_ai_credentials()
+    if not ai_enabled or not api_key:
+        return JsonResponse({'error': 'IA non configurée'}, status=403)
+
+    from articles.models import Article
+    from projects.models import Project
+    from tips.models import Tip
+
+    try:
+        all_content = []
+        for a in Article.objects.filter(status='published').values('title', 'slug', 'excerpt')[:25]:
+            all_content.append({'type': 'article', 'title': a['title'], 'url': f"/articles/{a['slug']}/", 'hint': (a.get('excerpt') or '')[:60]})
+        for p in Project.objects.filter(status='published').values('title', 'slug', 'description')[:20]:
+            all_content.append({'type': 'projet', 'title': p['title'], 'url': f"/projets/{p['slug']}/", 'hint': (p.get('description') or '')[:60]})
+        for t in Tip.objects.filter(status='published').values('title', 'slug', 'excerpt')[:20]:
+            all_content.append({'type': 'astuce', 'title': t['title'], 'url': f"/astuces/{t['slug']}/", 'hint': (t.get('excerpt') or '')[:60]})
+    except Exception as e:
+        return JsonResponse({'error': f'Erreur DB : {str(e)}'}, status=200)
+
+    if not all_content:
+        return JsonResponse({'links': [], 'ok': True, 'message': 'Aucun contenu publié trouvé sur le site.'})
+
+    content_list = '\n'.join([f"- [{c['type']}] {c['title']} → {c['url']}" for c in all_content])
+    text_excerpt = _re.sub(r'<[^>]+>', ' ', content)[:400] if content else ''
+
+    prompt = (
+        f'Pour ce contenu en cours de rédaction :\n'
+        f'Titre : "{title}"\nExtrait : {text_excerpt}\n\n'
+        f'Contenu existant sur le site :\n{content_list}\n\n'
+        f'Sélectionne 3 à 5 contenus les plus pertinents à lier dans cet article.\n'
+        f'Retourne UNIQUEMENT ce JSON (sans markdown) :\n'
+        f'[{{"title":"...","url":"...","type":"...","reason":"Pourquoi ce lien enrichit le lecteur (1 phrase)"}}]'
+    )
+
+    try:
+        reply = _call_ai(
+            api_key=api_key,
+            base_url=base_url or 'https://api.chatanywhere.tech/v1',
+            model=model or 'gpt-3.5-turbo',
+            messages=[
+                {"role": "system", "content": "Tu es un expert SEO en liens internes. Tu réponds UNIQUEMENT en JSON valide."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=600,
+        )
+        clean = reply.strip()
+        if clean.startswith('```'):
+            clean = clean.split('\n', 1)[1] if '\n' in clean else clean[3:]
+        if clean.endswith('```'):
+            clean = clean.rsplit('```', 1)[0]
+        links = json.loads(clean.strip())
+        return JsonResponse({'links': links, 'ok': True})
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Réponse IA invalide.', 'links': []}, status=200)
+    except urllib.error.HTTPError as e:
+        code_map = {401: 'Clé API invalide.', 429: 'Quota API dépassé.'}
+        return JsonResponse({'error': code_map.get(e.code, f'Erreur API ({e.code})')}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=200)
+
+
+@staff_member_required
+@csrf_exempt
+@require_POST
+def ai_check_duplicate(request):
+    """Vérifie si un contenu similaire existe déjà dans la base de données."""
+    import functools
+    import operator as _op
+    try:
+        body = json.loads(request.body)
+        title = body.get('title', '').strip()
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    if not title or len(title) < 4:
+        return JsonResponse({'duplicates': [], 'ok': True, 'count': 0})
+
+    from articles.models import Article
+    from projects.models import Project
+    from tips.models import Tip
+    from django.db.models import Q
+
+    # Extract meaningful words (>3 chars)
+    words = [w.lower() for w in title.split() if len(w) > 3]
+    if not words:
+        return JsonResponse({'duplicates': [], 'ok': True, 'count': 0})
+
+    try:
+        q = functools.reduce(_op.or_, [Q(title__icontains=w) for w in words])
+        duplicates = []
+        for a in Article.objects.filter(q)[:6]:
+            duplicates.append({'type': 'Article', 'title': a.title, 'url': f'/articles/{a.slug}/', 'status': a.status})
+        for p in Project.objects.filter(q)[:4]:
+            duplicates.append({'type': 'Projet', 'title': p.title, 'url': f'/projets/{p.slug}/', 'status': p.status})
+        for t in Tip.objects.filter(q)[:4]:
+            duplicates.append({'type': 'Astuce', 'title': t.title, 'url': f'/astuces/{t.slug}/', 'status': t.status})
+        return JsonResponse({'duplicates': duplicates[:8], 'ok': True, 'count': len(duplicates)})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=200)
 
