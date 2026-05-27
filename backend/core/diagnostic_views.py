@@ -364,3 +364,74 @@ def send_newsletter_campaign(request):
             return JsonResponse({'ok': False, 'error': str(e), 'campaign_id': campaign.pk}, status=500)
     else:
         return JsonResponse({'ok': True, 'sent': 0, 'message': 'Brouillon sauvegardé.', 'campaign_id': campaign.pk})
+import json
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils import timezone
+
+
+@staff_member_required
+def editorial_calendar(request):
+    """Editorial calendar — shows all content by publish date."""
+    from articles.models import Article
+    from projects.models import Project
+    from tips.models import Tip
+
+    events = []
+
+    try:
+        for a in Article.objects.only('id', 'title', 'status', 'published_at', 'created_at', 'slug').order_by('-published_at')[:60]:
+            date = a.published_at or a.created_at
+            if date:
+                events.append({
+                    'id': f'article-{a.id}',
+                    'title': a.title,
+                    'date': date.strftime('%Y-%m-%d'),
+                    'type': 'article',
+                    'status': a.status,
+                    'url': f'/admin/articles/article/{a.id}/change/',
+                    'view_url': f'/articles/{a.slug}/',
+                    'color': '#4f46e5' if a.status == 'published' else '#94a3b8',
+                })
+    except Exception:
+        pass
+
+    try:
+        for p in Project.objects.only('id', 'title', 'status', 'published_at', 'created_at', 'slug').order_by('-published_at')[:30]:
+            date = p.published_at or p.created_at
+            if date:
+                events.append({
+                    'id': f'project-{p.id}',
+                    'title': p.title,
+                    'date': date.strftime('%Y-%m-%d'),
+                    'type': 'project',
+                    'status': p.status,
+                    'url': f'/admin/projects/project/{p.id}/change/',
+                    'view_url': f'/projets/{p.slug}/',
+                    'color': '#0891b2' if p.status == 'published' else '#94a3b8',
+                })
+    except Exception:
+        pass
+
+    try:
+        for t in Tip.objects.only('id', 'title', 'status', 'published_at', 'created_at', 'slug').order_by('-published_at')[:30]:
+            date = t.published_at or t.created_at
+            if date:
+                events.append({
+                    'id': f'tip-{t.id}',
+                    'title': t.title,
+                    'date': date.strftime('%Y-%m-%d'),
+                    'type': 'tip',
+                    'status': t.status,
+                    'url': f'/admin/tips/tip/{t.id}/change/',
+                    'view_url': f'/astuces/{t.slug}/',
+                    'color': '#16a34a' if t.status == 'published' else '#94a3b8',
+                })
+    except Exception:
+        pass
+
+    return render(request, 'admin/editorial_calendar.html', {
+        'events_json': json.dumps(events),
+        'title': 'Calendrier Éditorial',
+    })

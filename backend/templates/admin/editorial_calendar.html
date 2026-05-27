@@ -1,0 +1,260 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Calendrier Éditorial — Admin{% endblock %}
+{% block content %}
+<style>
+  .cal-wrap { max-width: 1100px; margin: 0 auto; padding: 0 0 40px; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .cal-title { font-size: 1.5rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+  .cal-nav { display: flex; align-items: center; gap: 8px; }
+  .cal-nav button { background: #4f46e5; color: white; border: none; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+  .cal-nav button:hover { background: #3730a3; }
+  .cal-month-label { font-size: 1rem; font-weight: 700; color: #1e293b; min-width: 160px; text-align: center; }
+  .cal-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; }
+  .cal-legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
+  .cal-day-header { background: #4f46e5; color: white; text-align: center; padding: 10px 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+  .cal-day { background: white; min-height: 100px; padding: 6px; cursor: default; position: relative; }
+  .cal-day.other-month { background: #f8fafc; }
+  .cal-day.today { background: #eff6ff; }
+  .cal-day.today .cal-day-num { background: #4f46e5; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .cal-day-num { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+  .cal-day.other-month .cal-day-num { color: #cbd5e1; }
+  .cal-event { font-size: 0.67rem; padding: 2px 5px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: white; font-weight: 600; transition: opacity 0.15s; line-height: 1.4; }
+  .cal-event:hover { opacity: 0.85; }
+  .cal-event.draft { opacity: 0.55; border: 1px dashed rgba(0,0,0,0.15); }
+  .cal-more { font-size: 0.65rem; color: #6366f1; font-weight: 600; cursor: pointer; padding: 1px 4px; }
+  .cal-more:hover { text-decoration: underline; }
+  /* Sidebar stats */
+  .cal-sidebar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .cal-stat { flex: 1; min-width: 100px; background: white; border-radius: 10px; padding: 14px 16px; text-align: center; box-shadow: 0 1px 6px rgba(0,0,0,0.06); border-left: 3px solid #4f46e5; }
+  .cal-stat-num { font-size: 1.5rem; font-weight: 800; color: #1e293b; }
+  .cal-stat-label { font-size: 0.7rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  /* Modal */
+  .cal-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 9999; align-items: center; justify-content: center; }
+  .cal-modal.open { display: flex; }
+  .cal-modal-box { background: white; border-radius: 14px; padding: 24px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .cal-modal-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+  .cal-modal-meta { font-size: 0.78rem; color: #64748b; margin-bottom: 16px; }
+  .cal-modal-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cal-modal-btns a { padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-decoration: none; }
+  .btn-edit { background: #4f46e5; color: white; }
+  .btn-view { background: #0891b2; color: white; }
+  .btn-close-modal { background: #f1f5f9; color: #334155; border: none; cursor: pointer; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
+  /* Dark mode */
+  .dm .cal-title { color: #e2e8f0; }
+  .dm .cal-month-label { color: #e2e8f0; }
+  .dm .cal-day { background: #1e293b; }
+  .dm .cal-day.other-month { background: #0f172a; }
+  .dm .cal-day.today { background: #1e3a5f; }
+  .dm .cal-day-num { color: #94a3b8; }
+  .dm .cal-stat { background: #1e293b; border-left-color: #6366f1; }
+  .dm .cal-stat-num { color: #e2e8f0; }
+  .dm .cal-modal-box { background: #1e293b; }
+  .dm .cal-modal-title { color: #e2e8f0; }
+  .dm .btn-close-modal { background: #334155; color: #e2e8f0; }
+  @media (max-width: 640px) { .cal-day { min-height: 60px; padding: 4px; } .cal-event { font-size: 0.58rem; padding: 1px 3px; } }
+</style>
+
+<div class="cal-wrap">
+  <div class="cal-header">
+    <div class="cal-title"><i class="bi bi-calendar3" style="color:#4f46e5;"></i> Calendrier Éditorial</div>
+    <div class="cal-nav">
+      <button onclick="changeMonth(-1)">&#8592; Préc.</button>
+      <div class="cal-month-label" id="cal-month-label"></div>
+      <button onclick="changeMonth(1)">Suiv. &#8594;</button>
+      <button onclick="goToday()" style="background:#0891b2;">Aujourd'hui</button>
+    </div>
+  </div>
+
+  <div class="cal-legend">
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#4f46e5;"></div> Article publié</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#0891b2;"></div> Projet publié</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#16a34a;"></div> Astuce publiée</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#94a3b8;"></div> Brouillon</div>
+  </div>
+
+  <div class="cal-sidebar" id="cal-stats"></div>
+
+  <div class="cal-grid" id="cal-grid">
+    <div class="cal-day-header">LUN</div>
+    <div class="cal-day-header">MAR</div>
+    <div class="cal-day-header">MER</div>
+    <div class="cal-day-header">JEU</div>
+    <div class="cal-day-header">VEN</div>
+    <div class="cal-day-header">SAM</div>
+    <div class="cal-day-header">DIM</div>
+    <div id="cal-days-container" style="display:contents;"></div>
+  </div>
+
+  <div style="margin-top:16px;font-size:0.75rem;color:#64748b;">
+    <i class="bi bi-info-circle"></i> Cliquez sur un événement pour voir les options. Les brouillons apparaissent en transparence.
+  </div>
+</div>
+
+<div class="cal-modal" id="cal-modal">
+  <div class="cal-modal-box">
+    <div class="cal-modal-title" id="modal-title"></div>
+    <div class="cal-modal-meta" id="modal-meta"></div>
+    <div class="cal-modal-btns">
+      <a href="#" class="btn-edit" id="modal-edit-btn"><i class="bi bi-pencil-fill"></i> Modifier</a>
+      <a href="#" class="btn-view" id="modal-view-btn" target="_blank"><i class="bi bi-eye-fill"></i> Voir</a>
+      <button class="btn-close-modal" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var EVENTS = {{ events_json|safe }};
+var currentYear, currentMonth;
+var today = new Date();
+currentYear = today.getFullYear();
+currentMonth = today.getMonth();
+
+var TYPE_LABELS = { article: 'Article', project: 'Projet', tip: 'Astuce' };
+var MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+function getEventsForDate(dateStr) {
+  return EVENTS.filter(function(e) { return e.date === dateStr; });
+}
+
+function renderCalendar() {
+  var label = document.getElementById('cal-month-label');
+  label.textContent = MONTHS_FR[currentMonth] + ' ' + currentYear;
+
+  var container = document.getElementById('cal-days-container');
+  container.innerHTML = '';
+
+  var firstDay = new Date(currentYear, currentMonth, 1);
+  var lastDay = new Date(currentYear, currentMonth + 1, 0);
+  var startDow = (firstDay.getDay() + 6) % 7; // Mon=0
+  var endDow = (lastDay.getDay() + 6) % 7;
+
+  // Prev month padding
+  var prevLast = new Date(currentYear, currentMonth, 0).getDate();
+  for (var i = startDow - 1; i >= 0; i--) {
+    var d = prevLast - i;
+    var m = currentMonth === 0 ? 11 : currentMonth - 1;
+    var y = currentMonth === 0 ? currentYear - 1 : currentYear;
+    container.appendChild(makeDay(y, m, d, true));
+  }
+
+  // Current month
+  for (var day = 1; day <= lastDay.getDate(); day++) {
+    container.appendChild(makeDay(currentYear, currentMonth, day, false));
+  }
+
+  // Next month padding
+  var remaining = (7 - ((startDow + lastDay.getDate()) % 7)) % 7;
+  for (var nd = 1; nd <= remaining; nd++) {
+    var nm = currentMonth === 11 ? 0 : currentMonth + 1;
+    var ny = currentMonth === 11 ? currentYear + 1 : currentYear;
+    container.appendChild(makeDay(ny, nm, nd, true));
+  }
+
+  renderStats();
+}
+
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+function makeDay(y, m, d, otherMonth) {
+  var dateStr = y + '-' + pad(m + 1) + '-' + pad(d);
+  var isToday = (y === today.getFullYear() && m === today.getMonth() && d === today.getDate());
+  var div = document.createElement('div');
+  div.className = 'cal-day' + (otherMonth ? ' other-month' : '') + (isToday ? ' today' : '');
+
+  var numDiv = document.createElement('div');
+  numDiv.className = 'cal-day-num';
+  numDiv.textContent = d;
+  div.appendChild(numDiv);
+
+  var events = getEventsForDate(dateStr);
+  var maxShow = 3;
+  events.slice(0, maxShow).forEach(function(ev) {
+    var el = document.createElement('div');
+    el.className = 'cal-event' + (ev.status !== 'published' ? ' draft' : '');
+    el.style.background = ev.color;
+    var icon = ev.type === 'article' ? '📄' : ev.type === 'project' ? '💻' : '💡';
+    el.textContent = icon + ' ' + ev.title;
+    el.title = ev.title;
+    el.onclick = function() { openModal(ev); };
+    div.appendChild(el);
+  });
+
+  if (events.length > maxShow) {
+    var more = document.createElement('div');
+    more.className = 'cal-more';
+    more.textContent = '+' + (events.length - maxShow) + ' autres';
+    more.onclick = function() {
+      var all = events.slice(maxShow);
+      all.forEach(function(ev) {
+        var el = document.createElement('div');
+        el.className = 'cal-event' + (ev.status !== 'published' ? ' draft' : '');
+        el.style.background = ev.color;
+        var icon = ev.type === 'article' ? '📄' : ev.type === 'project' ? '💻' : '💡';
+        el.textContent = icon + ' ' + ev.title;
+        el.onclick = function() { openModal(ev); };
+        div.insertBefore(el, more);
+      });
+      more.style.display = 'none';
+    };
+    div.appendChild(more);
+  }
+  return div;
+}
+
+function renderStats() {
+  var monthEvents = EVENTS.filter(function(e) {
+    return e.date.startsWith(currentYear + '-' + pad(currentMonth + 1));
+  });
+  var published = monthEvents.filter(function(e) { return e.status === 'published'; });
+  var drafts = monthEvents.filter(function(e) { return e.status !== 'published'; });
+  var articles = published.filter(function(e) { return e.type === 'article'; });
+  var projects = published.filter(function(e) { return e.type === 'project'; });
+  var tips = published.filter(function(e) { return e.type === 'tip'; });
+
+  var statsEl = document.getElementById('cal-stats');
+  statsEl.innerHTML = [
+    { num: published.length, label: 'Publications', color: '#4f46e5' },
+    { num: articles.length, label: 'Articles', color: '#4f46e5' },
+    { num: projects.length, label: 'Projets', color: '#0891b2' },
+    { num: tips.length, label: 'Astuces', color: '#16a34a' },
+    { num: drafts.length, label: 'Brouillons', color: '#94a3b8' },
+  ].map(function(s) {
+    return '<div class="cal-stat" style="border-left-color:' + s.color + '">' +
+      '<div class="cal-stat-num" style="color:' + s.color + '">' + s.num + '</div>' +
+      '<div class="cal-stat-label">' + s.label + '</div></div>';
+  }).join('');
+}
+
+function openModal(ev) {
+  document.getElementById('modal-title').textContent = (ev.type === 'article' ? '📄 ' : ev.type === 'project' ? '💻 ' : '💡 ') + ev.title;
+  document.getElementById('modal-meta').textContent =
+    TYPE_LABELS[ev.type] + ' · ' + (ev.status === 'published' ? '✅ Publié' : '📋 Brouillon') + ' · ' + ev.date;
+  document.getElementById('modal-edit-btn').href = ev.url;
+  document.getElementById('modal-view-btn').href = ev.view_url;
+  document.getElementById('cal-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('cal-modal').classList.remove('open');
+}
+document.getElementById('cal-modal').onclick = function(e) {
+  if (e.target === this) closeModal();
+};
+
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  renderCalendar();
+}
+function goToday() {
+  currentYear = today.getFullYear();
+  currentMonth = today.getMonth();
+  renderCalendar();
+}
+
+renderCalendar();
+</script>
+{% endblock %}

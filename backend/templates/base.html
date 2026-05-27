@@ -8,7 +8,7 @@
   <!-- SEO Primary -->
   <title>{% block title %}{% if page_title %}{{ page_title }} — {{ settings.site_name|default:"Landry Net" }}{% else %}{{ settings.site_name|default:"Landry Net" }} — {{ settings.tagline|default:"Partager, Apprendre, Innover" }}{% endif %}{% endblock %}</title>
   <meta name="description" content="{% block description %}{{ page_description|default:settings.description|default:"Site personnel de Landry — Articles, Projets et Astuces" }}{% endblock %}">
-  <meta name="keywords" content="{{ settings.meta_keywords|default:"développement, technologie, programmation, web, tutoriels" }}">
+  <meta name="keywords" content="{{ settings.meta_keywords|default:"Landry, développement, technologie, programmation, web, tutoriels, articles, projets, astuces" }}">
   <meta name="author" content="{{ settings.author_name|default:"Landry" }}">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="{{ settings.pwa_theme_color|default:"#4F46E5" }}">
@@ -63,23 +63,42 @@
 
   {% block extra_head %}{% endblock %}
 
-  <!-- Schema.org Site -->
+  <!-- Schema.org WebSite -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "{{ settings.site_name|default:"Landry Net" }}",
+    "alternateName": ["{{ settings.author_name|default:"Landry" }}", "Landry Net Blog"],
     "url": "https://{{ request.get_host }}",
     "description": "{{ settings.description|default:"Site personnel de Landry" }}",
+    "inLanguage": "fr-FR",
     "author": {
       "@type": "Person",
-      "name": "{{ settings.author_name|default:"Landry" }}"
+      "name": "{{ settings.author_name|default:"Landry" }}",
+      "jobTitle": "{{ settings.author_job_title|default:"Développeur" }}",
+      "url": "https://{{ request.get_host }}/a-propos/"{% if settings.github_url %},
+      "sameAs": [{% if settings.github_url %}"{{ settings.github_url }}"{% endif %}{% if settings.linkedin_url %},"{{ settings.linkedin_url }}"{% endif %}{% if settings.twitter_url %},"{{ settings.twitter_url }}"{% endif %}]{% endif %}
     },
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://{{ request.get_host }}/articles/?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
+  }
+  </script>
+
+  <!-- Schema.org Person (pour l'indexation du nom de l'auteur) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "{{ settings.author_name|default:"Landry" }}",
+    "jobTitle": "{{ settings.author_job_title|default:"Développeur" }}",
+    "description": "{{ settings.author_bio|default:"Développeur passionné de technologie"|striptags|truncatechars:200 }}",
+    "url": "https://{{ request.get_host }}/a-propos/",
+    "image": "{% if settings.author_photo %}https://{{ request.get_host }}{{ settings.author_photo.url }}{% elif settings.logo %}https://{{ request.get_host }}{{ settings.logo.url }}{% endif %}"{% if settings.github_url or settings.linkedin_url or settings.twitter_url %},
+    "sameAs": [{% if settings.github_url %}"{{ settings.github_url }}"{% endif %}{% if settings.linkedin_url %},"{{ settings.linkedin_url }}"{% endif %}{% if settings.twitter_url %},"{{ settings.twitter_url }}"{% endif %}]{% endif %}
   }
   </script>
   {% block schema %}{% endblock %}

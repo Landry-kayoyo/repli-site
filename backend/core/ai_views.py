@@ -690,3 +690,144 @@ def get_admin_users(request):
     for u in users:
         u['display'] = (f"{u['first_name']} {u['last_name']}".strip()) or u['username']
     return JsonResponse({'users': users})
+
+
+@staff_member_required
+def smart_notifications(request):
+    """Rule-based + AI smart notifications for admin bell."""
+    from django.contrib.auth.models import User
+    from articles.models import Article
+    from projects.models import Project
+    from tips.models import Tip
+    from comments.models import Comment
+    from django.utils import timezone
+    from datetime import timedelta
+
+    notifications = []
+
+    # 1. Pending comments
+    try:
+        pending = Comment.objects.filter(is_approved=False).count()
+        recent_pending = Comment.objects.filter(is_approved=False).order_by('-created_at')[:3]
+        for c in recent_pending:
+            notifications.append({
+                'type': 'comment',
+                'icon': '💬',
+                'level': 'warning',
+                'title': 'Commentaire en attente de modération',
+                'detail': f"{c.author_name or 'Anonyme'} — {(c.content or '')[:50]}...",
+                'url': f'/admin/comments/comment/{c.id}/change/',
+                'time': c.created_at.strftime('%d/%m %H:%M') if c.created_at else '',
+            })
+    except Exception:
+        pass
+
+    # 2. Published articles missing SEO fields
+    try:
+        no_seo = Article.objects.filter(status='published').filter(
+            meta_description=''
+        )[:3]
+        for a in no_seo:
+            notifications.append({
+                'type': 'seo',
+                'icon': '🔍',
+                'level': 'info',
+                'title': f'SEO manquant : {a.title[:40]}',
+                'detail': 'Meta description vide — ajoutez-en une pour améliorer le référencement',
+                'url': f'/admin/articles/article/{a.id}/change/',
+                'time': '',
+            })
+    except Exception:
+        pass
+
+    # 3. Published articles missing cover image
+    try:
+        no_cover = Article.objects.filter(status='published', cover_image='')[:2]
+        for a in no_cover:
+            notifications.append({
+                'type': 'image',
+                'icon': '🖼️',
+                'level': 'info',
+                'title': f'Image manquante : {a.title[:40]}',
+                'detail': 'Ajoutez une image de couverture pour capter l\'attention',
+                'url': f'/admin/articles/article/{a.id}/change/',
+                'time': '',
+            })
+    except Exception:
+        pass
+
+    # 4. Articles with very short content (< 150 chars in content)
+    try:
+        short_articles = []
+        for a in Article.objects.filter(status='published').only('id', 'title', 'content'):
+            clean = (a.content or '').replace('<', ' <').replace('>', '> ')
+            import re
+            text = re.sub(r'<[^>]+>', '', clean).strip()
+            if len(text) < 200:
+                short_articles.append(a)
+        for a in short_articles[:2]:
+            notifications.append({
+                'type': 'quality',
+                'icon': '📝',
+                'level': 'warning',
+                'title': f'Contenu trop court : {a.title[:40]}',
+                'detail': 'Cet article a moins de 200 mots — enrichissez-le pour le SEO',
+                'url': f'/admin/articles/article/{a.id}/change/',
+                'time': '',
+            })
+    except Exception:
+        pass
+
+    # 5. Old drafts (> 7 days not updated)
+    try:
+        old_draft_threshold = timezone.now() - timedelta(days=7)
+        old_drafts = Article.objects.filter(
+            status='draft', updated_at__lt=old_draft_threshold
+        ).order_by('updated_at')[:2]
+        for a in old_drafts:
+            days = (timezone.now() - a.updated_at).days
+            notifications.append({
+                'type': 'draft',
+                'icon': '📋',
+                'level': 'info',
+                'title': f'Brouillon abandonné : {a.title[:35]}',
+                'detail': f'Non modifié depuis {days} jours — terminez ou supprimez-le',
+                'url': f'/admin/articles/article/{a.id}/change/',
+                'time': a.updated_at.strftime('%d/%m') if a.updated_at else '',
+            })
+    except Exception:
+        pass
+
+    # 6. Site settings not filled
+    try:
+        from core.models import SiteSettings
+        s = SiteSettings.objects.first()
+        if s:
+            if not s.meta_keywords:
+                notifications.append({
+                    'type': 'seo', 'icon': '🏷️', 'level': 'info',
+                    'title': 'Mots-clés SEO non définis',
+                    'detail': 'Ajoutez des mots-clés dans Admin → Paramètres du site',
+                    'url': '/admin/core/sitesettings/1/change/', 'time': '',
+                })
+            if not s.author_job_title:
+                notifications.append({
+                    'type': 'profile', 'icon': '👤', 'level': 'info',
+                    'title': 'Titre professionnel manquant',
+                    'detail': 'Ajoutez votre titre (ex: Développeur Full Stack) dans les paramètres',
+                    'url': '/admin/core/sitesettings/1/change/', 'time': '',
+                })
+            if not s.email_host_user:
+                notifications.append({
+                    'type': 'email', 'icon': '✉️', 'level': 'warning',
+                    'title': 'Email non configuré',
+                    'detail': 'Configurez votre Gmail pour recevoir les messages de contact',
+                    'url': '/admin-ai/diagnostic/', 'time': '',
+                })
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'count': len(notifications),
+        'notifications': notifications,
+    })

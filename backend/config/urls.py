@@ -41,6 +41,8 @@ urlpatterns = [
     path('admin-ai/newsletter/', __import__('core.diagnostic_views', fromlist=['newsletter_management']).newsletter_management, name='admin-ai-newsletter'),
     path('admin-ai/newsletter/send/', __import__('core.diagnostic_views', fromlist=['send_newsletter_campaign']).send_newsletter_campaign, name='admin-ai-newsletter-send'),
     path('admin-ai/users/', __import__('core.ai_views', fromlist=['get_admin_users']).get_admin_users, name='admin-ai-users'),
+    path('admin-ai/smart-notifications/', __import__('core.ai_views', fromlist=['smart_notifications']).smart_notifications, name='admin-ai-smart-notifications'),
+    path('admin-ai/calendar/', __import__('core.diagnostic_views', fromlist=['editorial_calendar']).editorial_calendar, name='admin-ai-calendar'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('rss/', include('core.feeds_urls')),
 
