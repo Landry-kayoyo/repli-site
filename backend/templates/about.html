@@ -86,11 +86,11 @@
         {% for skill in cat_skills %}
         <div class="skill-item">
           <div class="skill-header">
-            <span class="skill-name">{% if skill.icon %}<span style="margin-right:5px;">{{ skill.icon }}</span>{% endif %}{{ skill.name }}</span>
+            <span class="skill-name">{% if skill.icon %}<i class="bi {{ skill.icon }}" style="color:{{ skill.color|default:'#4F46E5' }};margin-right:5px;"></i>{% endif %}{{ skill.name }}</span>
             <span class="skill-level">{{ skill.level }}%</span>
           </div>
           <div class="skill-bar">
-            <div class="skill-fill" data-level="{{ skill.level }}"></div>
+            <div class="skill-fill" data-level="{{ skill.level }}" style="background:{{ skill.color|default:'#4F46E5' }};"></div>
           </div>
         </div>
         {% endfor %}
