@@ -397,6 +397,156 @@ input:focus, textarea:focus, select:focus {
   #ln-ai-panel { bottom:0; right:0; left:0; width:100%; height:85vh; max-height:85vh; border-radius:20px 20px 0 0; }
   #ln-ai-btn { bottom:16px; right:16px; width:50px; height:50px; font-size:1.2rem; }
 }
+
+/* ====================================================
+   PANEL SUGGESTIONS IA INLINE
+   ==================================================== */
+#ln-inline-suggest-panel {
+  margin: 10px 0 18px 0;
+  border: 1.5px solid #c7d8ff;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f0f6ff 0%, #f8fbff 100%);
+  overflow: hidden;
+  animation: lnSuggestSlide 0.25s ease;
+  box-shadow: 0 4px 20px rgba(13,110,253,0.08);
+}
+@keyframes lnSuggestSlide {
+  from { opacity:0; transform:translateY(-8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.ln-suggest-head {
+  background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+  color: white;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.ln-suggest-head-label { flex:1; display:flex; align-items:center; gap:8px; }
+.ln-suggest-type-badge {
+  background: rgba(255,255,255,0.22);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.ln-suggest-head-btns { display:flex; gap:6px; }
+.ln-suggest-hbtn {
+  background: rgba(255,255,255,0.18);
+  border: none; color: white;
+  width: 26px; height: 26px;
+  border-radius: 7px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; transition: background 0.15s;
+}
+.ln-suggest-hbtn:hover { background: rgba(255,255,255,0.32); }
+
+.ln-suggest-loading {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #0d6efd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.ln-suggest-spinner {
+  width: 18px; height: 18px;
+  border: 2.5px solid #c7d8ff;
+  border-top-color: #0d6efd;
+  border-radius: 50%;
+  animation: lnSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes lnSpin { to { transform: rotate(360deg); } }
+
+.ln-suggest-error {
+  padding: 14px 16px;
+  font-size: 0.8rem;
+  color: #dc2626;
+  background: #fff5f5;
+  border-top: 1px solid #fecaca;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.ln-suggest-body { padding: 12px 14px 8px; }
+.ln-suggest-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5eeff;
+}
+.ln-suggest-row:last-child { border-bottom: none; }
+.ln-suggest-info { flex: 1; min-width: 0; }
+.ln-suggest-field-name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #4f80c8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+.ln-suggest-value {
+  font-size: 0.8rem;
+  color: #1e293b;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.ln-suggest-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+.ln-suggest-tag {
+  background: #e7f1ff;
+  border: 1px solid #c7d8ff;
+  color: #1d4ed8;
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.ln-suggest-apply-btn {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+  color: white; border: none;
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.18s, transform 0.15s;
+}
+.ln-suggest-apply-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.ln-suggest-apply-btn.applied {
+  background: linear-gradient(135deg, #198754, #20c997) !important;
+}
+.ln-suggest-footer {
+  padding: 8px 14px 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+.ln-suggest-apply-all {
+  background: linear-gradient(135deg, #6f42c1, #0d6efd);
+  color: white; border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: opacity 0.18s, transform 0.15s;
+}
+.ln-suggest-apply-all:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* Dark mode adaptations */
+.dm #ln-inline-suggest-panel { background: linear-gradient(135deg,#1a2742,#1e293b); border-color:#334155; }
+.dm .ln-suggest-row { border-bottom-color: #334155; }
+.dm .ln-suggest-value { color: #cbd5e1; }
+.dm .ln-suggest-tag { background:#1e3a5f; border-color:#334155; color:#93c5fd; }
+.dm .ln-suggest-error { background:#2d1515; border-color:#7f1d1d; color:#f87171; }
 </style>
 {% endblock %}
 
@@ -1055,22 +1205,279 @@ loadHistory();
 
 <script>
 // ====================================================
-// INJECTION BOUTONS IA DANS LES FORMULAIRES
+// INJECTION BOUTONS IA + PANEL SUGGESTIONS EN TEMPS RÉEL
 // ====================================================
 (function() {
-  function injectAISuggestButtons() {
-    var fieldMap = {
-      'id_title': { label: '✨ Titres IA', prompt: function(val, title) { return 'Suggère 5 titres accrocheurs SEO pour: "' + (val || title || 'ce contenu') + '"'; } },
-      'id_meta_title': { label: '✨ SEO', prompt: function(val, title) { return 'Meta-title (60 caractères max) pour: "' + title + '"'; } },
-      'id_meta_description': { label: '✨ SEO', prompt: function(val, title) { return 'Meta-description (160 caractères max) pour: "' + title + '"'; } },
-      'id_excerpt': { label: '✨ Description', prompt: function(val, title) { return 'Description courte percutante (2-3 phrases, 180 caractères max) pour: "' + title + '"'; } },
-      'id_tags': { label: '✨ Tags', prompt: function(val, title) { return 'Propose 8 tags pertinents pour: "' + title + '". Un par ligne.'; } },
-      'id_subtitle': { label: '✨ Sous-titre', prompt: function(val, title) { return 'Suggère 3 sous-titres accrocheurs pour: "' + title + '"'; } }
-    };
 
-    for (var fieldId in fieldMap) {
-      (function(fId, info) {
-        var el = document.getElementById(fId);
+  // --- Détection du type de contenu selon l'URL ---
+  var CONTENT_TYPES = {
+    '/admin/articles/article/': { type: 'article', label: 'Article', icon: '📝', excerptField: 'id_excerpt' },
+    '/admin/projects/project/': { type: 'project', label: 'Projet',  icon: '🚀', excerptField: 'id_description' },
+    '/admin/tips/tip/':         { type: 'tip',     label: 'Astuce',  icon: '💡', excerptField: 'id_excerpt' },
+  };
+
+  function detectContentType() {
+    var path = window.location.pathname;
+    for (var prefix in CONTENT_TYPES) {
+      if (path.indexOf(prefix) === 0) return CONTENT_TYPES[prefix];
+    }
+    return null;
+  }
+
+  // --- Utilitaire CSRF ---
+  function getCsrfToken() {
+    var c = document.cookie.split(';').find(function(x){ return x.trim().startsWith('csrftoken='); });
+    return c ? c.trim().split('=')[1] : '';
+  }
+
+  // --- Insérer le panel après la ligne du titre ---
+  function insertPanelAfterTitle(titleRow) {
+    var existing = document.getElementById('ln-inline-suggest-panel');
+    if (existing) existing.remove();
+    var panel = document.createElement('div');
+    panel.id = 'ln-inline-suggest-panel';
+    titleRow.parentNode.insertBefore(panel, titleRow.nextSibling);
+    return panel;
+  }
+
+  // --- Rendu état chargement ---
+  function renderLoading(panel, ctInfo) {
+    panel.innerHTML =
+      '<div class="ln-suggest-head">' +
+        '<div class="ln-suggest-head-label">' +
+          '<i class="bi bi-stars"></i> Suggestions IA' +
+          '<span class="ln-suggest-type-badge">' + ctInfo.icon + ' ' + ctInfo.label + '</span>' +
+        '</div>' +
+        '<div class="ln-suggest-head-btns">' +
+          '<button class="ln-suggest-hbtn" onclick="document.getElementById(\'ln-inline-suggest-panel\').remove()" title="Fermer"><i class="bi bi-x-lg"></i></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ln-suggest-loading"><div class="ln-suggest-spinner"></div> L\'IA analyse votre titre…</div>';
+  }
+
+  // --- Rendu erreur ---
+  function renderError(panel, ctInfo, msg) {
+    panel.innerHTML =
+      '<div class="ln-suggest-head">' +
+        '<div class="ln-suggest-head-label">' +
+          '<i class="bi bi-stars"></i> Suggestions IA' +
+          '<span class="ln-suggest-type-badge">' + ctInfo.icon + ' ' + ctInfo.label + '</span>' +
+        '</div>' +
+        '<div class="ln-suggest-head-btns">' +
+          '<button class="ln-suggest-hbtn" onclick="document.getElementById(\'ln-inline-suggest-panel\').remove()" title="Fermer"><i class="bi bi-x-lg"></i></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ln-suggest-error"><i class="bi bi-exclamation-triangle-fill"></i> ' + msg + '</div>';
+  }
+
+  // --- Appliquer une valeur dans un champ ---
+  function applyField(fieldId, value) {
+    var el = document.getElementById(fieldId);
+    if (!el) return false;
+    el.value = value;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
+  }
+
+  // --- Rendu des suggestions ---
+  function renderSuggestions(panel, ctInfo, data, titleValue) {
+    var excerptKey = data.excerpt_key || (ctInfo.type === 'project' ? 'description' : 'excerpt');
+    var excerptLabel = ctInfo.type === 'project' ? 'Description courte' : 'Extrait SEO';
+
+    var rows = [
+      { key: 'subtitle',         label: 'Sous-titre',      fieldId: 'id_subtitle',              icon: '✏️' },
+      { key: excerptKey,         label: excerptLabel,       fieldId: ctInfo.excerptField,         icon: '📄' },
+      { key: 'tags',             label: 'Tags',             fieldId: 'id_tags',                   icon: '🏷️', isTags: true },
+      { key: 'meta_title',       label: 'Meta Title SEO',   fieldId: 'id_meta_title',             icon: '🔍' },
+      { key: 'meta_description', label: 'Meta Description', fieldId: 'id_meta_description',       icon: '📋' },
+    ];
+    if (ctInfo.type === 'tip' && data.difficulty) {
+      rows.push({ key: 'difficulty', label: 'Difficulté', fieldId: 'id_difficulty', icon: '⚡' });
+    }
+
+    var rowsHtml = rows.filter(function(r){ return data[r.key]; }).map(function(r, idx) {
+      var val = data[r.key];
+      var displayVal = '';
+      if (r.isTags && Array.isArray(val)) {
+        displayVal = '<div class="ln-suggest-tags">' +
+          val.map(function(t){ return '<span class="ln-suggest-tag">' + t + '</span>'; }).join('') +
+          '</div>';
+      } else {
+        displayVal = '<div class="ln-suggest-value">' + (val + '').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+      }
+      var applyVal = r.isTags && Array.isArray(val) ? val.join(', ') : val;
+      return '<div class="ln-suggest-row" id="ln-srow-' + idx + '">' +
+        '<div class="ln-suggest-info">' +
+          '<div class="ln-suggest-field-name">' + r.icon + ' ' + r.label + '</div>' +
+          displayVal +
+        '</div>' +
+        '<button class="ln-suggest-apply-btn" data-field="' + r.fieldId + '" data-val="' + encodeURIComponent(applyVal) + '" data-idx="' + idx + '" onclick="lnApplySuggestion(this)">' +
+          '<i class="bi bi-check2"></i> Appliquer' +
+        '</button>' +
+      '</div>';
+    }).join('');
+
+    panel.innerHTML =
+      '<div class="ln-suggest-head">' +
+        '<div class="ln-suggest-head-label">' +
+          '<i class="bi bi-stars"></i> Suggestions IA' +
+          '<span class="ln-suggest-type-badge">' + ctInfo.icon + ' ' + ctInfo.label + '</span>' +
+        '</div>' +
+        '<div class="ln-suggest-head-btns">' +
+          '<button class="ln-suggest-hbtn" onclick="lnRefreshSuggestions()" title="Régénérer"><i class="bi bi-arrow-clockwise"></i></button>' +
+          '<button class="ln-suggest-hbtn" onclick="document.getElementById(\'ln-inline-suggest-panel\').remove()" title="Fermer"><i class="bi bi-x-lg"></i></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ln-suggest-body">' + rowsHtml + '</div>' +
+      '<div class="ln-suggest-footer">' +
+        '<button class="ln-suggest-apply-all" onclick="lnApplyAllSuggestions()">' +
+          '<i class="bi bi-check2-all"></i> Tout appliquer' +
+        '</button>' +
+      '</div>';
+
+    // Stocker les données pour "Tout appliquer" et "Régénérer"
+    panel._suggestionData = data;
+    panel._ctInfo = ctInfo;
+    panel._titleValue = titleValue;
+    panel._rows = rows;
+  }
+
+  // --- Appliquer une seule suggestion ---
+  window.lnApplySuggestion = function(btn) {
+    var fieldId = btn.getAttribute('data-field');
+    var val = decodeURIComponent(btn.getAttribute('data-val'));
+    var ok = applyField(fieldId, val);
+    if (ok) {
+      btn.classList.add('applied');
+      btn.innerHTML = '<i class="bi bi-check-lg"></i> Appliqué';
+      setTimeout(function(){ btn.classList.remove('applied'); btn.innerHTML = '<i class="bi bi-check2"></i> Appliquer'; }, 2500);
+    }
+  };
+
+  // --- Tout appliquer ---
+  window.lnApplyAllSuggestions = function() {
+    var panel = document.getElementById('ln-inline-suggest-panel');
+    if (!panel || !panel._rows || !panel._suggestionData) return;
+    var data = panel._suggestionData;
+    var ctInfo = panel._ctInfo;
+    var excerptKey = data.excerpt_key || (ctInfo.type === 'project' ? 'description' : 'excerpt');
+    panel._rows.forEach(function(r) {
+      var val = data[r.key];
+      if (!val) return;
+      var applyVal = r.isTags && Array.isArray(val) ? val.join(', ') : val;
+      applyField(r.fieldId, applyVal);
+    });
+    // Ouvrir le fieldset SEO si replié
+    var seoFieldset = document.querySelector('fieldset.collapse');
+    if (seoFieldset) {
+      var toggle = seoFieldset.querySelector('h2 a');
+      if (toggle && seoFieldset.classList.contains('collapsed')) toggle.click();
+    }
+    var btn = panel.querySelector('.ln-suggest-apply-all');
+    if (btn) {
+      btn.innerHTML = '<i class="bi bi-check2-all"></i> Tout appliqué !';
+      btn.style.background = 'linear-gradient(135deg,#198754,#20c997)';
+    }
+    // Marquer tous les boutons
+    panel.querySelectorAll('.ln-suggest-apply-btn').forEach(function(b){
+      b.classList.add('applied');
+      b.innerHTML = '<i class="bi bi-check-lg"></i> Appliqué';
+    });
+  };
+
+  // --- Régénérer les suggestions ---
+  window.lnRefreshSuggestions = function() {
+    var panel = document.getElementById('ln-inline-suggest-panel');
+    if (!panel || !panel._ctInfo || !panel._titleValue) return;
+    fetchSuggestions(panel._ctInfo, panel._titleValue, panel);
+  };
+
+  // --- Appel API ---
+  function fetchSuggestions(ctInfo, titleValue, panel) {
+    renderLoading(panel, ctInfo);
+    fetch('/admin-ai/inline-suggest/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({ title: titleValue, content_type: ctInfo.type })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        renderError(panel, ctInfo, data.error);
+      } else {
+        renderSuggestions(panel, ctInfo, data, titleValue);
+      }
+    })
+    .catch(function(e) {
+      renderError(panel, ctInfo, 'Erreur réseau. Vérifiez votre connexion.');
+    });
+  }
+
+  // --- Initialisation principale ---
+  function initInlineSuggestions() {
+    var ctInfo = detectContentType();
+    if (!ctInfo) return; // pas sur une page article/projet/astuce
+
+    var titleEl = document.getElementById('id_title');
+    if (!titleEl) return;
+
+    // Trouver la ligne du formulaire qui contient le titre
+    var titleRow = titleEl.closest('.form-row') || titleEl.closest('div') || titleEl.parentNode;
+
+    var debounceTimer = null;
+    var lastFetched = '';
+
+    titleEl.addEventListener('input', function() {
+      var val = titleEl.value.trim();
+      clearTimeout(debounceTimer);
+      if (val.length < 5) return;
+      debounceTimer = setTimeout(function() {
+        if (val === lastFetched) return;
+        lastFetched = val;
+        var panel = document.getElementById('ln-inline-suggest-panel') || insertPanelAfterTitle(titleRow);
+        if (!document.getElementById('ln-inline-suggest-panel')) {
+          titleRow.parentNode.insertBefore(panel, titleRow.nextSibling);
+        }
+        fetchSuggestions(ctInfo, val, panel);
+      }, 1500);
+    });
+
+    // Bouton manuel "✨ Suggestions IA" à côté du titre
+    var manualBtn = document.createElement('button');
+    manualBtn.type = 'button';
+    manualBtn.className = 'ln-ai-suggest';
+    manualBtn.innerHTML = '<i class="bi bi-stars"></i> Suggestions IA';
+    manualBtn.style.cssText = 'margin-left:10px;';
+    manualBtn.onclick = function() {
+      var val = titleEl.value.trim();
+      if (val.length < 5) { alert('Écrivez d\'abord un titre (5 caractères minimum).'); return; }
+      var panel = document.getElementById('ln-inline-suggest-panel');
+      if (!panel) {
+        panel = insertPanelAfterTitle(titleRow);
+      }
+      fetchSuggestions(ctInfo, val, panel);
+    };
+    var titleParent = titleEl.parentNode;
+    if (titleParent) {
+      titleParent.style.cssText += ';display:flex;align-items:center;flex-wrap:wrap;gap:6px;';
+      titleParent.appendChild(manualBtn);
+    }
+  }
+
+  // --- Anciens boutons IA sur les autres champs ---
+  function injectLegacyButtons() {
+    var legacyFields = {
+      'id_meta_title':       { label: '✨ SEO', prompt: function(v, t){ return 'Meta-title (60 chars max) pour: "' + t + '"'; } },
+      'id_meta_description': { label: '✨ SEO', prompt: function(v, t){ return 'Meta-description (160 chars max) pour: "' + t + '"'; } },
+    };
+    for (var fId in legacyFields) {
+      (function(fieldId, info) {
+        var el = document.getElementById(fieldId);
         if (!el) return;
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -1089,9 +1496,10 @@ loadHistory();
           parent.style.cssText += ';display:flex;align-items:center;flex-wrap:wrap;gap:6px;';
           parent.appendChild(btn);
         }
-      })(fieldId, fieldMap[fieldId]);
+      })(fId, legacyFields[fId]);
     }
 
+    // Bouton Plan IA
     var titleEl = document.getElementById('id_title');
     if (titleEl && titleEl.parentNode) {
       var structBtn = document.createElement('button');
@@ -1109,10 +1517,15 @@ loadHistory();
     }
   }
 
-  if(document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectAISuggestButtons);
+  function init() {
+    initInlineSuggestions();
+    injectLegacyButtons();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    setTimeout(injectAISuggestButtons, 500);
+    setTimeout(init, 500);
   }
 })();
 </script>
