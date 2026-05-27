@@ -743,6 +743,9 @@ def ai_inline_suggest(request):
         body = json.loads(request.body)
         title = body.get('title', '').strip()
         content_type = body.get('content_type', 'article')
+        is_edit_mode = body.get('is_edit_mode', False)
+        existing_subtitle = body.get('existing_subtitle', '').strip()
+        existing_excerpt = body.get('existing_excerpt', '').strip()
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
@@ -767,17 +770,37 @@ def ai_inline_suggest(request):
     if content_type == 'tip':
         extra_field = '\n- difficulty: exactement une de ces valeurs: "débutant", "intermédiaire" ou "avancé"'
 
-    prompt = (
-        f'Pour un {type_label} intitulé : "{title}"\n\n'
-        f'Génère un JSON strict avec exactement ces clés :\n'
-        f'- subtitle: sous-titre accrocheur (max 120 caractères)\n'
-        f'- {excerpt_key}: description courte percutante (2 phrases, max 180 caractères)\n'
-        f'- tags: tableau JSON de 6 tags courts en minuscules sans accents (ex: ["python","django","api"])\n'
-        f'- meta_title: titre SEO (max 60 caractères, mot-clé principal en premier)\n'
-        f'- meta_description: description SEO avec appel à l\'action (max 160 caractères)'
-        f'{extra_field}\n\n'
-        f'Réponds UNIQUEMENT avec le JSON brut. Pas de ```json, pas d\'explication, juste le JSON.'
-    )
+    if is_edit_mode:
+        existing_context = f'Titre actuel : "{title}"\n'
+        if existing_subtitle:
+            existing_context += f'Sous-titre actuel : "{existing_subtitle}"\n'
+        if existing_excerpt:
+            existing_context += f'Description actuelle : "{existing_excerpt}"\n'
+
+        prompt = (
+            f'Tu dois améliorer le contenu existant d\'un {type_label}.\n\n'
+            f'{existing_context}\n'
+            f'Propose des améliorations optimisées dans un JSON strict avec exactement ces clés :\n'
+            f'- subtitle: sous-titre amélioré et plus accrocheur (max 120 caractères)\n'
+            f'- {excerpt_key}: description améliorée, plus percutante (2 phrases, max 180 caractères)\n'
+            f'- tags: tableau JSON de 6 tags courts en minuscules sans accents (ex: ["python","django","api"])\n'
+            f'- meta_title: titre SEO amélioré (max 60 caractères, mot-clé principal en premier)\n'
+            f'- meta_description: description SEO améliorée avec appel à l\'action (max 160 caractères)'
+            f'{extra_field}\n\n'
+            f'Réponds UNIQUEMENT avec le JSON brut. Pas de ```json, pas d\'explication, juste le JSON.'
+        )
+    else:
+        prompt = (
+            f'Pour un {type_label} intitulé : "{title}"\n\n'
+            f'Génère un JSON strict avec exactement ces clés :\n'
+            f'- subtitle: sous-titre accrocheur (max 120 caractères)\n'
+            f'- {excerpt_key}: description courte percutante (2 phrases, max 180 caractères)\n'
+            f'- tags: tableau JSON de 6 tags courts en minuscules sans accents (ex: ["python","django","api"])\n'
+            f'- meta_title: titre SEO (max 60 caractères, mot-clé principal en premier)\n'
+            f'- meta_description: description SEO avec appel à l\'action (max 160 caractères)'
+            f'{extra_field}\n\n'
+            f'Réponds UNIQUEMENT avec le JSON brut. Pas de ```json, pas d\'explication, juste le JSON.'
+        )
 
     try:
         reply = _call_ai(

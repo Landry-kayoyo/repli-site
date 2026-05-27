@@ -1370,6 +1370,11 @@ loadHistory();
     return null;
   }
 
+  function isEditMode() {
+    var path = window.location.pathname;
+    return /\/\d+\/change\/$/.test(path);
+  }
+
   // --- Utilitaire CSRF ---
   function getCsrfToken() {
     var c = document.cookie.split(';').find(function(x){ return x.trim().startsWith('csrftoken='); });
@@ -1387,18 +1392,20 @@ loadHistory();
   }
 
   // --- Rendu état chargement ---
-  function renderLoading(panel, ctInfo) {
+  function renderLoading(panel, ctInfo, editMode) {
+    var panelTitle = editMode ? 'Améliorations IA' : 'Suggestions IA';
+    var loadingMsg = editMode ? 'L\'IA analyse votre contenu existant…' : 'L\'IA analyse votre titre…';
     panel.innerHTML =
       '<div class="ln-suggest-head">' +
         '<div class="ln-suggest-head-label">' +
-          '<i class="bi bi-stars"></i> Suggestions IA' +
+          '<i class="bi bi-stars"></i> ' + panelTitle +
           '<span class="ln-suggest-type-badge">' + ctInfo.icon + ' ' + ctInfo.label + '</span>' +
         '</div>' +
         '<div class="ln-suggest-head-btns">' +
           '<button class="ln-suggest-hbtn" onclick="document.getElementById(\'ln-inline-suggest-panel\').remove()" title="Fermer"><i class="bi bi-x-lg"></i></button>' +
         '</div>' +
       '</div>' +
-      '<div class="ln-suggest-loading"><div class="ln-suggest-spinner"></div> L\'IA analyse votre titre…</div>';
+      '<div class="ln-suggest-loading"><div class="ln-suggest-spinner"></div> ' + loadingMsg + '</div>';
   }
 
   // --- Rendu erreur ---
@@ -1427,7 +1434,7 @@ loadHistory();
   }
 
   // --- Rendu des suggestions ---
-  function renderSuggestions(panel, ctInfo, data, titleValue) {
+  function renderSuggestions(panel, ctInfo, data, titleValue, editMode) {
     var excerptKey = data.excerpt_key || (ctInfo.type === 'project' ? 'description' : 'excerpt');
     var excerptLabel = ctInfo.type === 'project' ? 'Description courte' : 'Extrait SEO';
 
@@ -1464,10 +1471,13 @@ loadHistory();
       '</div>';
     }).join('');
 
+    var panelTitle = editMode ? 'Améliorations IA' : 'Suggestions IA';
+    var applyAllLabel = editMode ? '<i class="bi bi-check2-all"></i> Tout améliorer' : '<i class="bi bi-check2-all"></i> Tout appliquer';
+
     panel.innerHTML =
       '<div class="ln-suggest-head">' +
         '<div class="ln-suggest-head-label">' +
-          '<i class="bi bi-stars"></i> Suggestions IA' +
+          '<i class="bi bi-stars"></i> ' + panelTitle +
           '<span class="ln-suggest-type-badge">' + ctInfo.icon + ' ' + ctInfo.label + '</span>' +
         '</div>' +
         '<div class="ln-suggest-head-btns">' +
@@ -1478,7 +1488,7 @@ loadHistory();
       '<div class="ln-suggest-body">' + rowsHtml + '</div>' +
       '<div class="ln-suggest-footer">' +
         '<button class="ln-suggest-apply-all" onclick="lnApplyAllSuggestions()">' +
-          '<i class="bi bi-check2-all"></i> Tout appliquer' +
+          applyAllLabel +
         '</button>' +
       '</div>';
 
@@ -1487,6 +1497,7 @@ loadHistory();
     panel._ctInfo = ctInfo;
     panel._titleValue = titleValue;
     panel._rows = rows;
+    panel._editMode = editMode;
   }
 
   // --- Appliquer une seule suggestion ---
@@ -1536,12 +1547,19 @@ loadHistory();
   window.lnRefreshSuggestions = function() {
     var panel = document.getElementById('ln-inline-suggest-panel');
     if (!panel || !panel._ctInfo || !panel._titleValue) return;
-    fetchSuggestions(panel._ctInfo, panel._titleValue, panel);
+    fetchSuggestions(panel._ctInfo, panel._titleValue, panel, panel._editMode);
   };
 
   // --- Appel API ---
-  function fetchSuggestions(ctInfo, titleValue, panel) {
-    renderLoading(panel, ctInfo);
+  function fetchSuggestions(ctInfo, titleValue, panel, editMode, existingSubtitle, existingExcerpt) {
+    renderLoading(panel, ctInfo, editMode);
+    var payload = {
+      title: titleValue,
+      content_type: ctInfo.type,
+      is_edit_mode: !!editMode,
+      existing_subtitle: existingSubtitle || '',
+      existing_excerpt: existingExcerpt || ''
+    };
     fetch('/admin-ai/inline-suggest/', {
       method: 'POST',
       credentials: 'same-origin',
@@ -1549,19 +1567,25 @@ loadHistory();
         'Content-Type': 'application/json',
         'X-CSRFToken': getCsrfToken()
       },
-      body: JSON.stringify({ title: titleValue, content_type: ctInfo.type })
+      body: JSON.stringify(payload)
     })
     .then(function(r){ return r.json(); })
     .then(function(data) {
       if (data.error) {
         renderError(panel, ctInfo, data.error);
       } else {
-        renderSuggestions(panel, ctInfo, data, titleValue);
+        renderSuggestions(panel, ctInfo, data, titleValue, editMode);
       }
     })
     .catch(function(e) {
       renderError(panel, ctInfo, 'Erreur réseau. Vérifiez votre connexion.');
     });
+  }
+
+  // --- Lire la valeur d'un champ existant ---
+  function getFieldValue(fieldId) {
+    var el = document.getElementById(fieldId);
+    return el ? el.value.trim() : '';
   }
 
   // --- Initialisation principale ---
@@ -1572,41 +1596,56 @@ loadHistory();
     var titleEl = document.getElementById('id_title');
     if (!titleEl) return;
 
+    var editMode = isEditMode();
+
     // Trouver la ligne du formulaire qui contient le titre
     var titleRow = titleEl.closest('.form-row') || titleEl.closest('div') || titleEl.parentNode;
 
     var debounceTimer = null;
     var lastFetched = '';
 
-    titleEl.addEventListener('input', function() {
-      var val = titleEl.value.trim();
-      clearTimeout(debounceTimer);
-      if (val.length < 5) return;
-      debounceTimer = setTimeout(function() {
-        if (val === lastFetched) return;
-        lastFetched = val;
-        var panel = document.getElementById('ln-inline-suggest-panel') || insertPanelAfterTitle(titleRow);
-        if (!document.getElementById('ln-inline-suggest-panel')) {
-          titleRow.parentNode.insertBefore(panel, titleRow.nextSibling);
-        }
-        fetchSuggestions(ctInfo, val, panel);
-      }, 1500);
-    });
+    // En mode création, déclenchement automatique lors de la saisie du titre
+    if (!editMode) {
+      titleEl.addEventListener('input', function() {
+        var val = titleEl.value.trim();
+        clearTimeout(debounceTimer);
+        if (val.length < 5) return;
+        debounceTimer = setTimeout(function() {
+          if (val === lastFetched) return;
+          lastFetched = val;
+          var panel = document.getElementById('ln-inline-suggest-panel') || insertPanelAfterTitle(titleRow);
+          if (!document.getElementById('ln-inline-suggest-panel')) {
+            titleRow.parentNode.insertBefore(panel, titleRow.nextSibling);
+          }
+          fetchSuggestions(ctInfo, val, panel, false);
+        }, 1500);
+      });
+    }
 
-    // Bouton manuel "✨ Suggestions IA" à côté du titre
+    // Bouton manuel : "✨ Suggestions IA" (création) ou "✨ Améliorer" (édition)
     var manualBtn = document.createElement('button');
     manualBtn.type = 'button';
     manualBtn.className = 'ln-ai-suggest';
-    manualBtn.innerHTML = '<i class="bi bi-stars"></i> Suggestions IA';
+    if (editMode) {
+      manualBtn.innerHTML = '<i class="bi bi-stars"></i> Améliorer avec l\'IA';
+    } else {
+      manualBtn.innerHTML = '<i class="bi bi-stars"></i> Suggestions IA';
+    }
     manualBtn.style.cssText = 'margin-left:10px;';
     manualBtn.onclick = function() {
       var val = titleEl.value.trim();
-      if (val.length < 5) { alert('Écrivez d\'abord un titre (5 caractères minimum).'); return; }
+      if (val.length < 5) { alert('Le titre doit faire au moins 5 caractères.'); return; }
       var panel = document.getElementById('ln-inline-suggest-panel');
       if (!panel) {
         panel = insertPanelAfterTitle(titleRow);
       }
-      fetchSuggestions(ctInfo, val, panel);
+      if (editMode) {
+        var existingSubtitle = getFieldValue('id_subtitle');
+        var existingExcerpt = getFieldValue(ctInfo.excerptField);
+        fetchSuggestions(ctInfo, val, panel, true, existingSubtitle, existingExcerpt);
+      } else {
+        fetchSuggestions(ctInfo, val, panel, false);
+      }
     };
     var titleParent = titleEl.parentNode;
     if (titleParent) {
