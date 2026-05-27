@@ -239,6 +239,8 @@ class SkillAdmin(admin.ModelAdmin):
     list_editable = ['order', 'level']
     list_filter = ['category']
     search_fields = ['name']
+    readonly_fields = ['icon_preview_large', 'icon_search_box']
+    fields = ['name', 'icon', 'icon_search_box', 'icon_preview_large', 'category', 'level', 'order']
 
     def icon_preview(self, obj):
         if obj.icon:
@@ -250,6 +252,24 @@ class SkillAdmin(admin.ModelAdmin):
             return format_html('<span style="font-size:1.3rem;">{}</span>', obj.icon)
         return '-'
     icon_preview.short_description = 'Icône'
+
+    def icon_preview_large(self, obj):
+        if obj.icon:
+            if obj.icon.startswith('bi-'):
+                return format_html(
+                    '<i class="bi {}" style="font-size:2.5rem;color:#4F46E5;"></i>',
+                    obj.icon
+                )
+            return format_html('<span style="font-size:2.5rem;">{}</span>', obj.icon)
+        return format_html('<span style="color:#9ca3af;">Aucune icône définie</span>')
+    icon_preview_large.short_description = 'Aperçu icône actuelle'
+
+    def icon_search_box(self, obj):
+        return mark_safe(_ICON_SEARCH_JS)
+    icon_search_box.short_description = 'Recherche d\'icône'
+
+    class Media:
+        css = {'all': ['https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css']}
 
 
 @admin.register(Experience)
