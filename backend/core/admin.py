@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.conf import settings as django_settings
 from django.db.models import Sum, TextField
 from django.utils import timezone
 from datetime import timedelta
@@ -162,9 +164,8 @@ class TechnologyAdmin(admin.ModelAdmin):
     color_swatch.short_description = 'Couleur'
 
     def icon_search_box(self, obj):
-        return format_html('{}', _ICON_SEARCH_JS)
+        return mark_safe(_ICON_SEARCH_JS)
     icon_search_box.short_description = 'Recherche d\'icône'
-    icon_search_box.allow_tags = True
 
     class Media:
         css = {'all': ['https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css']}
@@ -218,7 +219,8 @@ class PageViewAdmin(admin.ModelAdmin):
                 'portfolio': f'/portfolio/{obj.object_slug}',
             }
             url = url_map.get(obj.content_type, '#')
-            return format_html('<a href="http://localhost:5000{}" target="_blank">Voir →</a>', url)
+            site_url = getattr(django_settings, 'FRONTEND_URL', 'https://landryit.pythonanywhere.com').rstrip('/')
+            return format_html('<a href="{}{}" target="_blank">Voir →</a>', site_url, url)
         return '-'
     view_link.short_description = 'Lien'
 

@@ -104,11 +104,11 @@ def _send_emails(message_obj):
         conn = _build_smtp_connection(s)
 
         site_name = s.site_name or 'Landry Net'
-        frontend_url = settings.FRONTEND_URL or 'http://localhost:5000'
+        frontend_url = (settings.FRONTEND_URL or 'https://landryit.pythonanywhere.com').rstrip('/')
         from_email = f"{site_name} <{s.email_host_user}>"
-        ticket = f"MSG-{message_obj.pk:04d}"
         import datetime
         sent_at = datetime.datetime.now().strftime('%d/%m/%Y à %H:%M')
+        logo_html = f'<img src="{frontend_url}{s.logo.url}" alt="{site_name}" style="height:60px;width:60px;border-radius:16px;object-fit:cover;margin-bottom:14px;">' if s.logo else f'<div class="logo-circle">{site_name[:2].upper()}</div>'
 
         # ── 1. Admin notification ──────────────────────────────────
         admin_recipient = s.contact_email or s.email_host_user
@@ -117,7 +117,7 @@ def _send_emails(message_obj):
 
             admin_body = f"""
       <div class="header">
-        <div class="logo-circle">LN</div>
+        {logo_html}
         <div class="site-name">{site_name}</div>
         <div class="header-badge">📬 Nouveau message de contact</div>
       </div>
@@ -126,11 +126,9 @@ def _send_emails(message_obj):
         <p class="section-body">Un visiteur vous a envoyé un message via le formulaire de contact.</p>
 
         <div class="info-card">
-          <div class="row"><span class="label">🔖 Référence</span><span class="value">{ticket}</span></div>
           <div class="row"><span class="label">👤 Expéditeur</span><span class="value">{message_obj.name}</span></div>
           <div class="row"><span class="label">📧 Email</span><span class="value">{message_obj.email}</span></div>
           <div class="row"><span class="label">📅 Date</span><span class="value">{sent_at}</span></div>
-          <div class="row"><span class="label">🌐 IP</span><span class="value">{message_obj.ip_address or 'Inconnue'}</span></div>
         </div>
 
         <div class="field-row">
@@ -149,14 +147,14 @@ def _send_emails(message_obj):
       </div>"""
 
             admin_footer = f"""<p>Message reçu via le formulaire de contact de <strong style="color:#c7d2fe;">{site_name}</strong></p>
-      <p><a href="{frontend_url}/admin/">{frontend_url}/admin/</a></p>"""
+      <p><a href="{frontend_url}">{frontend_url}</a></p>"""
 
             admin_html = _wrap(admin_body, admin_footer)
-            admin_plain = f"Nouveau message de contact [{ticket}]\n\nDe: {message_obj.name} ({message_obj.email})\nSujet: {message_obj.subject}\nDate: {sent_at}\n\n{message_obj.message}\n\nRépondre: {reply_link}"
+            admin_plain = f"Nouveau message de contact\n\nDe: {message_obj.name} ({message_obj.email})\nSujet: {message_obj.subject}\nDate: {sent_at}\n\n{message_obj.message}\n\nRépondre: {reply_link}"
 
             try:
                 msg = EmailMultiAlternatives(
-                    f"[{site_name}] {ticket} — {message_obj.subject}",
+                    f"📬 Nouveau message : {message_obj.subject}",
                     admin_plain, from_email, [admin_recipient],
                     reply_to=[message_obj.email],
                     connection=conn,
@@ -170,7 +168,7 @@ def _send_emails(message_obj):
         # ── 2. Confirmation to sender ──────────────────────────────
         confirm_body = f"""
       <div class="header">
-        <div class="logo-circle">LN</div>
+        {logo_html}
         <div class="site-name">{site_name}</div>
         <div class="header-badge">✅ Message bien reçu</div>
       </div>
@@ -186,7 +184,6 @@ def _send_emails(message_obj):
         </div>
 
         <div class="info-card">
-          <div class="row"><span class="label">🔖 Référence</span><span class="value">{ticket}</span></div>
           <div class="row"><span class="label">📅 Reçu le</span><span class="value">{sent_at}</span></div>
           <div class="row"><span class="label">⏱ Délai de réponse</span><span class="value">24 – 48 heures</span></div>
         </div>
@@ -213,12 +210,12 @@ def _send_emails(message_obj):
       <p>Cet email est automatique, merci de ne pas y répondre directement.</p>"""
 
         confirm_html = _wrap(confirm_body, confirm_footer)
-        confirm_plain = f"Merci {message_obj.name} !\n\nVotre message [{ticket}] a bien été reçu.\nRéponse attendue : 24–48h\n\nVotre message :\n{message_obj.message}\n\nVisitez le site : {frontend_url}"
+        confirm_plain = f"Merci {message_obj.name} !\n\nVotre message a bien été reçu.\nRéponse attendue : 24–48h\n\nVotre message :\n{message_obj.message}\n\nVisitez le site : {frontend_url}"
 
         try:
             conn2 = _build_smtp_connection(s)
             msg = EmailMultiAlternatives(
-                f"✅ Message reçu [{ticket}] — {site_name}",
+                f"✅ Message bien reçu — {site_name}",
                 confirm_plain, from_email, [message_obj.email],
                 connection=conn2,
             )

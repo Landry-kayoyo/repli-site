@@ -174,7 +174,8 @@ def send_newsletter_notification(title, excerpt, url, content_type_label, author
     from_email = f"{s.newsletter_from_name or s.site_name} <{s.email_host_user}>"
     sent_count = 0
     author_initial = (author_name[0] if author_name else 'L').upper()
-    frontend_url = settings.FRONTEND_URL or 'http://localhost:5000'
+    frontend_url = (settings.FRONTEND_URL or 'https://landryit.pythonanywhere.com').rstrip('/')
+    logo_html = f'<img src="{frontend_url}{s.logo.url}" alt="{s.site_name}" style="height:60px;width:60px;border-radius:16px;object-fit:cover;margin-bottom:14px;">' if s.logo else f'<div class="logo-circle">{(s.site_name[:2] if s.site_name else "LN").upper()}</div>'
 
     for sub in subscribers:
         unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
@@ -183,7 +184,7 @@ def send_newsletter_notification(title, excerpt, url, content_type_label, author
 
         body_html = f"""
       <div class="header">
-        <div class="logo-circle">LN</div>
+        {logo_html}
         <div class="site-name">{s.site_name}</div>
         <div class="site-tagline">{s.tagline}</div>
         <div class="header-badge">{type_icon} Nouvelle publication</div>
@@ -243,7 +244,8 @@ def send_welcome_email(subscriber_email, subscriber_name=''):
 
     greeting_name = subscriber_name.split()[0] if subscriber_name else 'vous'
     from .models import Subscriber
-    frontend_url = settings.FRONTEND_URL or 'http://localhost:5000'
+    frontend_url = (settings.FRONTEND_URL or 'https://landryit.pythonanywhere.com').rstrip('/')
+    logo_html = f'<img src="{frontend_url}{s.logo.url}" alt="{s.site_name}" style="height:60px;width:60px;border-radius:16px;object-fit:cover;margin-bottom:14px;">' if s.logo else f'<div class="logo-circle">{(s.site_name[:2] if s.site_name else "LN").upper()}</div>'
     try:
         sub = Subscriber.objects.get(email=subscriber_email)
         unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
@@ -255,7 +257,7 @@ def send_welcome_email(subscriber_email, subscriber_name=''):
 
     body_html = f"""
       <div class="header">
-        <div class="logo-circle">LN</div>
+        {logo_html}
         <div class="site-name">{s.site_name}</div>
         <div class="site-tagline">{s.tagline}</div>
         <div class="header-badge">🎉 Abonnement confirmé</div>
@@ -335,7 +337,8 @@ def send_campaign(campaign_id):
     subscribers = Subscriber.objects.filter(status='active')
     from_email = f"{s.newsletter_from_name or s.site_name} <{s.email_host_user}>"
     sent_count = 0
-    frontend_url = settings.FRONTEND_URL or 'http://localhost:5000'
+    frontend_url = (settings.FRONTEND_URL or 'https://landryit.pythonanywhere.com').rstrip('/')
+    logo_html = f'<img src="{frontend_url}{s.logo.url}" alt="{s.site_name}" style="height:60px;width:60px;border-radius:16px;object-fit:cover;margin-bottom:14px;">' if s.logo else f'<div class="logo-circle">{(s.site_name[:2] if s.site_name else "LN").upper()}</div>'
 
     for sub in subscribers:
         unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
@@ -343,7 +346,7 @@ def send_campaign(campaign_id):
 
         body_html = f"""
       <div class="header">
-        <div class="logo-circle">LN</div>
+        {logo_html}
         <div class="site-name">{s.site_name}</div>
         <div class="site-tagline">{s.tagline}</div>
         <div class="header-badge">📣 Newsletter</div>

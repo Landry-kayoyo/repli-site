@@ -23,9 +23,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.app',
     'https://*.spock.replit.dev',
     'https://*.kirk.replit.dev',
-    'http://localhost:5000',
     'http://127.0.0.1:5000',
-    'https://LandryIT.pythonanywhere.com',  # AJOUTÉ
+    'https://landryit.pythonanywhere.com',
 ]
 if REPLIT_DEV_DOMAIN:
     CSRF_TRUSTED_ORIGINS.append(f'https://{REPLIT_DEV_DOMAIN}')
@@ -159,7 +158,7 @@ CKEDITOR_CONFIGS = {
 
 TAGGIT_CASE_INSENSITIVE = True
 
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5000')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://landryit.pythonanywhere.com')
 
 # URL publique du site (pour le ping Google Sitemap)
 SITE_URL = os.environ.get('SITE_URL', FRONTEND_URL)
