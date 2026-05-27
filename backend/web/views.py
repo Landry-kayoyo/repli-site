@@ -213,6 +213,11 @@ def about(request):
         if cat not in skills_by_category:
             skills_by_category[cat] = []
         skills_by_category[cat].append(skill)
+    og_image = None
+    if settings.logo:
+        og_image = settings.logo.url
+    elif settings.author_photo:
+        og_image = settings.author_photo.url
     return render(request, 'about.html', {
         'settings': settings,
         'skills_by_category': skills_by_category,
@@ -220,6 +225,7 @@ def about(request):
         'educations': educations,
         'page_title': settings.about_title or 'À propos',
         'page_description': settings.author_bio or 'En savoir plus sur moi.',
+        'og_image': og_image,
     })
 
 

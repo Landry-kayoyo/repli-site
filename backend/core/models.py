@@ -91,7 +91,20 @@ class SiteSettings(models.Model):
     def apply_email_settings(self):
         if self.email_host_user:
             from django.conf import settings as dj_settings
-            dj_settings.EMAIL_HOST = self.email_host
+            raw = (self.email_host or '').strip()
+            if not raw or '@' in raw:
+                domain = raw.split('@')[-1].lower() if '@' in raw else self.email_host_user.split('@')[-1].lower()
+                smtp_map = {
+                    'gmail.com': 'smtp.gmail.com', 'googlemail.com': 'smtp.gmail.com',
+                    'yahoo.com': 'smtp.mail.yahoo.com', 'yahoo.fr': 'smtp.mail.yahoo.fr',
+                    'outlook.com': 'smtp-mail.outlook.com', 'hotmail.com': 'smtp-mail.outlook.com',
+                    'hotmail.fr': 'smtp-mail.outlook.com', 'live.com': 'smtp-mail.outlook.com',
+                    'live.fr': 'smtp-mail.outlook.com', 'icloud.com': 'smtp.mail.me.com',
+                }
+                resolved_host = smtp_map.get(domain, f'smtp.{domain}' if domain else 'smtp.gmail.com')
+            else:
+                resolved_host = raw
+            dj_settings.EMAIL_HOST = resolved_host
             dj_settings.EMAIL_PORT = self.email_port
             dj_settings.EMAIL_USE_TLS = self.email_use_tls
             dj_settings.EMAIL_HOST_USER = self.email_host_user

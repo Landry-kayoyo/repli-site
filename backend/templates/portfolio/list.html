@@ -33,7 +33,7 @@
     <a href="/portfolio/{{ item.slug }}/" class="card portfolio-card">
       <div class="card-cover">
         {% if item.cover_image %}
-          <img src="{{ item.cover_image.url }}" alt="{{ item.title }}" loading="lazy">
+          <img src="{{ item.cover_image.url }}" alt="{{ item.title }}" >
         {% else %}
           <div class="card-cover-icon"><i class="bi bi-palette-fill"></i></div>
         {% endif %}

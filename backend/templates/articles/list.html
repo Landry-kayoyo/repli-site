@@ -36,7 +36,7 @@
     <a href="/articles/{{ article.slug }}/" class="card-h">
       <div class="card-h-cover">
         {% if article.cover_image %}
-          <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" loading="lazy">
+          <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" >
         {% else %}
           <div class="card-h-cover-icon"><i class="bi bi-journal-text"></i></div>
         {% endif %}

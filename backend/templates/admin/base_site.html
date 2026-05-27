@@ -932,12 +932,15 @@ window.publishAIContent = function() {
 window.toggleAI = function() {
   aiOpen = !aiOpen;
   var panel = document.getElementById('ln-ai-panel');
+  var btn = document.getElementById('ln-ai-btn');
   if (aiOpen) {
     panel.classList.add('open');
+    if (btn) btn.style.display = 'none';
     var input = document.getElementById('ai-input');
     if (input) setTimeout(function() { input.focus(); }, 100);
   } else {
     panel.classList.remove('open');
+    if (btn) btn.style.display = '';
   }
 };
 

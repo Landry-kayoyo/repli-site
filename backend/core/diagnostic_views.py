@@ -123,8 +123,11 @@ def test_smtp_connection(request):
     from core.models import SiteSettings
     s, _ = SiteSettings.objects.get_or_create(pk=1)
 
+    from newsletter.utils import _resolve_smtp_host
     steps = []
-    host = s.email_host or 'smtp.gmail.com'
+    raw_host = s.email_host or ''
+    host = _resolve_smtp_host(raw_host, s.email_host_user)
+    host_was_fixed = raw_host and raw_host != host
     port = s.email_port or 587
     use_tls = s.email_use_tls
     user = s.email_host_user
@@ -142,8 +145,10 @@ def test_smtp_connection(request):
              'msg': '❌ Mot de passe non configuré — renseignez votre Mot de Passe d\'Application Gmail'}
         ]})
 
-    steps.append({'step': 'Configuration', 'status': 'ok',
-                  'msg': f'✅ Email: {user} | Hôte: {host}:{port} | TLS: {use_tls}'})
+    config_msg = f'✅ Email: {user} | Hôte: {host}:{port} | TLS: {use_tls}'
+    if host_was_fixed:
+        config_msg += f' ⚠️ Hôte corrigé automatiquement (était: {raw_host} → {host})'
+    steps.append({'step': 'Configuration', 'status': 'ok', 'msg': config_msg})
 
     # Step 1: TCP connection
     smtp = None

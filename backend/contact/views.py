@@ -64,11 +64,27 @@ def _wrap(content, footer_html=''):
 </html>"""
 
 
+def _resolve_smtp_host(host, email_user=''):
+    raw = (host or '').strip()
+    if not raw or '@' in raw:
+        domain = raw.split('@')[-1].lower() if '@' in raw else (email_user or '').split('@')[-1].lower()
+        smtp_map = {
+            'gmail.com': 'smtp.gmail.com', 'googlemail.com': 'smtp.gmail.com',
+            'yahoo.com': 'smtp.mail.yahoo.com', 'yahoo.fr': 'smtp.mail.yahoo.fr',
+            'outlook.com': 'smtp-mail.outlook.com', 'hotmail.com': 'smtp-mail.outlook.com',
+            'hotmail.fr': 'smtp-mail.outlook.com', 'live.com': 'smtp-mail.outlook.com',
+            'live.fr': 'smtp-mail.outlook.com', 'icloud.com': 'smtp.mail.me.com',
+        }
+        return smtp_map.get(domain, f'smtp.{domain}' if domain else 'smtp.gmail.com')
+    return raw
+
+
 def _build_smtp_connection(s):
     """Build an explicit SMTP connection from SiteSettings (thread-safe)."""
+    host = _resolve_smtp_host(s.email_host, s.email_host_user)
     return get_connection(
         backend='django.core.mail.backends.smtp.EmailBackend',
-        host=s.email_host or 'smtp.gmail.com',
+        host=host,
         port=int(s.email_port or 587),
         username=s.email_host_user,
         password=s.email_host_password,

@@ -35,7 +35,7 @@
     <a href="/projets/{{ project.slug }}/" class="card-h">
       <div class="card-h-cover">
         {% if project.cover_image %}
-          <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" loading="lazy">
+          <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" >
         {% else %}
           <div class="card-h-cover-icon"><i class="bi bi-code-square"></i></div>
         {% endif %}

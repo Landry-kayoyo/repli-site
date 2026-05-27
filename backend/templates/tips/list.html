@@ -41,7 +41,7 @@
     <a href="/astuces/{{ tip.slug }}/" class="card-h">
       <div class="card-h-cover">
         {% if tip.cover_image %}
-          <img src="{{ tip.cover_image.url }}" alt="{{ tip.title }}" loading="lazy">
+          <img src="{{ tip.cover_image.url }}" alt="{{ tip.title }}" >
         {% else %}
           <div class="card-h-cover-icon"><i class="bi bi-lightbulb-fill"></i></div>
         {% endif %}
