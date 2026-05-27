@@ -21,19 +21,24 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
 if git diff --cached --quiet; then
   echo "✅ Rien à committer — tout est déjà à jour."
 else
-  git commit -m "✨ Refonte Landry Net — Hero centré, Tech Stack DB, Admin mobile, Fix emails — $TIMESTAMP
+  git commit -m "✨ Suggestions IA en temps réel — articles, projets, astuces — $TIMESTAMP
 
-Changements principaux :
-- Hero homepage : centré sans photo (clean mobile), pills de stats
-- Stats section (grille 3/6 cartes) : supprimée de la homepage
-- Nouveau modèle Technology (tech stack piloté depuis admin Django)
-  - Migration : core/0005_add_technology.py
-  - Widget recherche Bootstrap Icons en live dans l'admin
-- Fix emails contact + newsletter : get_connection() thread-safe
-- Admin Django : navbar mobile améliorée, meilleurs touch targets,
-  header compact, inputs 44px, tables scrollables, submit-row vertical
-- Footer mobile : Navigation + Autres côte à côte
-- README (replit.md) : mise à jour avec commandes de migration prod"
+Nouveau système de suggestions IA inline dans les formulaires admin :
+
+- Nouveau endpoint /admin-ai/inline-suggest/ (core/ai_views.py)
+  Retourne JSON structuré : subtitle, excerpt/description, tags, meta_title, meta_description
+  Adapté par type : article (excerpt), projet (description), astuce (excerpt + difficulty)
+
+- Panel visuel inline dans base_site.html
+  Apparaît automatiquement 1,5s après frappe dans le champ titre
+  Bouton Appliquer par champ + bouton Tout appliquer en un clic
+  Bouton Régénérer pour relancer les suggestions
+  Détection automatique du type selon l'URL admin
+  Support mode sombre complet
+
+- URL enregistrée dans config/urls.py
+- Fonctionne sur : /admin/articles/article/, /admin/projects/project/, /admin/tips/tip/
+- Portfolio exclu intentionnellement"
 fi
 
 git push origin main
