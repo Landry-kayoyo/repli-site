@@ -116,6 +116,7 @@ class Skill(models.Model):
     name = models.CharField(max_length=100)
     level = models.IntegerField(default=80)
     icon = models.CharField(max_length=100, blank=True)
+    color = models.CharField(max_length=20, blank=True, default='#4F46E5')
     category = models.CharField(max_length=50, blank=True)
     order = models.IntegerField(default=0)
 

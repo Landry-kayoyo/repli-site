@@ -239,30 +239,40 @@ class SkillAdmin(admin.ModelAdmin):
     list_editable = ['order', 'level']
     list_filter = ['category']
     search_fields = ['name']
-    readonly_fields = ['icon_preview_large', 'icon_search_box']
-    fields = ['name', 'icon', 'icon_search_box', 'icon_preview_large', 'category', 'level', 'order']
+    readonly_fields = ['icon_preview_large', 'icon_search_box', 'color_swatch']
+    fields = ['name', 'icon', 'icon_search_box', 'icon_preview_large', 'color', 'color_swatch', 'category', 'level', 'order']
 
     def icon_preview(self, obj):
+        color = obj.color or '#4F46E5'
         if obj.icon:
             if obj.icon.startswith('bi-'):
                 return format_html(
-                    '<i class="bi {}" style="font-size:1.3rem;color:#4F46E5;"></i> <small style="color:#6B7280;">{}</small>',
-                    obj.icon, obj.icon
+                    '<i class="bi {}" style="font-size:1.3rem;color:{};"></i> <small style="color:#6B7280;">{}</small>',
+                    obj.icon, color, obj.icon
                 )
             return format_html('<span style="font-size:1.3rem;">{}</span>', obj.icon)
         return '-'
     icon_preview.short_description = 'Icône'
 
     def icon_preview_large(self, obj):
+        color = obj.color or '#4F46E5'
         if obj.icon:
             if obj.icon.startswith('bi-'):
                 return format_html(
-                    '<i class="bi {}" style="font-size:2.5rem;color:#4F46E5;"></i>',
-                    obj.icon
+                    '<i class="bi {}" style="font-size:2.5rem;color:{};"></i>',
+                    obj.icon, color
                 )
             return format_html('<span style="font-size:2.5rem;">{}</span>', obj.icon)
         return format_html('<span style="color:#9ca3af;">Aucune icône définie</span>')
     icon_preview_large.short_description = 'Aperçu icône actuelle'
+
+    def color_swatch(self, obj):
+        color = obj.color or '#4F46E5'
+        return format_html(
+            '<span style="display:inline-block;width:20px;height:20px;border-radius:5px;background:{};border:1px solid #e5e7eb;vertical-align:middle;"></span> {}',
+            color, color
+        )
+    color_swatch.short_description = 'Aperçu couleur'
 
     def icon_search_box(self, obj):
         return mark_safe(_ICON_SEARCH_JS)
