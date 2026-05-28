@@ -4,8 +4,44 @@ from django.utils.safestring import mark_safe
 from django.conf import settings as django_settings
 from django.db.models import Sum, TextField
 from django.utils import timezone
+from django.forms import TextInput
 from datetime import timedelta
 from .models import SiteSettings, Skill, Experience, Education, PageView, Technology, AIConfig
+
+
+class ColorPickerWidget(TextInput):
+    """Widget HTML color picker + saisie hex manuelle."""
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('attrs', {})
+        kwargs['attrs'].update({
+            'class': 'color-picker-input',
+        })
+        super().__init__(*args, **kwargs)
+
+    class Media:
+        css = {'all': []}
+
+    def render(self, name, value, attrs=None, renderer=None):
+        attrs = attrs or {}
+        field_id = attrs.get('id', f'id_{name}')
+        color_val = value or '#4F46E5'
+        html = f"""
+<div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+  <input type="color" id="{field_id}_picker" value="{color_val}"
+         style="width:52px;height:40px;padding:2px 3px;cursor:pointer;border-radius:8px;border:1.5px solid #c7d2fe;background:#fff;"
+         oninput="document.getElementById('{field_id}').value=this.value;document.getElementById('{field_id}_preview').style.background=this.value;">
+  <input type="text" name="{name}" id="{field_id}" value="{color_val}"
+         maxlength="20"
+         style="width:110px;padding:8px 12px;border-radius:8px;border:1.5px solid #c7d2fe;font-size:14px;font-family:monospace;outline:none;"
+         oninput="if(/^#[0-9A-Fa-f]{{3,6}}$/.test(this.value)){{document.getElementById('{field_id}_picker').value=this.value;document.getElementById('{field_id}_preview').style.background=this.value;}}">
+  <span id="{field_id}_preview"
+        style="display:inline-block;width:32px;height:32px;border-radius:8px;border:1.5px solid #e5e7eb;background:{color_val};flex-shrink:0;"></span>
+  <span style="font-size:12px;color:#6b7280;">Format hex : <code>#4F46E5</code></span>
+</div>
+"""
+        return mark_safe(html)
+
+
 try:
     from ckeditor.widgets import CKEditorWidget
     CKEDITOR_AVAILABLE = True
@@ -193,6 +229,11 @@ class TechnologyAdmin(admin.ModelAdmin):
     readonly_fields = ['icon_preview_large', 'icon_search_box']
     fields = ['name', 'icon', 'icon_search_box', 'icon_preview_large', 'color', 'url', 'order']
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'color':
+            kwargs['widget'] = ColorPickerWidget
+        return super().formfield_for_dbfield(db_field, **kwargs)
+
     def icon_preview(self, obj):
         if obj.icon:
             if obj.icon.startswith('bi-'):
@@ -240,6 +281,11 @@ class SkillAdmin(admin.ModelAdmin):
     search_fields = ['name']
     readonly_fields = ['icon_preview_large', 'icon_search_box', 'color_swatch']
     fields = ['name', 'icon', 'icon_search_box', 'icon_preview_large', 'color', 'color_swatch', 'category', 'level', 'order']
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'color':
+            kwargs['widget'] = ColorPickerWidget
+        return super().formfield_for_dbfield(db_field, **kwargs)
 
     def icon_preview(self, obj):
         color = obj.color or '#4F46E5'
