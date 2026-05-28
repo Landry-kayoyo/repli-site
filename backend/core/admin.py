@@ -107,7 +107,6 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
 
 _ICON_SEARCH_JS = """
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
 .bi-wrap{margin-top:8px;padding:16px;background:#f8f7ff;border-radius:12px;border:1px solid #e0e7ff;}
 .bi-inp{width:100%;padding:9px 14px;border-radius:8px;border:1.5px solid #c7d2fe;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;}
@@ -270,7 +269,7 @@ class TechnologyAdmin(admin.ModelAdmin):
     icon_search_box.short_description = 'Recherche d\'icône'
 
     class Media:
-        css = {'all': ['https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css']}
+        css = {'all': ['css/bootstrap-icons/bootstrap-icons.min.css']}
 
 
 @admin.register(Skill)
@@ -326,7 +325,7 @@ class SkillAdmin(admin.ModelAdmin):
     icon_search_box.short_description = 'Recherche d\'icône'
 
     class Media:
-        css = {'all': ['https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css']}
+        css = {'all': ['css/bootstrap-icons/bootstrap-icons.min.css']}
 
 
 @admin.register(Experience)
