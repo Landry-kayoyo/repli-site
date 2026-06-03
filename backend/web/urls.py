@@ -13,4 +13,5 @@ urlpatterns = [
 
     path('a-propos/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
+    path('newsletter/desabonnement/', views.newsletter_unsubscribe, name='newsletter_unsubscribe'),
 ]

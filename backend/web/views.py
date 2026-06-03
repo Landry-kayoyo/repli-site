@@ -248,6 +248,49 @@ def contact(request):
     })
 
 
+def newsletter_unsubscribe(request):
+    settings = get_settings()
+    token = request.GET.get('token', '')
+    email = request.GET.get('email', '')
+    success = None
+    message = ''
+
+    if request.method == 'POST' or token or email:
+        try:
+            from newsletter.models import Subscriber
+            if token:
+                sub = Subscriber.objects.get(token=token)
+            elif email:
+                sub = Subscriber.objects.get(email=email)
+            else:
+                sub = None
+
+            if sub:
+                if sub.status == 'unsubscribed':
+                    success = True
+                    message = 'Vous êtes déjà désabonné(e). Vous ne recevez plus nos emails.'
+                else:
+                    sub.status = 'unsubscribed'
+                    sub.save()
+                    success = True
+                    message = 'Désabonnement réussi. Vous ne recevrez plus nos emails.'
+            else:
+                success = False
+                message = 'Aucun abonnement trouvé.'
+        except Exception:
+            success = False
+            message = 'Lien invalide ou abonnement introuvable.'
+
+    return render(request, 'newsletter/unsubscribe.html', {
+        'settings': settings,
+        'page_title': 'Désabonnement newsletter',
+        'success': success,
+        'message': message,
+        'token': token,
+        'email': email,
+    })
+
+
 def handler404(request, exception):
     settings = get_settings()
     return render(request, '404.html', {'settings': settings}, status=404)

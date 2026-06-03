@@ -310,14 +310,14 @@ function appendNewComment(data, parentId) {
   const dateStr = 'À l\'instant';
 
   const div = document.createElement('div');
-  div.className = 'comment-item comment-item-root comment-pending-item';
+  div.className = 'comment-item comment-item-root';
   div.innerHTML = `
     <div class="comment-avatar">${escapeHtml(initial)}</div>
     <div class="comment-body">
       <div class="comment-header">
         <span class="comment-author">${escapeHtml(data.author_name)}</span>
         <span class="comment-date">${dateStr}</span>
-        <span class="comment-pending-badge"><i class="bi bi-hourglass-split"></i> En attente de modération</span>
+        <span style="font-size:0.72rem;background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:20px;font-weight:600;"><i class="bi bi-check-circle-fill"></i> Publié</span>
       </div>
       <p class="comment-text">${escapeHtml(data.content)}</p>
     </div>`;

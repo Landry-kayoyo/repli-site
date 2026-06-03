@@ -178,7 +178,7 @@ def send_newsletter_notification(title, excerpt, url, content_type_label, author
     logo_html = f'<img src="{frontend_url}{s.logo.url}" alt="{s.site_name}" style="height:60px;width:60px;border-radius:16px;object-fit:cover;margin-bottom:14px;">' if s.logo else f'<div class="logo-circle">{(s.site_name[:2] if s.site_name else "LN").upper()}</div>'
 
     for sub in subscribers:
-        unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
+        unsub_url = f"{frontend_url}/newsletter/desabonnement/?token={sub.token}"
         subject = f"✨ {content_type_label} : {title} — {s.site_name}"
         greeting_name = sub.name.split()[0] if sub.name else 'vous'
 
