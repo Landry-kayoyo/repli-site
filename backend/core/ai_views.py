@@ -437,6 +437,20 @@ def ai_suggest(request):
             f"Puis fournis un prompt optimisé pour Midjourney/DALL-E en anglais (1 ligne, après «Prompt IA :»). "
             f"Sans Markdown."
         ),
+        'format_content': (
+            f"Tu es un expert en mise en forme de contenu web. Voici un texte à reformater professionnellement en HTML.\n\n"
+            f"Règles STRICTES :\n"
+            f"- Garde ABSOLUMENT tout le contenu original (ne supprime rien, ne résume pas)\n"
+            f"- Structure avec des balises HTML : h2 pour sections, h3 pour sous-sections, p pour paragraphes\n"
+            f"- Transforme les listes en <ul><li> propres\n"
+            f"- Mets en <strong> les termes importants\n"
+            f"- Entoure les blocs de code avec <pre><code>\n"
+            f"- Ajoute des <blockquote> pour les citations\n"
+            f"- Assure-toi que chaque paragraphe est dans une balise <p>\n"
+            f"- Réponds UNIQUEMENT avec le HTML formaté, sans aucune explication ni commentaire\n\n"
+            f"Titre : {data.get('title', '')}\n\n"
+            f"Contenu à formater :\n{data.get('content', '')}"
+        ),
     }
 
     if action not in prompts:

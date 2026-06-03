@@ -87,7 +87,7 @@ def article_detail(request, slug):
     Article.objects.filter(pk=article.pk).update(views_count=article.views_count + 1)
     PageView.record('article', article.pk, title=article.title, slug=article.slug)
     ct = ContentType.objects.get_for_model(Article)
-    comments = Comment.objects.filter(content_type=ct, object_id=article.id, is_approved=True, parent=None).prefetch_related('replies')
+    comments = Comment.objects.filter(content_type=ct, object_id=article.id, is_approved=True, parent=None).prefetch_related('replies').order_by('-created_at')
     related = Article.objects.filter(status='published', category=article.category).exclude(pk=article.pk)[:3]
     tags = list(article.tags.names())
     return render(request, 'articles/detail.html', {
@@ -135,13 +135,18 @@ def project_detail(request, slug):
     Project.objects.filter(pk=project.pk).update(views_count=project.views_count + 1)
     PageView.record('project', project.pk, title=project.title, slug=project.slug)
     ct = ContentType.objects.get_for_model(Project)
-    comments = Comment.objects.filter(content_type=ct, object_id=project.id, is_approved=True, parent=None).prefetch_related('replies')
+    comments = Comment.objects.filter(content_type=ct, object_id=project.id, is_approved=True, parent=None).prefetch_related('replies').order_by('-created_at')
     tags = list(project.tags.names())
     technologies = [t.strip() for t in project.technologies.split(',') if t.strip()] if project.technologies else []
+    related = Project.objects.filter(status='published').exclude(pk=project.pk)
+    if project.category:
+        related = related.filter(category=project.category)
+    related = related[:3]
     return render(request, 'projects/detail.html', {
         'settings': settings,
         'project': project,
         'comments': comments,
+        'related': related,
         'tags': tags,
         'technologies': technologies,
         'content_type': 'projects.project',
@@ -187,12 +192,17 @@ def tip_detail(request, slug):
     Tip.objects.filter(pk=tip.pk).update(views_count=tip.views_count + 1)
     PageView.record('tip', tip.pk, title=tip.title, slug=tip.slug)
     ct = ContentType.objects.get_for_model(Tip)
-    comments = Comment.objects.filter(content_type=ct, object_id=tip.id, is_approved=True, parent=None).prefetch_related('replies')
+    comments = Comment.objects.filter(content_type=ct, object_id=tip.id, is_approved=True, parent=None).prefetch_related('replies').order_by('-created_at')
     tags = list(tip.tags.names())
+    related = Tip.objects.filter(status='published').exclude(pk=tip.pk)
+    if tip.category:
+        related = related.filter(category=tip.category)
+    related = related[:3]
     return render(request, 'tips/detail.html', {
         'settings': settings,
         'tip': tip,
         'comments': comments,
+        'related': related,
         'tags': tags,
         'content_type': 'tips.tip',
         'object_id': tip.id,

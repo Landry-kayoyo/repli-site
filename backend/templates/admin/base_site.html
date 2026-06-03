@@ -2057,7 +2057,55 @@ loadHistory();
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // FONCTIONNALITÉ 6 — Détection de doublons
+  // FONCTIONNALITÉ 6 — Mise en forme IA du contenu
+  // ═══════════════════════════════════════════════════════════════════════════
+  function lnFormatContent(ctInfo) {
+    var content = getCKContent();
+    if (!content || content.replace(/<[^>]*>/g,'').trim().length < 50) {
+      alert('Il n\'y a pas assez de contenu à mettre en forme. Rédigez d\'abord le contenu.'); return;
+    }
+
+    var btn = document.querySelector('.ln-tb-btn-fmt');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Mise en forme…'; }
+
+    openModal('🎨 Mise en forme du contenu',
+      '<div class="ln-modal-loading"><div class="ln-spin"></div>' +
+      '<p style="margin-top:12px;font-size:13px">L\'IA restructure et formate votre contenu…<br>' +
+      '<small style="color:#94a3b8">Structuration des titres, paragraphes, listes…</small></p></div>'
+    );
+
+    apiFetch('/admin-ai/suggest/', {
+      action: 'format_content',
+      data: { title: getTitle(), content: content, content_type: ctInfo.type }
+    }, function(d) {
+      if (btn) { btn.disabled = false; btn.textContent = '🎨 Mise en forme'; }
+      var formatted = d.reply || '';
+      if (!formatted) { setModalBody('<div class="ln-modal-error">❌ Aucun contenu retourné.</div>'); return; }
+
+      setModalBody(
+        '<p style="font-size:13px;color:#475569;margin-bottom:14px">✅ Mise en forme prête — prévisualisation :</p>' +
+        '<div style="max-height:280px;overflow-y:auto;padding:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;line-height:1.7">' +
+          formatted.substring(0, 900) + (formatted.length > 900 ? '…' : '') +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">' +
+          '<button onclick="document.getElementById(\'ln-ai-modal-overlay\').classList.remove(\'open\')" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:7px;background:#fff;cursor:pointer;font-size:13px">Annuler</button>' +
+          '<button id="ln-apply-fmt-btn" style="padding:8px 18px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;font-size:13px">🎨 Appliquer la mise en forme</button>' +
+        '</div>'
+      );
+      var applyBtn = document.getElementById('ln-apply-fmt-btn');
+      applyBtn.onclick = function() {
+        setCKContent(formatted);
+        document.getElementById('ln-ai-modal-overlay').classList.remove('open');
+        if (btn) { btn.style.background = 'linear-gradient(135deg,#10b981,#059669)'; btn.textContent = '✅ Formaté !'; setTimeout(function(){ btn.style.background=''; btn.textContent='🎨 Mise en forme'; }, 2500); }
+      };
+    }, function(err) {
+      if (btn) { btn.disabled = false; btn.textContent = '🎨 Mise en forme'; }
+      setModalBody('<div class="ln-modal-error">❌ ' + err + '</div>');
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FONCTIONNALITÉ 7 — Détection de doublons
   // ═══════════════════════════════════════════════════════════════════════════
   var dupTimer = null;
   function lnCheckDuplicate(title) {
@@ -2108,6 +2156,7 @@ loadHistory();
       toolbar.innerHTML =
         '<span id="ln-ai-toolbar-label">✨ IA</span>' +
         '<button type="button" class="ln-tb-btn ln-tb-btn-gen"  onclick="lnDoGenerate()">✨ Générer le contenu</button>' +
+        '<button type="button" class="ln-tb-btn ln-tb-btn-fmt"  onclick="lnDoFormat()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:#7c3aed;">🎨 Mise en forme</button>' +
         '<button type="button" class="ln-tb-btn ln-tb-btn-opt"  onclick="lnDoOptimize()">📊 Analyser & SEO</button>' +
         '<button type="button" class="ln-tb-btn ln-tb-btn-links" onclick="lnDoLinks()">🔗 Liens internes</button>' +
         '<button type="button" class="ln-tb-btn ln-tb-btn-exc"  onclick="lnDoExcerpt()">📝 Résumé auto</button>' +
@@ -2140,6 +2189,7 @@ loadHistory();
 
     // Expose handlers via window (used by inline onclick)
     window.lnDoGenerate = function() { lnGenerateContent(ctInfo); };
+    window.lnDoFormat   = function() { lnFormatContent(ctInfo); };
     window.lnDoOptimize = function() { lnOptimizeContent(ctInfo); };
     window.lnDoLinks    = function() { lnInternalLinks(ctInfo); };
     window.lnDoExcerpt  = function() { lnAutoExcerpt(ctInfo); };

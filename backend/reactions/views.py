@@ -56,4 +56,8 @@ class ReactionView(APIView):
         if not created:
             reaction.delete()
             return Response({'action': 'removed', 'reaction_type': reaction_type})
+        # Exclusive reactions: remove all other types for this session
+        Reaction.objects.filter(
+            content_type=ct, object_id=object_id, session_key=session_key
+        ).exclude(reaction_type=reaction_type).delete()
         return Response({'action': 'added', 'reaction_type': reaction_type})

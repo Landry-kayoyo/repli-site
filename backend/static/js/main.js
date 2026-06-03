@@ -1,4 +1,4 @@
-/* Landry Net — Main JS v3 */
+/* Landry Net — Main JS v4 */
 
 const API_BASE = '/api';
 
@@ -131,7 +131,7 @@ function renderSearchResults(results, container) {
   }).join('');
 }
 
-/* ========= REACTIONS — persistance par session serveur ========= */
+/* ========= REACTIONS — exclusives, 1 seule réaction à la fois ========= */
 function initReactions() {
   const container = document.getElementById('reactionsContainer');
   if (!container) return;
@@ -158,14 +158,13 @@ function renderReactions(data, contentType, objectId, container) {
     { type: 'bookmark', icon: 'bi-bookmark-fill', label: 'Sauvegarder' }
   ];
 
-  // data is a dict: { "like": { count: 5, reacted: true }, ... }
   container.innerHTML = reactions.map(({ type, icon, label }) => {
     const info = (data && data[type]) ? data[type] : { count: 0, reacted: false };
     const count = info.count || 0;
     const reacted = info.reacted || false;
-    return `<button class="reaction-btn ${reacted ? 'active' : ''}" 
-      onclick="toggleReaction('${contentType}',${objectId},'${type}',this)" 
-      title="${label}" data-type="${type}">
+    return `<button class="reaction-btn ${reacted ? 'active' : ''}"
+      onclick="toggleReaction('${contentType}',${objectId},'${type}',this)"
+      title="${label}" data-type="${type}" aria-label="${label}">
       <i class="bi ${icon}"></i>
       <span class="reaction-count">${count > 0 ? count : ''}</span>
     </button>`;
@@ -173,19 +172,39 @@ function renderReactions(data, contentType, objectId, container) {
 }
 
 async function toggleReaction(contentType, objectId, reactionType, btn) {
+  const container = btn.closest('.reactions-row') || btn.parentElement;
   const wasActive = btn.classList.contains('active');
-  const countEl = btn.querySelector('.reaction-count');
-  let count = parseInt(countEl.textContent) || 0;
 
-  // Optimistic update
-  if (wasActive) {
-    btn.classList.remove('active');
-    count = Math.max(0, count - 1);
-  } else {
+  // Disable all buttons during request to prevent double-clicks
+  const allBtns = container.querySelectorAll('.reaction-btn');
+  allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+  // Optimistic update: exclusive — deactivate all others when activating one
+  if (!wasActive) {
+    allBtns.forEach(other => {
+      if (other !== btn && other.classList.contains('active')) {
+        other.classList.remove('active');
+        const otherCount = other.querySelector('.reaction-count');
+        if (otherCount) {
+          const c = parseInt(otherCount.textContent) || 0;
+          otherCount.textContent = c > 1 ? String(c - 1) : '';
+        }
+      }
+    });
     btn.classList.add('active');
-    count += 1;
+    const countEl = btn.querySelector('.reaction-count');
+    const c = parseInt(countEl.textContent) || 0;
+    countEl.textContent = String(c + 1);
+  } else {
+    btn.classList.remove('active');
+    const countEl = btn.querySelector('.reaction-count');
+    const c = parseInt(countEl.textContent) || 0;
+    countEl.textContent = c > 1 ? String(c - 1) : '';
   }
-  countEl.textContent = count > 0 ? count : '';
+
+  // Animate
+  btn.style.transform = 'scale(1.18)';
+  setTimeout(() => { btn.style.transform = ''; }, 180);
 
   try {
     const res = await fetch(`${API_BASE}/reactions/`, {
@@ -195,22 +214,50 @@ async function toggleReaction(contentType, objectId, reactionType, btn) {
       body: JSON.stringify({ content_type: contentType, object_id: objectId, reaction_type: reactionType })
     });
     if (!res.ok) {
-      // Revert on error
-      if (wasActive) { btn.classList.add('active'); countEl.textContent = (count + 1) > 0 ? (count + 1) : ''; }
-      else { btn.classList.remove('active'); countEl.textContent = Math.max(0, count - 1) > 0 ? Math.max(0, count - 1) : ''; }
+      // Revert on error: reload from server
+      loadReactions(contentType, objectId, container);
     }
   } catch (e) {
     console.error('Reaction error:', e);
-    // Revert
-    if (wasActive) { btn.classList.add('active'); } else { btn.classList.remove('active'); }
-    countEl.textContent = (wasActive ? count + 1 : Math.max(0, count - 1)) > 0 ? (wasActive ? count + 1 : Math.max(0, count - 1)) : '';
+    loadReactions(contentType, objectId, container);
+  } finally {
+    allBtns.forEach(b => b.style.pointerEvents = '');
   }
 }
 
 /* ========= COMMENTS ========= */
+const COMMENTS_INITIAL = 3;
+
 function initComments() {
   const form = document.getElementById('commentForm');
   if (form) form.addEventListener('submit', submitComment);
+  initCommentsShowMore();
+}
+
+function initCommentsShowMore() {
+  const list = document.getElementById('commentsList');
+  if (!list) return;
+  const items = list.querySelectorAll('.comment-item-root');
+  if (items.length <= COMMENTS_INITIAL) return;
+
+  // Hide older comments (after the 3 most recent which are first)
+  items.forEach((item, i) => {
+    if (i >= COMMENTS_INITIAL) {
+      item.style.display = 'none';
+      item.dataset.hidden = '1';
+    }
+  });
+
+  const hiddenCount = items.length - COMMENTS_INITIAL;
+  const moreBtn = document.createElement('button');
+  moreBtn.id = 'commentsMoreBtn';
+  moreBtn.className = 'btn-voir-plus';
+  moreBtn.innerHTML = `<i class="bi bi-chat-dots"></i> Voir plus (${hiddenCount} commentaire${hiddenCount > 1 ? 's' : ''})`;
+  moreBtn.addEventListener('click', () => {
+    items.forEach(item => { item.style.display = ''; delete item.dataset.hidden; });
+    moreBtn.remove();
+  });
+  list.parentNode.insertBefore(moreBtn, list.nextSibling);
 }
 
 async function submitComment(e) {
@@ -220,14 +267,20 @@ async function submitComment(e) {
   const data = {
     content_type: form.dataset.contentType,
     object_id: parseInt(form.dataset.objectId),
-    author_name: form.querySelector('[name="author_name"]').value,
-    author_email: form.querySelector('[name="author_email"]').value,
+    author_name: form.querySelector('[name="author_name"]').value.trim(),
+    author_email: form.querySelector('[name="author_email"]').value.trim(),
     author_website: form.querySelector('[name="author_website"]')?.value || '',
-    content: form.querySelector('[name="content"]').value,
+    content: form.querySelector('[name="content"]').value.trim(),
   };
   const parentId = form.querySelector('[name="parent"]')?.value;
   if (parentId) data.parent = parseInt(parentId);
-  btn.disabled = true; btn.textContent = 'Envoi…';
+
+  if (!data.author_name || !data.content) return;
+
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Envoi…';
+
   try {
     const res = await fetch(`${API_BASE}/comments/`, {
       method: 'POST',
@@ -235,10 +288,67 @@ async function submitComment(e) {
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
       body: JSON.stringify(data)
     });
-    if (res.ok || res.status === 201) { form.reset(); showToast('Commentaire publié avec succès !', 'success'); cancelReply(); }
-    else throw new Error('Error');
-  } catch { showToast("Erreur lors de l'envoi. Réessayez.", 'error'); }
-  finally { btn.disabled = false; btn.textContent = 'Publier le commentaire'; }
+    if (res.ok || res.status === 201) {
+      form.reset();
+      cancelReply();
+      appendNewComment(data, parentId ? parseInt(parentId) : null);
+      showToast('Commentaire envoyé ! Il sera visible après modération.', 'success');
+    } else {
+      throw new Error('Error');
+    }
+  } catch {
+    showToast("Erreur lors de l'envoi. Réessayez.", 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
+}
+
+function appendNewComment(data, parentId) {
+  const initial = (data.author_name || '?')[0].toUpperCase();
+  const now = new Date();
+  const dateStr = 'À l\'instant';
+
+  const div = document.createElement('div');
+  div.className = 'comment-item comment-item-root comment-pending-item';
+  div.innerHTML = `
+    <div class="comment-avatar">${escapeHtml(initial)}</div>
+    <div class="comment-body">
+      <div class="comment-header">
+        <span class="comment-author">${escapeHtml(data.author_name)}</span>
+        <span class="comment-date">${dateStr}</span>
+        <span class="comment-pending-badge"><i class="bi bi-hourglass-split"></i> En attente de modération</span>
+      </div>
+      <p class="comment-text">${escapeHtml(data.content)}</p>
+    </div>`;
+
+  const list = document.getElementById('commentsList');
+  if (list) {
+    // Insert at top (most recent first)
+    list.insertBefore(div, list.firstChild);
+    // Update heading count
+    const heading = document.querySelector('.comments-heading');
+    if (heading) {
+      const match = heading.textContent.match(/\((\d+)\)/);
+      if (match) {
+        heading.innerHTML = heading.innerHTML.replace(/\(\d+\)/, `(${parseInt(match[1]) + 1})`);
+      } else {
+        heading.innerHTML = heading.innerHTML.replace(/Commentaires/, 'Commentaires (1)');
+      }
+    }
+    // If no comments message was showing, remove it
+    const noComment = list.querySelector('.no-comments-msg');
+    if (noComment) noComment.remove();
+  }
+
+  // Animate in
+  div.style.opacity = '0';
+  div.style.transform = 'translateY(-10px)';
+  requestAnimationFrame(() => {
+    div.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+    div.style.opacity = '1';
+    div.style.transform = 'translateY(0)';
+  });
 }
 
 function setReplyTo(parentId, parentName) {
@@ -247,7 +357,7 @@ function setReplyTo(parentId, parentName) {
   const pi = form.querySelector('[name="parent"]');
   if (pi) pi.value = parentId;
   const ind = document.getElementById('replyIndicator');
-  if (ind) { ind.textContent = `Réponse à ${parentName}`; ind.style.display = 'inline-flex'; }
+  if (ind) { ind.querySelector('.reply-name').textContent = `Réponse à ${parentName}`; ind.style.display = 'inline-flex'; }
   form.querySelector('[name="content"]').focus();
   form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -339,7 +449,6 @@ function shareContent(title, url) {
 
 /* ========= STATS COUNTER ========= */
 function initCounters() {
-  /* No scroll animations — display values immediately */
   const counters = document.querySelectorAll('.stat-number[data-count]');
   counters.forEach(el => { el.textContent = el.dataset.count || '0'; });
 }
@@ -363,7 +472,7 @@ function showToast(message, type = '') {
 
 function escapeHtml(text) {
   const div = document.createElement('div');
-  div.appendChild(document.createTextNode(text));
+  div.appendChild(document.createTextNode(text || ''));
   return div.innerHTML;
 }
 
