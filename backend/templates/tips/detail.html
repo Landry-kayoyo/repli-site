@@ -67,48 +67,89 @@
   <!-- RELATED TIPS -->
   {% if related %}
   <style>
-  .related-carousel-wrap{overflow:hidden;width:100%;position:relative;mask-image:linear-gradient(to right,transparent 0%,black 8%,black 92%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,black 8%,black 92%,transparent 100%)}
-  .related-carousel-wrap:hover .related-carousel-track{animation-play-state:paused}
-  .related-carousel-track{display:flex!important;flex-wrap:nowrap!important;gap:.75rem;animation:relScroll 30s linear infinite;will-change:transform;width:max-content!important}
-  @keyframes relScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-  .related-card{flex-shrink:0!important;width:175px!important;display:flex;flex-direction:column;text-decoration:none;border-radius:14px;overflow:hidden;border:1.5px solid var(--border);background:var(--card-bg);transition:box-shadow .2s,border-color .2s;box-shadow:var(--shadow-xs)}
-  .related-card:hover{box-shadow:var(--shadow-md);border-color:rgba(79,70,229,.3)}
-  .related-card-img{width:100%;height:90px;background-size:cover;background-position:center;background-color:var(--bg-secondary)}
-  .related-card-placeholder{display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:linear-gradient(135deg,rgba(79,70,229,.07),rgba(124,58,237,.07))}
-  .related-card-body{padding:.6rem .8rem}
-  .related-card-title{font-size:.78rem;font-weight:600;color:var(--text);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .related-card-date{font-size:.68rem;color:var(--text-muted);margin-top:4px}
+  .rc-section{margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border)}
+  .rc-title{font-size:1.05rem;font-weight:700;margin:0 0 1rem;color:var(--text);display:flex;align-items:center;gap:6px}
+  .rc-outer{position:relative;display:flex;align-items:center;gap:8px}
+  .rc-vp{overflow:hidden;flex:1;min-width:0}
+  .rc-track{display:flex;gap:12px;will-change:transform;transition:transform .42s cubic-bezier(.25,.46,.45,.94)}
+  .rc-card{flex-shrink:0;text-decoration:none;border-radius:12px;overflow:hidden;border:1.5px solid var(--border);background:var(--card-bg);box-shadow:0 1px 3px rgba(0,0,0,.06);transition:box-shadow .2s,border-color .2s;display:block}
+  .rc-card:hover{box-shadow:0 4px 16px rgba(79,70,229,.15);border-color:rgba(79,70,229,.35)}
+  .rc-img{width:100%;height:86px;background-size:cover;background-position:center;background-color:var(--bg-secondary)}
+  .rc-placeholder{display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:linear-gradient(135deg,rgba(79,70,229,.07),rgba(124,58,237,.07))}
+  .rc-body{padding:.55rem .7rem}
+  .rc-card-title{font-size:.75rem;font-weight:600;color:var(--text);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .rc-card-date{font-size:.65rem;color:var(--text-muted);margin-top:3px}
+  .rc-btn{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:var(--card-bg);border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s;padding:0;line-height:1}
+  .rc-btn:hover{background:#4F46E5;border-color:#4F46E5;color:#fff;box-shadow:0 3px 10px rgba(79,70,229,.35)}
   </style>
-  <div class="related-section">
-    <h3 class="related-title">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:6px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <div class="rc-section">
+    <h3 class="rc-title">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       Astuces similaires
     </h3>
-    <div class="related-carousel-wrap">
-      <div class="related-carousel-track" id="relCarouselTip">
-        {% for rel in related %}
-        <a href="/astuces/{{ rel.slug }}/" class="related-card">
-          {% if rel.cover_image %}
-          <div class="related-card-img" style="background-image:url('{{ rel.cover_image.url }}');"></div>
-          {% else %}
-          <div class="related-card-img related-card-placeholder">💡</div>
-          {% endif %}
-          <div class="related-card-body">
-            <div class="related-card-title">{{ rel.title }}</div>
-            {% if rel.published_at %}<div class="related-card-date">{{ rel.published_at|date:"d M Y" }}</div>{% endif %}
-          </div>
-        </a>
-        {% endfor %}
+    <div class="rc-outer" id="rcTip">
+      <button class="rc-btn rc-btn-prev" aria-label="Précédent">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="rc-vp">
+        <div class="rc-track">
+          {% for rel in related %}
+          <a href="/astuces/{{ rel.slug }}/" class="rc-card">
+            {% if rel.cover_image %}
+            <div class="rc-img" style="background-image:url('{{ rel.cover_image.url }}');"></div>
+            {% else %}
+            <div class="rc-img rc-placeholder">💡</div>
+            {% endif %}
+            <div class="rc-body">
+              <div class="rc-card-title">{{ rel.title }}</div>
+              {% if rel.published_at %}<div class="rc-card-date">{{ rel.published_at|date:"d M Y" }}</div>{% endif %}
+            </div>
+          </a>
+          {% endfor %}
+        </div>
       </div>
+      <button class="rc-btn rc-btn-next" aria-label="Suivant">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
-    <script>
-    (function(){
-      var t = document.getElementById('relCarouselTip');
-      if(!t || t.children.length < 2) { if(t) t.style.animation='none'; return; }
-      t.innerHTML += t.innerHTML;
-    })();
-    </script>
   </div>
+  <script>
+  (function(){
+    var wrap=document.getElementById('rcTip');
+    if(!wrap)return;
+    var vp=wrap.querySelector('.rc-vp'),track=wrap.querySelector('.rc-track');
+    var btnP=wrap.querySelector('.rc-btn-prev'),btnN=wrap.querySelector('.rc-btn-next');
+    var GAP=12,PV=window.innerWidth<600?2:3;
+    var vpW=vp.offsetWidth,cw=Math.floor((vpW-GAP*(PV-1))/PV);
+    var orig=Array.from(track.children),N=orig.length;
+    if(N===0)return;
+    orig.forEach(function(c){c.style.width=cw+'px';});
+    if(N<=PV){btnP.style.display='none';btnN.style.display='none';return;}
+    track.innerHTML=track.innerHTML+track.innerHTML;
+    var step=cw+GAP,cur=0;
+    function go(i,instant){
+      if(instant){track.style.transition='none';}
+      else{track.style.transition='transform .42s cubic-bezier(.25,.46,.45,.94)';}
+      cur=i;track.style.transform='translateX(-'+(cur*step)+'px)';
+    }
+    function next(){
+      if(cur<N-1){go(cur+1);}
+      else{go(N);setTimeout(function(){go(0,true);track.getBoundingClientRect();},440);}
+    }
+    function prev(){
+      if(cur>0){go(cur-1);}
+      else{go(N,true);track.getBoundingClientRect();go(N-1);}
+    }
+    var t;
+    function startT(){t=setInterval(next,4000);}
+    function resetT(){clearInterval(t);startT();}
+    btnN.onclick=function(){next();resetT();};
+    btnP.onclick=function(){prev();resetT();};
+    wrap.addEventListener('mouseenter',function(){clearInterval(t);});
+    wrap.addEventListener('mouseleave',startT);
+    startT();
+  })();
+  </script>
   {% endif %}
 
   <!-- COMMENTS -->
