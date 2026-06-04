@@ -88,11 +88,19 @@ def article_detail(request, slug):
     PageView.record('article', article.pk, title=article.title, slug=article.slug)
     ct = ContentType.objects.get_for_model(Article)
     comments = Comment.objects.filter(content_type=ct, object_id=article.id, is_approved=True, parent=None).prefetch_related('replies').order_by('-created_at')
-    related = list(Article.objects.filter(status='published', category=article.category).exclude(pk=article.pk)[:6])
-    if len(related) < 4:
-        others = list(Article.objects.filter(status='published').exclude(pk=article.pk).exclude(pk__in=[r.pk for r in related])[:6 - len(related)])
-        related = related + others
     tags = list(article.tags.names())
+    related = list(Article.objects.filter(status='published', category=article.category).exclude(pk=article.pk)[:6])
+    if len(related) < 4 and tags:
+        tag_related = list(
+            Article.objects.filter(status='published', tags__name__in=tags)
+            .exclude(pk=article.pk)
+            .exclude(pk__in=[r.pk for r in related])
+            .distinct()[:6 - len(related)]
+        )
+        related = related + tag_related
+    if len(related) < 4:
+        others = list(Article.objects.filter(status='published').exclude(pk=article.pk).exclude(pk__in=[r.pk for r in related])[:4 - len(related)])
+        related = related + others
     return render(request, 'articles/detail.html', {
         'settings': settings,
         'article': article,
@@ -142,8 +150,16 @@ def project_detail(request, slug):
     tags = list(project.tags.names())
     technologies = [t.strip() for t in project.technologies.split(',') if t.strip()] if project.technologies else []
     related = list(Project.objects.filter(status='published').exclude(pk=project.pk).filter(category=project.category)[:6]) if project.category else []
+    if len(related) < 4 and tags:
+        tag_related = list(
+            Project.objects.filter(status='published', tags__name__in=tags)
+            .exclude(pk=project.pk)
+            .exclude(pk__in=[r.pk for r in related])
+            .distinct()[:6 - len(related)]
+        )
+        related = related + tag_related
     if len(related) < 4:
-        others = list(Project.objects.filter(status='published').exclude(pk=project.pk).exclude(pk__in=[r.pk for r in related])[:6 - len(related)])
+        others = list(Project.objects.filter(status='published').exclude(pk=project.pk).exclude(pk__in=[r.pk for r in related])[:4 - len(related)])
         related = related + others
     return render(request, 'projects/detail.html', {
         'settings': settings,
@@ -198,8 +214,16 @@ def tip_detail(request, slug):
     comments = Comment.objects.filter(content_type=ct, object_id=tip.id, is_approved=True, parent=None).prefetch_related('replies').order_by('-created_at')
     tags = list(tip.tags.names())
     related = list(Tip.objects.filter(status='published').exclude(pk=tip.pk).filter(category=tip.category)[:6]) if tip.category else []
+    if len(related) < 4 and tags:
+        tag_related = list(
+            Tip.objects.filter(status='published', tags__name__in=tags)
+            .exclude(pk=tip.pk)
+            .exclude(pk__in=[r.pk for r in related])
+            .distinct()[:6 - len(related)]
+        )
+        related = related + tag_related
     if len(related) < 4:
-        others = list(Tip.objects.filter(status='published').exclude(pk=tip.pk).exclude(pk__in=[r.pk for r in related])[:6 - len(related)])
+        others = list(Tip.objects.filter(status='published').exclude(pk=tip.pk).exclude(pk__in=[r.pk for r in related])[:4 - len(related)])
         related = related + others
     return render(request, 'tips/detail.html', {
         'settings': settings,
