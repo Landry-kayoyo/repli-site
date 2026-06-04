@@ -119,7 +119,7 @@
     if(!wrap)return;
     var vp=wrap.querySelector('.rc-vp'),track=wrap.querySelector('.rc-track');
     var btnP=wrap.querySelector('.rc-btn-prev'),btnN=wrap.querySelector('.rc-btn-next');
-    var GAP=12,PV=window.innerWidth<600?2:3;
+    var GAP=12,PV=window.innerWidth<768?1:2;
     var vpW=vp.offsetWidth,cw=Math.floor((vpW-GAP*(PV-1))/PV);
     var orig=Array.from(track.children),N=orig.length;
     if(N===0)return;
@@ -141,7 +141,7 @@
       else{go(N,true);track.getBoundingClientRect();go(N-1);}
     }
     var t;
-    function startT(){t=setInterval(next,4000);}
+    function startT(){t=setInterval(next,5000);}
     function resetT(){clearInterval(t);startT();}
     btnN.onclick=function(){next();resetT();};
     btnP.onclick=function(){prev();resetT();};
