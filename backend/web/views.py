@@ -88,7 +88,10 @@ def article_detail(request, slug):
     PageView.record('article', article.pk, title=article.title, slug=article.slug)
     ct = ContentType.objects.get_for_model(Article)
     comments = Comment.objects.filter(content_type=ct, object_id=article.id, is_approved=True, parent=None).prefetch_related('replies').order_by('-created_at')
-    related = Article.objects.filter(status='published', category=article.category).exclude(pk=article.pk)[:3]
+    related = list(Article.objects.filter(status='published', category=article.category).exclude(pk=article.pk)[:6])
+    if len(related) < 4:
+        others = list(Article.objects.filter(status='published').exclude(pk=article.pk).exclude(pk__in=[r.pk for r in related])[:6 - len(related)])
+        related = related + others
     tags = list(article.tags.names())
     return render(request, 'articles/detail.html', {
         'settings': settings,
@@ -138,10 +141,10 @@ def project_detail(request, slug):
     comments = Comment.objects.filter(content_type=ct, object_id=project.id, is_approved=True, parent=None).prefetch_related('replies').order_by('-created_at')
     tags = list(project.tags.names())
     technologies = [t.strip() for t in project.technologies.split(',') if t.strip()] if project.technologies else []
-    related = Project.objects.filter(status='published').exclude(pk=project.pk)
-    if project.category:
-        related = related.filter(category=project.category)
-    related = related[:3]
+    related = list(Project.objects.filter(status='published').exclude(pk=project.pk).filter(category=project.category)[:6]) if project.category else []
+    if len(related) < 4:
+        others = list(Project.objects.filter(status='published').exclude(pk=project.pk).exclude(pk__in=[r.pk for r in related])[:6 - len(related)])
+        related = related + others
     return render(request, 'projects/detail.html', {
         'settings': settings,
         'project': project,
@@ -194,10 +197,10 @@ def tip_detail(request, slug):
     ct = ContentType.objects.get_for_model(Tip)
     comments = Comment.objects.filter(content_type=ct, object_id=tip.id, is_approved=True, parent=None).prefetch_related('replies').order_by('-created_at')
     tags = list(tip.tags.names())
-    related = Tip.objects.filter(status='published').exclude(pk=tip.pk)
-    if tip.category:
-        related = related.filter(category=tip.category)
-    related = related[:3]
+    related = list(Tip.objects.filter(status='published').exclude(pk=tip.pk).filter(category=tip.category)[:6]) if tip.category else []
+    if len(related) < 4:
+        others = list(Tip.objects.filter(status='published').exclude(pk=tip.pk).exclude(pk__in=[r.pk for r in related])[:6 - len(related)])
+        related = related + others
     return render(request, 'tips/detail.html', {
         'settings': settings,
         'tip': tip,
