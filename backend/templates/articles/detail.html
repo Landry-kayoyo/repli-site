@@ -111,21 +111,30 @@
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:6px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
       Articles similaires
     </h3>
-    <div class="related-grid">
-      {% for rel in related %}
-      <a href="/articles/{{ rel.slug }}/" class="related-card">
-        {% if rel.cover_image %}
-        <div class="related-card-img" style="background-image:url('{{ rel.cover_image.url }}');"></div>
-        {% else %}
-        <div class="related-card-img related-card-placeholder">📝</div>
-        {% endif %}
-        <div class="related-card-body">
-          <div class="related-card-title">{{ rel.title|truncatechars:65 }}</div>
-          {% if rel.published_at %}<div class="related-card-date">{{ rel.published_at|date:"d M Y" }}</div>{% endif %}
-        </div>
-      </a>
-      {% endfor %}
+    <div class="related-carousel-wrap">
+      <div class="related-carousel-track" id="relCarouselArt">
+        {% for rel in related %}
+        <a href="/articles/{{ rel.slug }}/" class="related-card">
+          {% if rel.cover_image %}
+          <div class="related-card-img" style="background-image:url('{{ rel.cover_image.url }}');"></div>
+          {% else %}
+          <div class="related-card-img related-card-placeholder">📝</div>
+          {% endif %}
+          <div class="related-card-body">
+            <div class="related-card-title">{{ rel.title }}</div>
+            {% if rel.published_at %}<div class="related-card-date">{{ rel.published_at|date:"d M Y" }}</div>{% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
     </div>
+    <script>
+    (function(){
+      var t = document.getElementById('relCarouselArt');
+      if(!t || t.children.length < 2) { if(t) t.style.animation='none'; return; }
+      t.innerHTML += t.innerHTML;
+    })();
+    </script>
   </div>
   {% endif %}
 

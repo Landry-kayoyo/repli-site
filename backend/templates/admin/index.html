@@ -203,20 +203,20 @@ var statsConfig = [
   {name:'Astuces',       icon:'bi-lightbulb',          color:'warning', url:'/api/tips/?status=published&limit=1',     admin:'/admin/tips/tip/'},
   {name:'Commentaires',  icon:'bi-chat-dots',          color:'danger',  url:'/api/stats/', countKey:'comments_count',    admin:'/admin/comments/comment/'},
   {name:'Abonnés',       icon:'bi-envelope-check',     color:'success', url:'/api/stats/', countKey:'subscribers_count', admin:'/admin/newsletter/subscriber/'},
-  {name:'Vues',          icon:'bi-graph-up',           color:'primary', url:'/api/stats/', admin:'/admin/'}
+  {name:'Vues (30j)',    icon:'bi-graph-up',           color:'info',    url:'/api/stats/detailed/?days=30', countKey:'views_last_30_days', detailUrl:true, admin:'/admin/'}
 ];
 
 function loadStats() {
   var grid = document.getElementById('statsGrid');
-  // Fetch /api/stats/ once and share the result
   var statsPromise = fetch('/api/stats/', {credentials:'same-origin'}).then(r => r.json().catch(()=>({})));
+  var detailPromise = fetch('/api/stats/detailed/?days=30', {credentials:'same-origin'}).then(r => r.json().catch(()=>({})));
+
   Promise.all(statsConfig.map(stat => {
+    if (stat.detailUrl) {
+      return detailPromise.then(d => ({stat: stat, count: d[stat.countKey] != null ? d[stat.countKey] : 0}));
+    }
     if (stat.countKey) {
       return statsPromise.then(d => ({stat: stat, count: d[stat.countKey] || 0}));
-    }
-    if (stat.url === '/api/stats/' && !stat.countKey) {
-      // Vues — handled by loadAnalytics separately, show 0 placeholder
-      return Promise.resolve({stat: stat, count: '—'});
     }
     return fetch(stat.url, {credentials:'same-origin'})
       .then(r => r.json().catch(()=>({})))
@@ -233,14 +233,10 @@ function loadStats() {
         </a>
       </div>
     `).join('');
-    
-    // Charger les contenus récents
-    var articlesResult = results.find(r => r.stat.name === 'Articles');
-    var projectsResult = results.find(r => r.stat.name === 'Projets');
-    var tipsResult = results.find(r => r.stat.name === 'Astuces');
-    if(articlesResult) loadRecent('/api/articles/?status=published&limit=5', 'recentArticles', 'article');
-    if(projectsResult) loadRecent('/api/projects/?status=published&limit=3', 'recentProjects', 'project');
-    if(tipsResult) loadRecent('/api/tips/?status=published&limit=3', 'recentTips', 'tip');
+
+    loadRecent('/api/articles/?status=published&limit=5', 'recentArticles', 'article');
+    loadRecent('/api/projects/?status=published&limit=3', 'recentProjects', 'project');
+    loadRecent('/api/tips/?status=published&limit=3', 'recentTips', 'tip');
   });
 }
 

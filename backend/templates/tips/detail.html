@@ -71,21 +71,30 @@
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:6px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       Astuces similaires
     </h3>
-    <div class="related-grid">
-      {% for rel in related %}
-      <a href="/astuces/{{ rel.slug }}/" class="related-card">
-        {% if rel.cover_image %}
-        <div class="related-card-img" style="background-image:url('{{ rel.cover_image.url }}');"></div>
-        {% else %}
-        <div class="related-card-img related-card-placeholder">💡</div>
-        {% endif %}
-        <div class="related-card-body">
-          <div class="related-card-title">{{ rel.title|truncatechars:65 }}</div>
-          {% if rel.published_at %}<div class="related-card-date">{{ rel.published_at|date:"d M Y" }}</div>{% endif %}
-        </div>
-      </a>
-      {% endfor %}
+    <div class="related-carousel-wrap">
+      <div class="related-carousel-track" id="relCarouselTip">
+        {% for rel in related %}
+        <a href="/astuces/{{ rel.slug }}/" class="related-card">
+          {% if rel.cover_image %}
+          <div class="related-card-img" style="background-image:url('{{ rel.cover_image.url }}');"></div>
+          {% else %}
+          <div class="related-card-img related-card-placeholder">💡</div>
+          {% endif %}
+          <div class="related-card-body">
+            <div class="related-card-title">{{ rel.title }}</div>
+            {% if rel.published_at %}<div class="related-card-date">{{ rel.published_at|date:"d M Y" }}</div>{% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
     </div>
+    <script>
+    (function(){
+      var t = document.getElementById('relCarouselTip');
+      if(!t || t.children.length < 2) { if(t) t.style.animation='none'; return; }
+      t.innerHTML += t.innerHTML;
+    })();
+    </script>
   </div>
   {% endif %}
 
