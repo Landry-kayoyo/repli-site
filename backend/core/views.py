@@ -40,10 +40,14 @@ class StatsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        from comments.models import Comment
+        from newsletter.models import Subscriber
         return Response({
             'articles_count': Article.objects.filter(status='published').count(),
             'projects_count': Project.objects.filter(status='published').count(),
             'tips_count': Tip.objects.filter(status='published').count(),
+            'comments_count': Comment.objects.filter(is_approved=True).count(),
+            'subscribers_count': Subscriber.objects.filter(status='active').count(),
         })
 
 

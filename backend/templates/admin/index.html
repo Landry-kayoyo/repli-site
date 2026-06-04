@@ -198,21 +198,30 @@ document.getElementById('dbDate').textContent = today.toLocaleDateString('fr-FR'
 
 // Configuration des stats
 var statsConfig = [
-  {name:'Articles', icon:'bi-file-earmark-text', color:'primary', url:'/api/articles/?status=published&limit=1', admin:'/admin/articles/article/'},
-  {name:'Projets', icon:'bi-code-slash', color:'success', url:'/api/projects/?status=published&limit=1', admin:'/admin/projects/project/'},
-  {name:'Astuces', icon:'bi-lightbulb', color:'warning', url:'/api/tips/?status=published&limit=1', admin:'/admin/tips/tip/'},
-  {name:'Commentaires', icon:'bi-chat-dots', color:'danger', url:'/api/comments/?limit=1', admin:'/admin/comments/comment/'},
-  {name:'Abonnés', icon:'bi-envelope-check', color:'success', url:'/api/newsletter/subscribers/?limit=1', admin:'/admin/newsletter/subscriber/'},
-  {name:'Vues', icon:'bi-graph-up', color:'primary', url:'/api/stats/', admin:'/admin/'}
+  {name:'Articles',      icon:'bi-file-earmark-text', color:'primary', url:'/api/articles/?status=published&limit=1', admin:'/admin/articles/article/'},
+  {name:'Projets',       icon:'bi-code-slash',         color:'success', url:'/api/projects/?status=published&limit=1', admin:'/admin/projects/project/'},
+  {name:'Astuces',       icon:'bi-lightbulb',          color:'warning', url:'/api/tips/?status=published&limit=1',     admin:'/admin/tips/tip/'},
+  {name:'Commentaires',  icon:'bi-chat-dots',          color:'danger',  url:'/api/stats/', countKey:'comments_count',    admin:'/admin/comments/comment/'},
+  {name:'Abonnés',       icon:'bi-envelope-check',     color:'success', url:'/api/stats/', countKey:'subscribers_count', admin:'/admin/newsletter/subscriber/'},
+  {name:'Vues',          icon:'bi-graph-up',           color:'primary', url:'/api/stats/', admin:'/admin/'}
 ];
 
 function loadStats() {
   var grid = document.getElementById('statsGrid');
-  Promise.all(statsConfig.map(stat =>
-    fetch(stat.url, {credentials:'same-origin'})
+  // Fetch /api/stats/ once and share the result
+  var statsPromise = fetch('/api/stats/', {credentials:'same-origin'}).then(r => r.json().catch(()=>({})));
+  Promise.all(statsConfig.map(stat => {
+    if (stat.countKey) {
+      return statsPromise.then(d => ({stat: stat, count: d[stat.countKey] || 0}));
+    }
+    if (stat.url === '/api/stats/' && !stat.countKey) {
+      // Vues — handled by loadAnalytics separately, show 0 placeholder
+      return Promise.resolve({stat: stat, count: '—'});
+    }
+    return fetch(stat.url, {credentials:'same-origin'})
       .then(r => r.json().catch(()=>({})))
-      .then(d => ({stat: stat, count: d.count || (d.results ? d.results.length : 0)}))
-  )).then(results => {
+      .then(d => ({stat: stat, count: d.count != null ? d.count : (d.results ? d.results.length : 0)}));
+  })).then(results => {
     grid.innerHTML = results.map(r => `
       <div class="col-6 col-md-4 col-lg-2">
         <a href="${r.stat.admin}" class="stat-card">

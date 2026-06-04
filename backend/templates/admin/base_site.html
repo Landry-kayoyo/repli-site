@@ -549,19 +549,19 @@ input:focus, textarea:focus, select:focus {
 .dm .ln-suggest-error { background:#2d1515; border-color:#7f1d1d; color:#f87171; }
 
 /* ===== BARRE D'OUTILS IA (6 fonctionnalités) ===== */
-#ln-ai-toolbar {
+#ln-ai-toolbar, #ln-ai-toolbar-steps {
   display:flex; flex-wrap:wrap; gap:7px; align-items:center;
   margin:10px 0 4px; padding:10px 12px;
   background:linear-gradient(135deg,#eef2ff,#f5f3ff);
   border:1px solid #c7d2fe; border-radius:10px;
   box-sizing:border-box; width:100%;
 }
-.dm #ln-ai-toolbar { background:linear-gradient(135deg,#1e1b4b,#1a1a2e); border-color:#3730a3; }
-#ln-ai-toolbar-label {
+.dm #ln-ai-toolbar, .dm #ln-ai-toolbar-steps { background:linear-gradient(135deg,#1e1b4b,#1a1a2e); border-color:#3730a3; }
+#ln-ai-toolbar-label, .ln-ai-toolbar-label {
   font-size:11px; font-weight:700; color:#6366f1; letter-spacing:.5px;
   text-transform:uppercase; margin-right:4px; white-space:nowrap;
 }
-.dm #ln-ai-toolbar-label { color:#a5b4fc; }
+.dm #ln-ai-toolbar-label, .dm .ln-ai-toolbar-label { color:#a5b4fc; }
 .ln-tb-btn {
   display:inline-flex; align-items:center; gap:5px; padding:5px 11px;
   font-size:12px; font-weight:600; border:none; border-radius:7px; cursor:pointer;
@@ -894,14 +894,15 @@ input:focus, textarea:focus, select:focus {
       <span style="font-size:0.73rem;font-weight:700;color:#166534;">📤 Publier le contenu généré</span>
       <button onclick="hidePublishBar()" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:0.9rem;padding:0;line-height:1;">✕</button>
     </div>
-    <!-- Preview miniature -->
-    <div id="pub-preview" style="display:flex;align-items:center;gap:10px;background:white;border:1px solid #cce0cc;border-radius:8px;padding:8px 10px;margin-bottom:8px;">
+    <!-- Preview miniature carousel (1 proposition à la fois, défilement auto toutes les 2s) -->
+    <div id="pub-preview" style="display:flex;align-items:center;gap:10px;background:white;border:1px solid #cce0cc;border-radius:8px;padding:8px 10px;margin-bottom:4px;">
       <div id="pub-thumb" style="width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,#4f46e5,#7c3aed);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">✍️</div>
       <div style="flex:1;min-width:0;">
         <div id="pub-preview-title" style="font-size:0.8rem;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Nouveau contenu</div>
         <div id="pub-preview-type" style="font-size:0.7rem;color:#64748b;margin-top:2px;">Article</div>
       </div>
     </div>
+    <div id="pub-dots" style="text-align:center;margin-bottom:6px;min-height:10px;"></div>
     <div class="ai-publish-form">
       <select class="ai-pub-select" id="pub-type" onchange="updatePubPreview()">
         <option value="article">📝 Article</option>
@@ -920,8 +921,8 @@ input:focus, textarea:focus, select:focus {
     </div>
   </div>
 
-  <!-- Quick buttons — carousel auto-défilant -->
-  <div class="ai-quick-btns" id="aiQuickBtns">
+  <!-- Quick buttons -->
+  <div class="ai-quick-btns">
     <button class="ai-quick-btn" onclick="aiQuick('Fais un audit SEO complet de mon site et donne-moi les 5 actions prioritaires.')">📈 SEO</button>
     <button class="ai-quick-btn" onclick="aiQuick('Donne-moi 10 idées d\'articles tech originaux pour mon site basées sur les tendances actuelles.')">💡 Idées</button>
     <button class="ai-quick-btn" onclick="aiQuick('Crée un article complet et professionnel sur les meilleures pratiques en développement web. Format HTML prêt à publier.')">✍️ Article</button>
@@ -930,8 +931,6 @@ input:focus, textarea:focus, select:focus {
     <button class="ai-quick-btn" onclick="showPublishBar()">📤 Créer & Publier</button>
     <button class="ai-quick-btn" onclick="window.open('/admin-ai/newsletter/','_blank')" style="background:#f0fff4;border-color:#86efac;color:#166534;">📧 Newsletter</button>
     <button class="ai-quick-btn" onclick="window.open('/admin-ai/diagnostic/','_blank')" style="background:#fff0f8;border-color:#f9a8d4;color:#be185d;">🔧 Diagnostic</button>
-    <button class="ai-quick-btn" onclick="aiQuick('Génère une astuce pratique et concise sur la sécurité web en 2025. Format HTML.')">🔒 Sécurité</button>
-    <button class="ai-quick-btn" onclick="aiQuick('Rédige un projet de démonstration avec tutorial pas-à-pas sur React et Django.')">⚡ Tuto Projet</button>
   </div>
 
   <!-- Input area -->
@@ -1212,74 +1211,87 @@ function hasPublishableContent(text) {
 }
 
 function suggestPublish(content) {
-  showPublishBar();
   var titleMatch = content.match(/(?:titre[:\s]+|title[:\s]+|^#\s+)(.{10,80})/im);
-  if (titleMatch) {
-    var pubTitle = document.getElementById('pub-title');
-    if (pubTitle) {
-      pubTitle.value = titleMatch[1].replace(/[*#_]/g,'').trim().substring(0, 100);
-      updatePubPreview();
-    }
-  }
+  var title = titleMatch ? titleMatch[1].replace(/[*#_]/g,'').trim().substring(0, 100) : 'Nouveau contenu';
+  var typeEl = document.getElementById('pub-type');
+  var type = typeEl ? typeEl.value : 'article';
+  _pubProposals.push({title: title, type: type});
+  _pubActiveIdx = _pubProposals.length - 1;
+  showPublishBar();
+  _renderPubProposal();
+  _startPubCarousel();
 }
 
 function updatePubPreview() {
   var typeEl = document.getElementById('pub-type');
   var titleEl = document.getElementById('pub-title');
-  var previewTitle = document.getElementById('pub-preview-title');
-  var previewType = document.getElementById('pub-preview-type');
-  var thumb = document.getElementById('pub-thumb');
   if (!typeEl || !titleEl) return;
+  if (_pubProposals[_pubActiveIdx]) {
+    _pubProposals[_pubActiveIdx].title = titleEl.value.trim() || 'Nouveau contenu';
+    _pubProposals[_pubActiveIdx].type = typeEl.value;
+  }
+  _renderPubProposal();
+}
+
+// === Carousel des propositions de publication ===
+var _pubProposals = [];
+var _pubActiveIdx = 0;
+var _pubCarouselTimer = null;
+
+function _renderPubProposal() {
+  var p = _pubProposals[_pubActiveIdx] || {title: 'Nouveau contenu', type: 'article'};
   var typeMap = {
     'article': { label: 'Article', emoji: '✍️', gradient: 'linear-gradient(135deg,#4f46e5,#7c3aed)' },
-    'project': { label: 'Projet', emoji: '🚀', gradient: 'linear-gradient(135deg,#0ea5e9,#2563eb)' },
-    'tip':     { label: 'Astuce', emoji: '💡', gradient: 'linear-gradient(135deg,#f59e0b,#ef4444)' },
+    'project': { label: 'Projet',  emoji: '🚀', gradient: 'linear-gradient(135deg,#0ea5e9,#2563eb)' },
+    'tip':     { label: 'Astuce',  emoji: '💡', gradient: 'linear-gradient(135deg,#f59e0b,#ef4444)' },
   };
-  var info = typeMap[typeEl.value] || typeMap['article'];
-  if (previewTitle) previewTitle.textContent = titleEl.value.trim() || 'Nouveau contenu';
-  if (previewType) previewType.textContent = info.label;
-  if (thumb) {
-    thumb.style.background = info.gradient;
-    thumb.textContent = info.emoji;
+  var info = typeMap[p.type] || typeMap['article'];
+  var thumb = document.getElementById('pub-thumb');
+  var prevTitle = document.getElementById('pub-preview-title');
+  var prevType = document.getElementById('pub-preview-type');
+  var dots = document.getElementById('pub-dots');
+  if (thumb) { thumb.style.background = info.gradient; thumb.textContent = info.emoji; }
+  if (prevTitle) prevTitle.textContent = p.title || 'Nouveau contenu';
+  if (prevType) prevType.textContent = info.label + (_pubProposals.length > 1 ? ' · ' + (_pubActiveIdx + 1) + '/' + _pubProposals.length : '');
+  // Sync form fields
+  var titleEl = document.getElementById('pub-title');
+  var typeEl = document.getElementById('pub-type');
+  if (titleEl && p.title) titleEl.value = p.title;
+  if (typeEl && p.type) typeEl.value = p.type;
+  // Dots
+  if (dots) {
+    dots.innerHTML = _pubProposals.length > 1 ? _pubProposals.map(function(_,i) {
+      return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;margin:0 2px;background:' + (i===_pubActiveIdx?'#4f46e5':'#c7d2fe') + '"></span>';
+    }).join('') : '';
   }
 }
 
-// Carousel auto-scroll for quick buttons
-(function() {
-  var interval = null;
-  function startCarousel() {
-    var container = document.getElementById('aiQuickBtns');
-    if (!container) return;
-    var step = 90;
-    interval = setInterval(function() {
-      var maxScroll = container.scrollWidth - container.clientWidth;
-      if (maxScroll <= 0) return;
-      if (container.scrollLeft + step >= maxScroll) {
-        container.scrollLeft = 0;
-      } else {
-        container.scrollLeft += step;
-      }
-    }, 3500);
-    container.addEventListener('mouseenter', function() { clearInterval(interval); });
-    container.addEventListener('mouseleave', function() {
-      clearInterval(interval);
-      startCarousel();
-    });
-    container.addEventListener('touchstart', function() { clearInterval(interval); });
-  }
-  document.addEventListener('DOMContentLoaded', startCarousel);
-  setTimeout(startCarousel, 1500);
-})();
+function _startPubCarousel() {
+  clearInterval(_pubCarouselTimer);
+  if (_pubProposals.length < 2) return;
+  _pubCarouselTimer = setInterval(function() {
+    _pubActiveIdx = (_pubActiveIdx + 1) % _pubProposals.length;
+    _renderPubProposal();
+  }, 2000);
+}
 
 function showPublishBar() {
   var bar = document.getElementById('ai-publish-bar');
   if (bar) bar.classList.add('show');
   loadPubAuthors();
+  if (_pubProposals.length === 0) {
+    _pubProposals.push({title: 'Nouveau contenu', type: 'article'});
+    _pubActiveIdx = 0;
+    _renderPubProposal();
+  }
 }
 
 function hidePublishBar() {
   var bar = document.getElementById('ai-publish-bar');
   if (bar) bar.classList.remove('show');
+  clearInterval(_pubCarouselTimer);
+  _pubProposals = [];
+  _pubActiveIdx = 0;
 }
 
 // Load admin users into author selector
@@ -1784,35 +1796,40 @@ loadHistory();
 (function() {
   'use strict';
 
-  // ── Helpers CKEditor ──────────────────────────────────────────────────────
-  function getCKContent() {
+  // ── Helpers CKEditor (fieldId optionnel, défaut: 'id_content') ────────────
+  var _activeCKField = 'id_content';
+
+  function getCKContent(fieldId) {
+    var fid = fieldId || _activeCKField || 'id_content';
     if (typeof CKEDITOR !== 'undefined') {
-      var inst = CKEDITOR.instances['id_content'];
+      var inst = CKEDITOR.instances[fid];
       if (inst) return inst.getData();
     }
-    var el = document.getElementById('id_content');
+    var el = document.getElementById(fid);
     return el ? el.value : '';
   }
 
-  function setCKContent(html) {
+  function setCKContent(html, fieldId) {
+    var fid = fieldId || _activeCKField || 'id_content';
     if (typeof CKEDITOR !== 'undefined') {
-      var inst = CKEDITOR.instances['id_content'];
+      var inst = CKEDITOR.instances[fid];
       if (inst) { inst.setData(html); return; }
       CKEDITOR.on('instanceReady', function(ev) {
-        if (ev.editor.name === 'id_content') ev.editor.setData(html);
+        if (ev.editor.name === fid) ev.editor.setData(html);
       });
       return;
     }
-    var el = document.getElementById('id_content');
+    var el = document.getElementById(fid);
     if (el) el.value = html;
   }
 
-  function insertLinkInCK(linkHtml) {
+  function insertLinkInCK(linkHtml, fieldId) {
+    var fid = fieldId || _activeCKField || 'id_content';
     if (typeof CKEDITOR !== 'undefined') {
-      var inst = CKEDITOR.instances['id_content'];
+      var inst = CKEDITOR.instances[fid];
       if (inst) { inst.insertHtml(linkHtml); return; }
     }
-    var el = document.getElementById('id_content');
+    var el = document.getElementById(fid);
     if (el) el.value += '\n' + linkHtml;
   }
 
@@ -2202,41 +2219,53 @@ loadHistory();
   // ═══════════════════════════════════════════════════════════════════════════
   // INITIALISATION — Barre d'outils + Indicateur doublon
   // ═══════════════════════════════════════════════════════════════════════════
+  function makeAIToolbar(fieldId, suffix, ctInfo) {
+    var sfx = suffix || '';
+    return '<span class="ln-ai-toolbar-label">✨ IA</span>' +
+      '<button type="button" class="ln-tb-btn ln-tb-btn-gen"   onclick="lnDoGenerate' + sfx + '()">✨ Générer le contenu</button>' +
+      '<button type="button" class="ln-tb-btn ln-tb-btn-fmt"   onclick="lnDoFormat' + sfx + '()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:#7c3aed;">🎨 Mise en forme</button>' +
+      '<button type="button" class="ln-tb-btn ln-tb-btn-opt"   onclick="lnDoOptimize' + sfx + '()">📊 Analyser & SEO</button>' +
+      '<button type="button" class="ln-tb-btn ln-tb-btn-links" onclick="lnDoLinks' + sfx + '()">🔗 Liens internes</button>' +
+      '<button type="button" class="ln-tb-btn ln-tb-btn-exc"   onclick="lnDoExcerpt' + sfx + '()">📝 Résumé auto</button>' +
+      '<button type="button" class="ln-tb-btn ln-tb-btn-img"   onclick="lnDoCover' + sfx + '()">🖼️ Image couverture</button>';
+  }
+
   function initAIToolbar() {
     var ctInfo = getCtInfo();
     if (!ctInfo) return;
 
-    // ── Barre d'outils sous le CKEditor ─────────────────────────────────
+    // ── Barre d'outils sous le champ Contenu principal ───────────────────
     var contentField = document.querySelector('.field-content, .field-description, [class*="field-content"]');
     if (!contentField) {
-      // fallback: find CKEditor wrapper
-      contentField = document.querySelector('.cke');
-      if (contentField) contentField = contentField.parentNode;
+      var ckWrap = document.querySelector('.cke');
+      if (ckWrap) contentField = ckWrap.parentNode;
     }
-
     if (contentField) {
       var toolbar = document.createElement('div');
       toolbar.id = 'ln-ai-toolbar';
-      toolbar.innerHTML =
-        '<span id="ln-ai-toolbar-label">✨ IA</span>' +
-        '<button type="button" class="ln-tb-btn ln-tb-btn-gen"  onclick="lnDoGenerate()">✨ Générer le contenu</button>' +
-        '<button type="button" class="ln-tb-btn ln-tb-btn-fmt"  onclick="lnDoFormat()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-color:#7c3aed;">🎨 Mise en forme</button>' +
-        '<button type="button" class="ln-tb-btn ln-tb-btn-opt"  onclick="lnDoOptimize()">📊 Analyser & SEO</button>' +
-        '<button type="button" class="ln-tb-btn ln-tb-btn-links" onclick="lnDoLinks()">🔗 Liens internes</button>' +
-        '<button type="button" class="ln-tb-btn ln-tb-btn-exc"  onclick="lnDoExcerpt()">📝 Résumé auto</button>' +
-        '<button type="button" class="ln-tb-btn ln-tb-btn-img"  onclick="lnDoCover()">🖼️ Image couverture</button>';
-
-      // Optimization panel (inline, below toolbar)
+      toolbar.innerHTML = makeAIToolbar('id_content', '', ctInfo);
       var optPanel = document.createElement('div');
       optPanel.id = 'ln-opt-panel';
-
-      // Links panel (inline, below toolbar)
       var linksPanel = document.createElement('div');
       linksPanel.id = 'ln-links-panel';
-
       contentField.appendChild(toolbar);
       contentField.appendChild(optPanel);
       contentField.appendChild(linksPanel);
+    }
+
+    // ── Barre d'outils sous les Étapes du tutoriel (projets) ─────────────
+    var stepsField = document.querySelector('.field-tutorial_steps');
+    if (stepsField) {
+      var stepsToolbar = document.createElement('div');
+      stepsToolbar.id = 'ln-ai-toolbar-steps';
+      stepsToolbar.innerHTML = makeAIToolbar('id_tutorial_steps', 'Steps', ctInfo);
+      var stepsOpt = document.createElement('div');
+      stepsOpt.id = 'ln-opt-panel-steps';
+      var stepsLinks = document.createElement('div');
+      stepsLinks.id = 'ln-links-panel-steps';
+      stepsField.appendChild(stepsToolbar);
+      stepsField.appendChild(stepsOpt);
+      stepsField.appendChild(stepsLinks);
     }
 
     // ── Indicateur doublon sous le titre ────────────────────────────────
@@ -2245,19 +2274,25 @@ loadHistory();
       var dupInd = document.createElement('div');
       dupInd.id = 'ln-dup-indicator';
       titleEl.parentNode.insertBefore(dupInd, titleEl.nextSibling);
-
       titleEl.addEventListener('input', function() {
         lnCheckDuplicate(this.value.trim());
       });
     }
 
-    // Expose handlers via window (used by inline onclick)
-    window.lnDoGenerate = function() { lnGenerateContent(ctInfo); };
-    window.lnDoFormat   = function() { lnFormatContent(ctInfo); };
-    window.lnDoOptimize = function() { lnOptimizeContent(ctInfo); };
-    window.lnDoLinks    = function() { lnInternalLinks(ctInfo); };
-    window.lnDoExcerpt  = function() { lnAutoExcerpt(ctInfo); };
-    window.lnDoCover    = function() { lnCoverPrompt(ctInfo); };
+    // Expose handlers — champ principal
+    window.lnDoGenerate  = function() { _activeCKField='id_content';        lnGenerateContent(ctInfo); };
+    window.lnDoFormat    = function() { _activeCKField='id_content';        lnFormatContent(ctInfo); };
+    window.lnDoOptimize  = function() { _activeCKField='id_content';        lnOptimizeContent(ctInfo); };
+    window.lnDoLinks     = function() { _activeCKField='id_content';        lnInternalLinks(ctInfo); };
+    window.lnDoExcerpt   = function() { _activeCKField='id_content';        lnAutoExcerpt(ctInfo); };
+    window.lnDoCover     = function() { _activeCKField='id_content';        lnCoverPrompt(ctInfo); };
+    // Expose handlers — étapes du tutoriel
+    window.lnDoGenerateSteps = function() { _activeCKField='id_tutorial_steps'; lnGenerateContent({type:ctInfo.type, excerptId:'id_description'}); };
+    window.lnDoFormatSteps   = function() { _activeCKField='id_tutorial_steps'; lnFormatContent(ctInfo); };
+    window.lnDoOptimizeSteps = function() { _activeCKField='id_tutorial_steps'; lnOptimizeContent(ctInfo); };
+    window.lnDoLinksSteps    = function() { _activeCKField='id_tutorial_steps'; lnInternalLinks(ctInfo); };
+    window.lnDoExcerptSteps  = function() { _activeCKField='id_tutorial_steps'; lnAutoExcerpt(ctInfo); };
+    window.lnDoCoverSteps    = function() { _activeCKField='id_tutorial_steps'; lnCoverPrompt(ctInfo); };
   }
 
   // Spinner style
