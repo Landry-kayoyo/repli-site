@@ -146,28 +146,10 @@
             <span class="comment-date">{{ comment.created_at|date:"d F Y à H:i" }}</span>
           </div>
           <p class="comment-text">{{ comment.content }}</p>
-          <button class="comment-reply-btn" onclick="setReplyTo({{ comment.id }}, '{{ comment.author_name|escapejs }}')">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
-            Répondre
+          <button class="comment-like-btn" onclick="toggleCommentLike(this, {{ comment.id }})" data-comment-id="{{ comment.id }}">
+            <i class="bi bi-heart like-icon"></i>
+            <span class="comment-like-count">{{ comment.likes_count }}</span>
           </button>
-          {% if comment.replies.all %}
-          <div class="comment-replies">
-            {% for reply in comment.replies.all %}
-            {% if reply.is_approved %}
-            <div class="comment-item" style="margin-bottom:1rem;">
-              <div class="comment-avatar" style="width:32px;height:32px;font-size:0.75rem;">{{ reply.author_name|first|upper }}</div>
-              <div class="comment-body">
-                <div class="comment-header">
-                  <span class="comment-author">{{ reply.author_name }}</span>
-                  <span class="comment-date">{{ reply.created_at|date:"d M Y" }}</span>
-                </div>
-                <p class="comment-text">{{ reply.content }}</p>
-              </div>
-            </div>
-            {% endif %}
-            {% endfor %}
-          </div>
-          {% endif %}
         </div>
       </div>
       {% empty %}
@@ -175,15 +157,9 @@
       {% endfor %}
     </div>
 
-    <!-- Comment form -->
     <div class="comment-form">
       <h4 style="margin:0 0 1.25rem;font-size:1rem;font-weight:700;">Laisser un commentaire</h4>
-      <span id="replyIndicator" style="display:none;align-items:center;gap:8px;background:rgba(79,70,229,0.08);color:var(--primary);padding:6px 14px;border-radius:100px;font-size:0.82rem;font-weight:600;margin-bottom:1rem;border:1px solid rgba(79,70,229,0.15);">
-        <span class="reply-name"></span>
-        <button onclick="cancelReply()" style="background:none;border:none;cursor:pointer;color:var(--primary);font-size:1rem;line-height:1;padding:0;">✕</button>
-      </span>
       <form id="commentForm" data-content-type="{{ content_type }}" data-object-id="{{ object_id }}">
-        <input type="hidden" name="parent" value="">
         <div class="form-row">
           <div class="form-field">
             <label class="form-label">Nom *</label>

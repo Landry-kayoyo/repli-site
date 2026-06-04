@@ -890,14 +890,25 @@ input:focus, textarea:focus, select:focus {
 
   <!-- Publish bar (appears when content ready) -->
   <div class="ai-publish-bar" id="ai-publish-bar">
-    <div style="font-size:0.73rem;font-weight:700;color:#166534;margin-bottom:6px;">📤 Publier le contenu généré</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-size:0.73rem;font-weight:700;color:#166534;">📤 Publier le contenu généré</span>
+      <button onclick="hidePublishBar()" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:0.9rem;padding:0;line-height:1;">✕</button>
+    </div>
+    <!-- Preview miniature -->
+    <div id="pub-preview" style="display:flex;align-items:center;gap:10px;background:white;border:1px solid #cce0cc;border-radius:8px;padding:8px 10px;margin-bottom:8px;">
+      <div id="pub-thumb" style="width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,#4f46e5,#7c3aed);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">✍️</div>
+      <div style="flex:1;min-width:0;">
+        <div id="pub-preview-title" style="font-size:0.8rem;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Nouveau contenu</div>
+        <div id="pub-preview-type" style="font-size:0.7rem;color:#64748b;margin-top:2px;">Article</div>
+      </div>
+    </div>
     <div class="ai-publish-form">
-      <select class="ai-pub-select" id="pub-type">
-        <option value="article">Article</option>
-        <option value="project">Projet</option>
-        <option value="tip">Astuce</option>
+      <select class="ai-pub-select" id="pub-type" onchange="updatePubPreview()">
+        <option value="article">📝 Article</option>
+        <option value="project">🚀 Projet</option>
+        <option value="tip">💡 Astuce</option>
       </select>
-      <input type="text" class="ai-pub-input" id="pub-title" placeholder="Titre..." maxlength="200">
+      <input type="text" class="ai-pub-input" id="pub-title" placeholder="Titre..." maxlength="200" oninput="updatePubPreview()">
       <select class="ai-pub-select" id="pub-author" title="Auteur">
         <option value="">Auteur...</option>
       </select>
@@ -909,8 +920,8 @@ input:focus, textarea:focus, select:focus {
     </div>
   </div>
 
-  <!-- Quick buttons -->
-  <div class="ai-quick-btns">
+  <!-- Quick buttons — carousel auto-défilant -->
+  <div class="ai-quick-btns" id="aiQuickBtns">
     <button class="ai-quick-btn" onclick="aiQuick('Fais un audit SEO complet de mon site et donne-moi les 5 actions prioritaires.')">📈 SEO</button>
     <button class="ai-quick-btn" onclick="aiQuick('Donne-moi 10 idées d\'articles tech originaux pour mon site basées sur les tendances actuelles.')">💡 Idées</button>
     <button class="ai-quick-btn" onclick="aiQuick('Crée un article complet et professionnel sur les meilleures pratiques en développement web. Format HTML prêt à publier.')">✍️ Article</button>
@@ -919,6 +930,8 @@ input:focus, textarea:focus, select:focus {
     <button class="ai-quick-btn" onclick="showPublishBar()">📤 Créer & Publier</button>
     <button class="ai-quick-btn" onclick="window.open('/admin-ai/newsletter/','_blank')" style="background:#f0fff4;border-color:#86efac;color:#166534;">📧 Newsletter</button>
     <button class="ai-quick-btn" onclick="window.open('/admin-ai/diagnostic/','_blank')" style="background:#fff0f8;border-color:#f9a8d4;color:#be185d;">🔧 Diagnostic</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Génère une astuce pratique et concise sur la sécurité web en 2025. Format HTML.')">🔒 Sécurité</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Rédige un projet de démonstration avec tutorial pas-à-pas sur React et Django.')">⚡ Tuto Projet</button>
   </div>
 
   <!-- Input area -->
@@ -1203,9 +1216,60 @@ function suggestPublish(content) {
   var titleMatch = content.match(/(?:titre[:\s]+|title[:\s]+|^#\s+)(.{10,80})/im);
   if (titleMatch) {
     var pubTitle = document.getElementById('pub-title');
-    if (pubTitle) pubTitle.value = titleMatch[1].replace(/[*#_]/g,'').trim().substring(0, 100);
+    if (pubTitle) {
+      pubTitle.value = titleMatch[1].replace(/[*#_]/g,'').trim().substring(0, 100);
+      updatePubPreview();
+    }
   }
 }
+
+function updatePubPreview() {
+  var typeEl = document.getElementById('pub-type');
+  var titleEl = document.getElementById('pub-title');
+  var previewTitle = document.getElementById('pub-preview-title');
+  var previewType = document.getElementById('pub-preview-type');
+  var thumb = document.getElementById('pub-thumb');
+  if (!typeEl || !titleEl) return;
+  var typeMap = {
+    'article': { label: 'Article', emoji: '✍️', gradient: 'linear-gradient(135deg,#4f46e5,#7c3aed)' },
+    'project': { label: 'Projet', emoji: '🚀', gradient: 'linear-gradient(135deg,#0ea5e9,#2563eb)' },
+    'tip':     { label: 'Astuce', emoji: '💡', gradient: 'linear-gradient(135deg,#f59e0b,#ef4444)' },
+  };
+  var info = typeMap[typeEl.value] || typeMap['article'];
+  if (previewTitle) previewTitle.textContent = titleEl.value.trim() || 'Nouveau contenu';
+  if (previewType) previewType.textContent = info.label;
+  if (thumb) {
+    thumb.style.background = info.gradient;
+    thumb.textContent = info.emoji;
+  }
+}
+
+// Carousel auto-scroll for quick buttons
+(function() {
+  var interval = null;
+  function startCarousel() {
+    var container = document.getElementById('aiQuickBtns');
+    if (!container) return;
+    var step = 90;
+    interval = setInterval(function() {
+      var maxScroll = container.scrollWidth - container.clientWidth;
+      if (maxScroll <= 0) return;
+      if (container.scrollLeft + step >= maxScroll) {
+        container.scrollLeft = 0;
+      } else {
+        container.scrollLeft += step;
+      }
+    }, 3500);
+    container.addEventListener('mouseenter', function() { clearInterval(interval); });
+    container.addEventListener('mouseleave', function() {
+      clearInterval(interval);
+      startCarousel();
+    });
+    container.addEventListener('touchstart', function() { clearInterval(interval); });
+  }
+  document.addEventListener('DOMContentLoaded', startCarousel);
+  setTimeout(startCarousel, 1500);
+})();
 
 function showPublishBar() {
   var bar = document.getElementById('ai-publish-bar');

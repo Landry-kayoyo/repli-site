@@ -13,6 +13,7 @@ class Comment(models.Model):
     content = models.TextField(verbose_name='Commentaire')
     is_approved = models.BooleanField(default=True)
     is_author_reply = models.BooleanField(default=False, verbose_name="Réponse de l'auteur")
+    likes_count = models.PositiveIntegerField(default=0, verbose_name='Likes')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -23,3 +24,14 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Commentaire de {self.author_name}"
+
+
+class CommentLike(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='likes')
+    session_key = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('comment', 'session_key')
+        verbose_name = 'Like commentaire'
+        verbose_name_plural = 'Likes commentaires'

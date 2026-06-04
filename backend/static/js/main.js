@@ -1,4 +1,4 @@
-/* Landry Net — Main JS v4 */
+/* Landry Net — Main JS v5 */
 
 const API_BASE = '/api';
 
@@ -150,12 +150,12 @@ async function loadReactions(contentType, objectId, container) {
 
 function renderReactions(data, contentType, objectId, container) {
   const reactions = [
-    { type: 'like', icon: 'bi-hand-thumbs-up-fill', label: "J'aime" },
-    { type: 'love', icon: 'bi-heart-fill', label: "J'adore" },
-    { type: 'wow', icon: 'bi-emoji-astonished-fill', label: 'Wow' },
-    { type: 'clap', icon: 'bi-hand-clapping-fill', label: 'Bravo' },
-    { type: 'fire', icon: 'bi-fire', label: 'Feu' },
-    { type: 'bookmark', icon: 'bi-bookmark-fill', label: 'Sauvegarder' }
+    { type: 'like',     icon: 'bi-hand-thumbs-up-fill',  label: "J'aime" },
+    { type: 'love',     icon: 'bi-heart-fill',            label: "J'adore" },
+    { type: 'wow',      icon: 'bi-emoji-astonished-fill', label: 'Wow' },
+    { type: 'clap',     icon: 'bi-stars',                 label: 'Bravo' },
+    { type: 'fire',     icon: 'bi-fire',                  label: 'Feu' },
+    { type: 'bookmark', icon: 'bi-bookmark-fill',         label: 'Sauvegarder' }
   ];
 
   container.innerHTML = reactions.map(({ type, icon, label }) => {
@@ -175,11 +175,9 @@ async function toggleReaction(contentType, objectId, reactionType, btn) {
   const container = btn.closest('.reactions-row') || btn.parentElement;
   const wasActive = btn.classList.contains('active');
 
-  // Disable all buttons during request to prevent double-clicks
   const allBtns = container.querySelectorAll('.reaction-btn');
   allBtns.forEach(b => b.style.pointerEvents = 'none');
 
-  // Optimistic update: exclusive — deactivate all others when activating one
   if (!wasActive) {
     allBtns.forEach(other => {
       if (other !== btn && other.classList.contains('active')) {
@@ -202,7 +200,6 @@ async function toggleReaction(contentType, objectId, reactionType, btn) {
     countEl.textContent = c > 1 ? String(c - 1) : '';
   }
 
-  // Animate
   btn.style.transform = 'scale(1.18)';
   setTimeout(() => { btn.style.transform = ''; }, 180);
 
@@ -214,7 +211,6 @@ async function toggleReaction(contentType, objectId, reactionType, btn) {
       body: JSON.stringify({ content_type: contentType, object_id: objectId, reaction_type: reactionType })
     });
     if (!res.ok) {
-      // Revert on error: reload from server
       loadReactions(contentType, objectId, container);
     }
   } catch (e) {
@@ -232,6 +228,7 @@ function initComments() {
   const form = document.getElementById('commentForm');
   if (form) form.addEventListener('submit', submitComment);
   initCommentsShowMore();
+  initCommentLikes();
 }
 
 function initCommentsShowMore() {
@@ -240,7 +237,6 @@ function initCommentsShowMore() {
   const items = list.querySelectorAll('.comment-item-root');
   if (items.length <= COMMENTS_INITIAL) return;
 
-  // Hide older comments (after the 3 most recent which are first)
   items.forEach((item, i) => {
     if (i >= COMMENTS_INITIAL) {
       item.style.display = 'none';
@@ -260,6 +256,55 @@ function initCommentsShowMore() {
   list.parentNode.insertBefore(moreBtn, list.nextSibling);
 }
 
+function initCommentLikes() {
+  const likedSet = JSON.parse(localStorage.getItem('commentLikes') || '[]');
+  document.querySelectorAll('.comment-like-btn').forEach(btn => {
+    const id = parseInt(btn.dataset.commentId);
+    if (likedSet.includes(id)) {
+      btn.classList.add('liked');
+      btn.querySelector('.like-icon')?.classList.replace('bi-heart', 'bi-heart-fill');
+    }
+  });
+}
+
+async function toggleCommentLike(btn, commentId) {
+  btn.style.pointerEvents = 'none';
+  const likedSet = JSON.parse(localStorage.getItem('commentLikes') || '[]');
+  const isLiked = likedSet.includes(commentId);
+  const countEl = btn.querySelector('.comment-like-count');
+  const iconEl = btn.querySelector('.like-icon');
+  const currentCount = parseInt(countEl?.textContent) || 0;
+
+  if (!isLiked) {
+    btn.classList.add('liked');
+    if (iconEl) { iconEl.classList.remove('bi-heart'); iconEl.classList.add('bi-heart-fill'); }
+    if (countEl) countEl.textContent = currentCount + 1;
+    likedSet.push(commentId);
+  } else {
+    btn.classList.remove('liked');
+    if (iconEl) { iconEl.classList.remove('bi-heart-fill'); iconEl.classList.add('bi-heart'); }
+    if (countEl) countEl.textContent = Math.max(0, currentCount - 1);
+    const idx = likedSet.indexOf(commentId);
+    if (idx > -1) likedSet.splice(idx, 1);
+  }
+  localStorage.setItem('commentLikes', JSON.stringify(likedSet));
+
+  btn.style.transform = 'scale(1.2)';
+  setTimeout(() => { btn.style.transform = ''; }, 150);
+
+  try {
+    await fetch(`${API_BASE}/comments/${commentId}/like/`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() }
+    });
+  } catch (e) {
+    console.error('Like error:', e);
+  } finally {
+    btn.style.pointerEvents = '';
+  }
+}
+
 async function submitComment(e) {
   e.preventDefault();
   const form = e.target;
@@ -272,8 +317,6 @@ async function submitComment(e) {
     author_website: form.querySelector('[name="author_website"]')?.value || '',
     content: form.querySelector('[name="content"]').value.trim(),
   };
-  const parentId = form.querySelector('[name="parent"]')?.value;
-  if (parentId) data.parent = parseInt(parentId);
 
   if (!data.author_name || !data.content) return;
 
@@ -290,8 +333,7 @@ async function submitComment(e) {
     });
     if (res.ok || res.status === 201) {
       form.reset();
-      cancelReply();
-      appendNewComment(data, parentId ? parseInt(parentId) : null);
+      appendNewComment(data);
       showToast('Commentaire envoyé ! Il sera visible après modération.', 'success');
     } else {
       throw new Error('Error');
@@ -304,10 +346,8 @@ async function submitComment(e) {
   }
 }
 
-function appendNewComment(data, parentId) {
+function appendNewComment(data) {
   const initial = (data.author_name || '?')[0].toUpperCase();
-  const now = new Date();
-  const dateStr = 'À l\'instant';
 
   const div = document.createElement('div');
   div.className = 'comment-item comment-item-root';
@@ -316,17 +356,19 @@ function appendNewComment(data, parentId) {
     <div class="comment-body">
       <div class="comment-header">
         <span class="comment-author">${escapeHtml(data.author_name)}</span>
-        <span class="comment-date">${dateStr}</span>
+        <span class="comment-date">À l'instant</span>
         <span style="font-size:0.72rem;background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:20px;font-weight:600;"><i class="bi bi-check-circle-fill"></i> Publié</span>
       </div>
       <p class="comment-text">${escapeHtml(data.content)}</p>
+      <button class="comment-like-btn" onclick="toggleCommentLike(this, 0)" data-comment-id="0">
+        <i class="bi bi-heart like-icon"></i>
+        <span class="comment-like-count">0</span>
+      </button>
     </div>`;
 
   const list = document.getElementById('commentsList');
   if (list) {
-    // Insert at top (most recent first)
     list.insertBefore(div, list.firstChild);
-    // Update heading count
     const heading = document.querySelector('.comments-heading');
     if (heading) {
       const match = heading.textContent.match(/\((\d+)\)/);
@@ -336,12 +378,10 @@ function appendNewComment(data, parentId) {
         heading.innerHTML = heading.innerHTML.replace(/Commentaires/, 'Commentaires (1)');
       }
     }
-    // If no comments message was showing, remove it
     const noComment = list.querySelector('.no-comments-msg');
     if (noComment) noComment.remove();
   }
 
-  // Animate in
   div.style.opacity = '0';
   div.style.transform = 'translateY(-10px)';
   requestAnimationFrame(() => {
@@ -349,24 +389,6 @@ function appendNewComment(data, parentId) {
     div.style.opacity = '1';
     div.style.transform = 'translateY(0)';
   });
-}
-
-function setReplyTo(parentId, parentName) {
-  const form = document.getElementById('commentForm');
-  if (!form) return;
-  const pi = form.querySelector('[name="parent"]');
-  if (pi) pi.value = parentId;
-  const ind = document.getElementById('replyIndicator');
-  if (ind) { ind.querySelector('.reply-name').textContent = `Réponse à ${parentName}`; ind.style.display = 'inline-flex'; }
-  form.querySelector('[name="content"]').focus();
-  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function cancelReply() {
-  const form = document.getElementById('commentForm');
-  if (form) { const p = form.querySelector('[name="parent"]'); if (p) p.value = ''; }
-  const ind = document.getElementById('replyIndicator');
-  if (ind) ind.style.display = 'none';
 }
 
 /* ========= NEWSLETTER ========= */

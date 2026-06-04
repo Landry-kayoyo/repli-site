@@ -1,9 +1,10 @@
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.contenttypes.models import ContentType
-from .models import Comment
+from django.db import transaction
+from .models import Comment, CommentLike
 from .serializers import CommentSerializer
 import threading
 
@@ -41,7 +42,6 @@ class CommentListCreateView(APIView):
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
             comment = serializer.save(content_type=ct, object_id=object_id, is_approved=True)
-            # Send email notification to admin in background
             threading.Thread(
                 target=_notify_admin_new_comment,
                 args=(comment, request),
@@ -49,6 +49,38 @@ class CommentListCreateView(APIView):
             ).start()
             return Response({'success': True, 'message': 'Commentaire publié !', 'comment': serializer.data}, status=201)
         return Response(serializer.errors, status=400)
+
+
+class CommentLikeView(APIView):
+    permission_classes = [AllowAny]
+
+    def get_session_key(self, request):
+        if not request.session.session_key:
+            request.session.create()
+        return request.session.session_key
+
+    def post(self, request, pk):
+        try:
+            comment = Comment.objects.get(pk=pk, is_approved=True)
+        except Comment.DoesNotExist:
+            return Response({'error': 'Commentaire introuvable.'}, status=404)
+
+        session_key = self.get_session_key(request)
+
+        with transaction.atomic():
+            comment_fresh = Comment.objects.select_for_update().get(pk=pk)
+            like, created = CommentLike.objects.get_or_create(
+                comment=comment_fresh, session_key=session_key
+            )
+            if created:
+                comment_fresh.likes_count += 1
+                comment_fresh.save(update_fields=['likes_count'])
+                return Response({'action': 'liked', 'likes_count': comment_fresh.likes_count})
+            else:
+                like.delete()
+                comment_fresh.likes_count = max(0, comment_fresh.likes_count - 1)
+                comment_fresh.save(update_fields=['likes_count'])
+                return Response({'action': 'unliked', 'likes_count': comment_fresh.likes_count})
 
 
 def _notify_admin_new_comment(comment, request):
@@ -64,7 +96,6 @@ def _notify_admin_new_comment(comment, request):
         if not admin_email or not s.email_host_user or not s.email_host_password:
             return
 
-        # Determine content URL
         try:
             ct = comment.content_type
             obj = ct.get_object_for_this_type(pk=comment.object_id)

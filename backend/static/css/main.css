@@ -678,7 +678,6 @@ h1, h2, h3, h4, h5, h6 {
 .comment-author { font-weight: 700; font-size: 0.875rem; font-family: var(--font-heading); }
 .comment-date { font-size: 0.75rem; color: var(--text-muted); }
 .comment-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.65; }
-.comment-reply-btn { background: none; border: none; cursor: pointer; font-size: 0.75rem; color: var(--primary); font-weight: 600; padding: 4px 0; margin-top: 6px; }
 .comment-replies { margin-top: 1rem; padding-left: 1.5rem; border-left: 2px solid var(--border); }
 
 /* ========= NEWSLETTER ========= */
@@ -1233,15 +1232,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 .comment-pending-badge i { font-size: 0.68rem; }
 
-/* ========= COMMENTS: REPLY BUTTON ========= */
-.comment-reply-btn {
+/* ========= COMMENTS: LIKE BUTTON ========= */
+.comment-like-btn {
   display: inline-flex; align-items: center; gap: 5px;
-  background: none; border: none; cursor: pointer;
-  color: var(--text-muted); font-size: 0.8rem; font-weight: 500;
-  padding: 4px 8px; border-radius: 6px; margin-top: 6px;
-  transition: all 0.15s;
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  color: var(--text-muted); font-size: 0.78rem; font-weight: 600;
+  padding: 4px 10px; border-radius: 20px; margin-top: 8px;
+  transition: all 0.18s; user-select: none;
 }
-.comment-reply-btn:hover {
-  color: var(--primary); background: var(--primary-glow);
+.comment-like-btn:hover {
+  color: #e11d48; border-color: #fda4af; background: #fff1f2;
 }
-.comment-reply-btn svg { flex-shrink: 0; }
+.comment-like-btn.liked {
+  color: #e11d48; border-color: #fda4af; background: #fff1f2;
+}
+.comment-like-btn .like-icon { font-size: 0.82rem; }
+.comment-like-count { font-size: 0.75rem; }

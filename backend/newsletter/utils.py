@@ -248,9 +248,9 @@ def send_welcome_email(subscriber_email, subscriber_name=''):
     logo_html = f'<img src="{frontend_url}{s.logo.url}" alt="{s.site_name}" style="height:60px;width:60px;border-radius:16px;object-fit:cover;margin-bottom:14px;">' if s.logo else f'<div class="logo-circle">{(s.site_name[:2] if s.site_name else "LN").upper()}</div>'
     try:
         sub = Subscriber.objects.get(email=subscriber_email)
-        unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
+        unsub_url = f"{frontend_url}/newsletter/desabonnement/?token={sub.token}"
     except Exception:
-        unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/"
+        unsub_url = f"{frontend_url}/newsletter/desabonnement/"
 
     from_email = f"{s.newsletter_from_name or s.site_name} <{s.email_host_user}>"
     subject = f"🎉 Bienvenue sur {s.site_name} — Abonnement confirmé !"
@@ -341,7 +341,7 @@ def send_campaign(campaign_id):
     logo_html = f'<img src="{frontend_url}{s.logo.url}" alt="{s.site_name}" style="height:60px;width:60px;border-radius:16px;object-fit:cover;margin-bottom:14px;">' if s.logo else f'<div class="logo-circle">{(s.site_name[:2] if s.site_name else "LN").upper()}</div>'
 
     for sub in subscribers:
-        unsub_url = f"{frontend_url}/api/newsletter/unsubscribe/?token={sub.token}"
+        unsub_url = f"{frontend_url}/newsletter/desabonnement/?token={sub.token}"
         greeting_name = sub.name.split()[0] if sub.name else 'vous'
 
         body_html = f"""
