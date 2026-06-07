@@ -324,10 +324,8 @@ def handler404(request, exception):
 
 
 def robots_txt(request):
-    s = get_settings()
-    scheme = 'https' if request.is_secure() else 'http'
-    host = request.get_host()
-    site_url = f"{scheme}://{host}"
+    from django.conf import settings as django_settings
+    site_url = django_settings.SITE_URL.rstrip('/')
     content = f"""User-agent: *
 Allow: /
 Disallow: /admin/

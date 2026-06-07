@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'articles',
     'projects',
     'tips',
-    'portfolio',
     'contact',
     'newsletter',
     'comments',
