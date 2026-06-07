@@ -1,0 +1,201 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Test Facebook — Landry Net Admin{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;margin:0 auto;padding:4px 0;">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1a3a6b,#1877F2);color:white;border-radius:16px;padding:28px 32px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+    <div style="width:56px;height:56px;background:rgba(255,255,255,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;">📘</div>
+    <div style="flex:1;">
+      <h1 style="margin:0;font-size:1.4rem;font-weight:800;">Test Publication Facebook</h1>
+      <p style="margin:4px 0 0;color:rgba(255,255,255,0.75);font-size:0.85rem;">Vérifie la connexion · Teste les permissions · Publie un post de test</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="/admin/" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:0.82rem;font-weight:600;">← Admin</a>
+      <a href="/admin/core/sitesettings/1/change/" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:0.82rem;font-weight:600;">⚙️ Paramètres</a>
+    </div>
+  </div>
+
+  <!-- Status card -->
+  <div style="background:white;border-radius:14px;border:1px solid #dee2e6;margin-bottom:20px;overflow:hidden;">
+    <div style="background:{% if configured %}linear-gradient(90deg,#155724,#1e7e34){% else %}linear-gradient(90deg,#7b1521,#c0392b){% endif %};padding:14px 20px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.1rem;">{% if configured %}✅{% else %}⚠️{% endif %}</span>
+      <span style="color:white;font-weight:700;font-size:0.9rem;">Configuration Facebook</span>
+      <span style="margin-left:auto;background:rgba(255,255,255,0.25);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">
+        {% if configured %}Configuré{% else %}Non configuré{% endif %}
+      </span>
+    </div>
+    <div style="padding:20px;">
+      {% if configured %}
+        <div style="display:flex;flex-wrap:wrap;gap:16px;">
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:0.75rem;color:#6b7280;font-weight:600;text-transform:uppercase;margin-bottom:4px;">ID de la Page</div>
+            <div style="font-family:monospace;background:#f8f9fa;padding:8px 12px;border-radius:8px;font-size:0.9rem;border:1px solid #e9ecef;">{{ s.facebook_page_id }}</div>
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:0.75rem;color:#6b7280;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Token d'accès</div>
+            <div style="font-family:monospace;background:#f8f9fa;padding:8px 12px;border-radius:8px;font-size:0.9rem;border:1px solid #e9ecef;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ s.facebook_page_token|slice:":30" }}…</div>
+          </div>
+          <div style="flex:0 0 auto;">
+            <div style="font-size:0.75rem;color:#6b7280;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Auto-post</div>
+            <div style="padding:8px 16px;border-radius:8px;font-size:0.9rem;font-weight:700;{% if auto_post %}background:#d4edda;color:#155724;border:1px solid #c3e6cb;{% else %}background:#fff3cd;color:#856404;border:1px solid #ffc107;{% endif %}">
+              {% if auto_post %}✅ Activé{% else %}⏸ Désactivé{% endif %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div style="text-align:center;padding:20px;">
+          <p style="color:#6b7280;margin-bottom:16px;">Facebook n'est pas encore configuré. Remplis l'ID de ta Page et ton Token dans les Paramètres du site.</p>
+          <a href="/admin/core/sitesettings/1/change/" style="background:#1877F2;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.9rem;">⚙️ Configurer maintenant</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if configured %}
+
+  <!-- Guide rapide -->
+  <div style="background:white;border-radius:14px;border:1px solid #dee2e6;margin-bottom:20px;overflow:hidden;">
+    <div style="background:linear-gradient(90deg,#0c2d6b,#1877F2);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+      <span style="color:white;font-weight:700;font-size:0.9rem;">📋 Comment obtenir un Page Access Token valide</span>
+    </div>
+    <div style="padding:20px;font-size:0.9rem;color:#374151;line-height:1.7;">
+      <ol style="margin:0;padding-left:1.4rem;">
+        <li>Va sur <a href="https://developers.facebook.com/tools/explorer/" target="_blank" style="color:#1877F2;font-weight:600;">Meta for Developers → Graph API Explorer</a></li>
+        <li>En haut à droite, sélectionne ton <strong>App Facebook</strong> (ou crée-en une gratuite)</li>
+        <li>Clique <strong>"Generate Access Token"</strong> → choisis ta <strong>Page</strong> (pas ton profil personnel)</li>
+        <li>Coche ces permissions : <code style="background:#f0f4ff;padding:1px 6px;border-radius:4px;">pages_manage_posts</code> + <code style="background:#f0f4ff;padding:1px 6px;border-radius:4px;">pages_read_engagement</code></li>
+        <li>Clique <strong>"Get Page Access Token"</strong> et copie le token généré</li>
+        <li>Colle-le dans <a href="/admin/core/sitesettings/1/change/" style="color:#1877F2;">Paramètres du site → Token d'accès de la Page</a></li>
+      </ol>
+      <div style="margin-top:14px;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:12px 16px;font-size:0.82rem;color:#7b5c00;">
+        <strong>⚠️ Important :</strong> Les tokens courts expirent en 1h. Pour un token permanent, utilise l'outil
+        <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" style="color:#1877F2;">Access Token Debugger</a>
+        → <em>"Extend Access Token"</em> pour obtenir un token valable 60 jours (ou permanent pour les Pages).
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+
+    <!-- Test connexion -->
+    <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;">
+      <div style="background:linear-gradient(90deg,#1565c0,#1976d2);padding:14px 20px;">
+        <span style="color:white;font-weight:700;font-size:0.9rem;">🔍 Étape 1 — Vérifier la connexion</span>
+      </div>
+      <div style="padding:20px;">
+        <p style="color:#6b7280;font-size:0.85rem;margin:0 0 16px;">Vérifie que ton token est valide, que les permissions sont accordées et que ta Page est accessible.</p>
+        <button onclick="testConnection()" id="btnConnect"
+          style="width:100%;background:#1877F2;color:white;border:none;padding:11px;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;">
+          🔍 Tester la connexion
+        </button>
+        <div id="connectResult" style="margin-top:14px;display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Test post -->
+    <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;">
+      <div style="background:linear-gradient(90deg,#1b5e20,#2e7d32);padding:14px 20px;">
+        <span style="color:white;font-weight:700;font-size:0.9rem;">🚀 Étape 2 — Publier un post de test</span>
+      </div>
+      <div style="padding:20px;">
+        <p style="color:#6b7280;font-size:0.85rem;margin:0 0 16px;">Publie un vrai message de test sur ta Page Facebook pour confirmer que tout fonctionne.</p>
+        <button onclick="testPost()" id="btnPost"
+          style="width:100%;background:#2e7d32;color:white;border:none;padding:11px;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;">
+          📘 Publier un post de test
+        </button>
+        <div id="postResult" style="margin-top:14px;display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  {% else %}
+
+  <!-- Not configured message -->
+  <div style="background:white;border-radius:14px;border:1px solid #dee2e6;padding:40px;text-align:center;">
+    <div style="font-size:3rem;margin-bottom:16px;">📘</div>
+    <h3 style="color:#374151;margin:0 0 8px;">Configuration requise</h3>
+    <p style="color:#6b7280;margin:0 0 20px;">Configure d'abord ton ID de Page et ton Token dans les Paramètres du site.</p>
+    <a href="/admin/core/sitesettings/1/change/" style="background:#1877F2;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;">⚙️ Aller aux Paramètres</a>
+  </div>
+
+  {% endif %}
+
+</div>
+
+{% if configured %}
+<script>
+const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+
+function stepHtml(steps) {
+  return steps.map(s => {
+    const colors = {ok:'#d4edda:#155724:#c3e6cb', error:'#f8d7da:#721c24:#f5c6cb', warn:'#fff3cd:#856404:#ffe082'};
+    const [bg, fg, border] = (colors[s.status] || colors.warn).split(':');
+    return `<div style="background:${bg};color:${fg};border:1px solid ${border};border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:0.85rem;">
+      <strong>${s.step}</strong><br><span>${s.msg}</span>
+    </div>`;
+  }).join('');
+}
+
+async function testConnection() {
+  const btn = document.getElementById('btnConnect');
+  const res = document.getElementById('connectResult');
+  btn.disabled = true; btn.textContent = '⏳ Vérification…';
+  res.style.display = 'none';
+  try {
+    const r = await fetch('/admin-ai/facebook/test-connection/', {
+      method: 'POST', headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'}
+    });
+    const data = await r.json();
+    res.innerHTML = stepHtml(data.steps || []);
+    res.style.display = 'block';
+    if (data.success) {
+      btn.style.background = '#2e7d32'; btn.textContent = '✅ Connexion validée !';
+    } else {
+      btn.style.background = '#c0392b'; btn.textContent = '❌ Échec — voir détails';
+    }
+  } catch(e) {
+    res.innerHTML = `<div style="background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;border-radius:8px;padding:10px 14px;font-size:0.85rem;">❌ Erreur réseau : ${e.message}</div>`;
+    res.style.display = 'block';
+    btn.style.background = '#c0392b'; btn.textContent = '❌ Erreur réseau';
+  }
+  btn.disabled = false;
+}
+
+async function testPost() {
+  if (!confirm('Cela va publier un vrai post sur ta Page Facebook. Continuer ?')) return;
+  const btn = document.getElementById('btnPost');
+  const res = document.getElementById('postResult');
+  btn.disabled = true; btn.textContent = '⏳ Publication en cours…';
+  res.style.display = 'none';
+  try {
+    const r = await fetch('/admin-ai/facebook/test-post/', {
+      method: 'POST', headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'}
+    });
+    const data = await r.json();
+    if (data.success) {
+      res.innerHTML = `<div style="background:#d4edda;color:#155724;border:1px solid #c3e6cb;border-radius:8px;padding:12px 14px;font-size:0.85rem;">
+        ${data.msg}
+        ${data.post_url ? `<br><br><a href="${data.post_url}" target="_blank" style="color:#155724;font-weight:700;">👉 Voir le post sur Facebook</a>` : ''}
+      </div>`;
+      btn.style.background = '#2e7d32'; btn.textContent = '✅ Posté avec succès !';
+    } else {
+      res.innerHTML = `<div style="background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;border-radius:8px;padding:12px 14px;font-size:0.85rem;">${data.msg}</div>`;
+      btn.style.background = '#c0392b'; btn.textContent = '❌ Échec — voir détails';
+    }
+    res.style.display = 'block';
+  } catch(e) {
+    res.innerHTML = `<div style="background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;border-radius:8px;padding:10px 14px;font-size:0.85rem;">❌ Erreur réseau : ${e.message}</div>`;
+    res.style.display = 'block';
+    btn.style.background = '#c0392b'; btn.textContent = '❌ Erreur réseau';
+  }
+  btn.disabled = false;
+}
+</script>
+{% endif %}
+{% endblock %}

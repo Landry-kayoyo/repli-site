@@ -442,6 +442,155 @@ def editorial_calendar(request):
 # ──────────────────────────────────────────────
 
 @staff_member_required
+def facebook_diagnostic(request):
+    """Page de test de la connexion Facebook."""
+    from core.models import SiteSettings
+    s, _ = SiteSettings.objects.get_or_create(pk=1)
+    return render(request, 'admin/facebook_diagnostic.html', {
+        'title': 'Test Facebook',
+        's': s,
+        'configured': bool(s.facebook_page_id and s.facebook_page_token),
+        'auto_post': s.facebook_auto_post,
+    })
+
+
+@staff_member_required
+@csrf_exempt
+@require_POST
+def facebook_test_connection(request):
+    """Vérifie que le token + page_id sont valides via l'API Graph."""
+    import urllib.request as ureq
+    import urllib.parse
+    from core.models import SiteSettings
+
+    s, _ = SiteSettings.objects.get_or_create(pk=1)
+    page_id = s.facebook_page_id.strip()
+    token = s.facebook_page_token.strip()
+
+    if not page_id or not token:
+        return JsonResponse({
+            'success': False,
+            'steps': [{'step': 'Configuration', 'status': 'error',
+                        'msg': '❌ ID de page ou token manquant — remplis les champs dans Paramètres du site.'}]
+        })
+
+    steps = []
+
+    # Étape 1 : vérifier le token (me?access_token=...)
+    try:
+        url = f"https://graph.facebook.com/v19.0/me?access_token={urllib.parse.quote(token)}&fields=id,name,type"
+        req = ureq.Request(url, headers={'User-Agent': 'LandryNet/1.0'})
+        with ureq.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read().decode())
+            name = data.get('name', '?')
+            fb_id = data.get('id', '?')
+            steps.append({'step': 'Validation du token', 'status': 'ok',
+                           'msg': f'✅ Token valide — Page : <strong>{name}</strong> (ID: {fb_id})'})
+    except Exception as e:
+        err = str(e)
+        if '190' in err or 'Invalid OAuth' in err or 'OAuthException' in err:
+            msg = '❌ Token invalide ou expiré — génère un nouveau Page Access Token sur Meta for Developers.'
+        elif '400' in err:
+            msg = f'❌ Requête invalide : {err}'
+        else:
+            msg = f'❌ Erreur réseau : {err}'
+        return JsonResponse({'success': False, 'steps': [{'step': 'Validation du token', 'status': 'error', 'msg': msg}]})
+
+    # Étape 2 : vérifier les permissions
+    try:
+        url = f"https://graph.facebook.com/v19.0/me/permissions?access_token={urllib.parse.quote(token)}"
+        req = ureq.Request(url, headers={'User-Agent': 'LandryNet/1.0'})
+        with ureq.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read().decode())
+            perms = {p['permission']: p['status'] for p in data.get('data', [])}
+            needed = ['pages_manage_posts', 'pages_read_engagement']
+            granted = [p for p in needed if perms.get(p) == 'granted']
+            missing = [p for p in needed if p not in granted]
+            if missing:
+                steps.append({'step': 'Permissions', 'status': 'warn',
+                               'msg': f'⚠️ Permissions manquantes : <code>{", ".join(missing)}</code> — retourne dans Graph API Explorer et coche-les.'})
+            else:
+                steps.append({'step': 'Permissions', 'status': 'ok',
+                               'msg': '✅ Toutes les permissions nécessaires sont accordées (<code>pages_manage_posts</code>, <code>pages_read_engagement</code>)'})
+    except Exception as e:
+        steps.append({'step': 'Permissions', 'status': 'warn', 'msg': f'⚠️ Impossible de vérifier les permissions : {e}'})
+
+    # Étape 3 : vérifier l'accès à la page
+    try:
+        url = f"https://graph.facebook.com/v19.0/{urllib.parse.quote(page_id)}?access_token={urllib.parse.quote(token)}&fields=id,name,fan_count"
+        req = ureq.Request(url, headers={'User-Agent': 'LandryNet/1.0'})
+        with ureq.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read().decode())
+            fans = data.get('fan_count', 'N/A')
+            steps.append({'step': "Accès à la Page", 'status': 'ok',
+                           'msg': f'✅ Page accessible — <strong>{data.get("name")}</strong> · {fans} abonnés'})
+    except Exception as e:
+        err = str(e)
+        if '100' in err or 'nodes' in err.lower():
+            msg = f'❌ Page introuvable avec cet ID ({page_id}) — vérifie l\'ID de ta page.'
+        else:
+            msg = f'❌ Erreur d\'accès à la page : {err}'
+        steps.append({'step': "Accès à la Page", 'status': 'error', 'msg': msg})
+
+    all_ok = all(s['status'] == 'ok' for s in steps)
+    return JsonResponse({'success': all_ok, 'steps': steps})
+
+
+@staff_member_required
+@csrf_exempt
+@require_POST
+def facebook_test_post(request):
+    """Publie un vrai post de test sur la Page Facebook."""
+    import urllib.request as ureq
+    import urllib.parse
+    from core.models import SiteSettings
+    from django.conf import settings as django_settings
+
+    s, _ = SiteSettings.objects.get_or_create(pk=1)
+    page_id = s.facebook_page_id.strip()
+    token = s.facebook_page_token.strip()
+
+    if not page_id or not token:
+        return JsonResponse({'success': False, 'msg': '❌ Configuration Facebook manquante.'})
+
+    site_url = getattr(django_settings, 'SITE_URL', '').rstrip('/')
+    message = (
+        f"🎉 Test de publication automatique depuis Landry Net !\n\n"
+        f"Si tu vois ce message, la connexion entre ton site et ta Page Facebook fonctionne parfaitement. "
+        f"Les futurs articles, projets et astuces seront publiés automatiquement ici.\n\n"
+        f"🌐 {site_url}"
+    )
+
+    try:
+        data = urllib.parse.urlencode({
+            'message': message,
+            'access_token': token,
+        }).encode('utf-8')
+        req = ureq.Request(
+            f'https://graph.facebook.com/v19.0/{page_id}/feed',
+            data=data, method='POST',
+            headers={'User-Agent': 'LandryNet/1.0'},
+        )
+        with ureq.urlopen(req, timeout=10) as r:
+            result = json.loads(r.read().decode())
+            post_id = result.get('id', '')
+            post_url = f"https://www.facebook.com/{post_id.replace('_', '/posts/')}" if post_id else ''
+            return JsonResponse({
+                'success': True,
+                'msg': f'✅ Post publié avec succès sur ta Page Facebook !',
+                'post_id': post_id,
+                'post_url': post_url,
+            })
+    except Exception as e:
+        err = str(e)
+        if '200' in err or 'permission' in err.lower():
+            msg = '❌ Permission refusée — assure-toi que le token est un <strong>Page Access Token</strong> (pas un User Token) avec la permission <code>pages_manage_posts</code>.'
+        else:
+            msg = f'❌ Erreur lors de la publication : {err}'
+        return JsonResponse({'success': False, 'msg': msg})
+
+
+@staff_member_required
 def seo_diagnostic(request):
     """Page de diagnostic SEO : robots.txt, sitemap, pings moteurs."""
     import urllib.request as ureq

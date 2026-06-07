@@ -50,6 +50,9 @@ urlpatterns = [
     path('admin-ai/calendar/', __import__('core.diagnostic_views', fromlist=['editorial_calendar']).editorial_calendar, name='admin-ai-calendar'),
     path('admin-ai/seo/', __import__('core.diagnostic_views', fromlist=['seo_diagnostic']).seo_diagnostic, name='admin-ai-seo'),
     path('admin-ai/seo/ping/', __import__('core.diagnostic_views', fromlist=['seo_ping_now']).seo_ping_now, name='admin-ai-seo-ping'),
+    path('admin-ai/facebook/', __import__('core.diagnostic_views', fromlist=['facebook_diagnostic']).facebook_diagnostic, name='admin-ai-facebook'),
+    path('admin-ai/facebook/test-connection/', __import__('core.diagnostic_views', fromlist=['facebook_test_connection']).facebook_test_connection, name='admin-ai-facebook-test-connection'),
+    path('admin-ai/facebook/test-post/', __import__('core.diagnostic_views', fromlist=['facebook_test_post']).facebook_test_post, name='admin-ai-facebook-test-post'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('rss/', include('core.feeds_urls')),
 
