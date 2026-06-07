@@ -435,3 +435,84 @@ def editorial_calendar(request):
         'events_json': json.dumps(events),
         'title': 'Calendrier Éditorial',
     })
+
+
+# ──────────────────────────────────────────────
+# SEO Diagnostic
+# ──────────────────────────────────────────────
+
+@staff_member_required
+def seo_diagnostic(request):
+    """Page de diagnostic SEO : robots.txt, sitemap, pings moteurs."""
+    import urllib.request as ureq
+    from django.conf import settings as django_settings
+
+    site_url = getattr(django_settings, 'SITE_URL', '').rstrip('/')
+
+    def _fetch(url):
+        try:
+            req = ureq.Request(url, headers={'User-Agent': 'LandryNet-SEO-Check/1.0'})
+            with ureq.urlopen(req, timeout=8) as r:
+                body = r.read().decode('utf-8', errors='replace')
+                return {'ok': True, 'status': r.status, 'body': body, 'error': None}
+        except Exception as e:
+            return {'ok': False, 'status': None, 'body': '', 'error': str(e)}
+
+    robots_url = f"{site_url}/robots.txt" if site_url else ''
+    sitemap_url = f"{site_url}/sitemap.xml" if site_url else ''
+
+    robots_result = _fetch(robots_url) if robots_url else {'ok': False, 'status': None, 'body': '', 'error': 'SITE_URL non configuré'}
+    sitemap_result = _fetch(sitemap_url) if sitemap_url else {'ok': False, 'status': None, 'body': '', 'error': 'SITE_URL non configuré'}
+
+    # Count URLs in sitemap
+    sitemap_url_count = 0
+    if sitemap_result['ok']:
+        sitemap_url_count = sitemap_result['body'].count('<loc>')
+
+    context = {
+        'title': 'Diagnostic SEO',
+        'site_url': site_url,
+        'robots_url': robots_url,
+        'sitemap_url': sitemap_url,
+        'robots': robots_result,
+        'sitemap': sitemap_result,
+        'sitemap_url_count': sitemap_url_count,
+        'opts': {'app_label': 'core'},
+    }
+    return render(request, 'admin/seo_diagnostic.html', context)
+
+
+@staff_member_required
+@csrf_exempt
+@require_POST
+def seo_ping_now(request):
+    """Déclenche manuellement un ping Google + Bing et retourne le résultat."""
+    import urllib.request as ureq
+    from django.conf import settings as django_settings
+    from django.utils import timezone
+
+    site_url = getattr(django_settings, 'SITE_URL', '').rstrip('/')
+    if not site_url:
+        return JsonResponse({'success': False, 'error': 'SITE_URL non configuré'})
+
+    sitemap_url = f"{site_url}/sitemap.xml"
+    results = []
+
+    engines = {
+        'Google': f'https://www.google.com/ping?sitemap={sitemap_url}',
+        'Bing':   f'https://www.bing.com/ping?sitemap={sitemap_url}',
+    }
+    for name, url in engines.items():
+        try:
+            req = ureq.Request(url, headers={'User-Agent': 'LandryNet-SitemapPing/1.0'})
+            with ureq.urlopen(req, timeout=8) as r:
+                results.append({'engine': name, 'status': r.status, 'ok': r.status in (200, 204)})
+        except Exception as e:
+            results.append({'engine': name, 'status': None, 'ok': False, 'error': str(e)})
+
+    return JsonResponse({
+        'success': True,
+        'results': results,
+        'sitemap_url': sitemap_url,
+        'pinged_at': timezone.now().strftime('%d/%m/%Y à %H:%M:%S'),
+    })

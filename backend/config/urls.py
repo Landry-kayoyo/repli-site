@@ -48,6 +48,8 @@ urlpatterns = [
     path('admin-ai/internal-links/', __import__('core.ai_views', fromlist=['ai_internal_links']).ai_internal_links, name='admin-ai-internal-links'),
     path('admin-ai/check-duplicate/', __import__('core.ai_views', fromlist=['ai_check_duplicate']).ai_check_duplicate, name='admin-ai-check-duplicate'),
     path('admin-ai/calendar/', __import__('core.diagnostic_views', fromlist=['editorial_calendar']).editorial_calendar, name='admin-ai-calendar'),
+    path('admin-ai/seo/', __import__('core.diagnostic_views', fromlist=['seo_diagnostic']).seo_diagnostic, name='admin-ai-seo'),
+    path('admin-ai/seo/ping/', __import__('core.diagnostic_views', fromlist=['seo_ping_now']).seo_ping_now, name='admin-ai-seo-ping'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('rss/', include('core.feeds_urls')),
 

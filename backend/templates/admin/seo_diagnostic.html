@@ -1,0 +1,315 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Diagnostic SEO — Landry Net Admin{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;padding:4px 0;">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#0d3b2e,#134e35);color:white;border-radius:16px;padding:28px 32px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+    <div style="width:56px;height:56px;background:rgba(16,185,129,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;">🔍</div>
+    <div style="flex:1;">
+      <h1 style="margin:0;font-size:1.4rem;font-weight:800;">Diagnostic SEO</h1>
+      <p style="margin:4px 0 0;color:rgba(255,255,255,0.7);font-size:0.85rem;">robots.txt · Sitemap · Ping Google &amp; Bing · Configuration SITE_URL</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="/admin/" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:0.82rem;font-weight:600;">← Admin</a>
+      <a href="/admin-ai/diagnostic/" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:0.82rem;font-weight:600;">🔧 Diagnostic complet</a>
+    </div>
+  </div>
+
+  <!-- SITE_URL Status -->
+  <div style="background:white;border-radius:14px;border:1px solid #dee2e6;margin-bottom:20px;overflow:hidden;">
+    <div style="background:linear-gradient(90deg,#0f766e,#14b8a6);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.1rem;">🌐</span>
+      <span style="color:white;font-weight:700;font-size:0.9rem;">Configuration SITE_URL</span>
+      {% if site_url %}
+        <span style="margin-left:auto;background:rgba(255,255,255,0.25);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">✅ Configuré</span>
+      {% else %}
+        <span style="margin-left:auto;background:#dc3545;color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">⚠️ Non configuré</span>
+      {% endif %}
+    </div>
+    <div style="padding:20px;">
+      {% if site_url %}
+        <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;">
+          <span style="font-size:1.3rem;">✅</span>
+          <div>
+            <div style="font-weight:700;color:#166534;font-size:0.9rem;">URL de production détectée</div>
+            <code style="font-size:0.85rem;color:#0f766e;font-weight:600;">{{ site_url }}</code>
+          </div>
+        </div>
+      {% else %}
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px;margin-bottom:14px;">
+          <strong style="color:#991b1b;">⚠️ SITE_URL non configuré</strong><br>
+          <p style="margin:8px 0 0;color:#7f1d1d;font-size:0.85rem;">
+            Google et Bing ne peuvent pas recevoir la bonne URL du sitemap. Configurez <code>SITE_URL</code> selon votre hébergeur.
+          </p>
+        </div>
+      {% endif %}
+
+      <!-- PythonAnywhere Guide -->
+      <div style="background:#fff8e7;border:1px solid #ffd97d;border-radius:10px;padding:16px;margin-top:14px;">
+        <strong style="color:#92400e;">📘 Où configurer SITE_URL sur PythonAnywhere ?</strong>
+        <ol style="margin:10px 0 0;padding-left:20px;color:#78350f;font-size:0.83rem;line-height:1.8;">
+          <li>Connectez-vous sur <a href="https://www.pythonanywhere.com" target="_blank" style="color:#0d6efd;">pythonanywhere.com</a></li>
+          <li>Allez dans <strong>Files</strong> → naviguez vers votre dossier projet</li>
+          <li>Ouvrez (ou créez) le fichier <code>backend/.env</code></li>
+          <li>Ajoutez la ligne : <code style="background:#fde68a;padding:2px 6px;border-radius:4px;">SITE_URL=https://landryit.pythonanywhere.com</code></li>
+          <li>Sauvegardez, puis allez dans <strong>Web</strong> → cliquez <strong>Reload</strong> sur votre domaine</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- robots.txt Check -->
+    <div class="col-12 col-lg-6">
+      <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;height:100%;">
+        <div style="background:{% if robots.ok %}linear-gradient(90deg,#059669,#10b981){% else %}linear-gradient(90deg,#dc2626,#ef4444){% endif %};padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">🤖</span>
+          <span style="color:white;font-weight:700;font-size:0.9rem;">robots.txt</span>
+          {% if robots.ok %}
+            <span style="margin-left:auto;background:rgba(255,255,255,0.25);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">✅ Accessible — HTTP {{ robots.status }}</span>
+          {% else %}
+            <span style="margin-left:auto;background:rgba(0,0,0,0.2);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">❌ Inaccessible</span>
+          {% endif %}
+        </div>
+        <div style="padding:20px;">
+          <div style="margin-bottom:12px;">
+            <span style="font-size:0.75rem;color:#6c757d;font-weight:600;text-transform:uppercase;">URL vérifiée</span><br>
+            <a href="{{ robots_url }}" target="_blank" style="color:#0d6efd;font-size:0.82rem;word-break:break-all;">{{ robots_url|default:"—" }}</a>
+          </div>
+
+          {% if robots.ok %}
+            <div style="background:#f8f9fa;border-radius:8px;padding:14px;font-family:monospace;font-size:0.75rem;color:#212529;white-space:pre-wrap;max-height:200px;overflow-y:auto;border:1px solid #e9ecef;">{{ robots.body }}</div>
+            <div style="margin-top:12px;display:flex;gap:8px;">
+              <a href="{{ robots_url }}" target="_blank" style="background:#0d6efd;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:0.78rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                <i class="bi bi-box-arrow-up-right"></i> Ouvrir
+              </a>
+              <a href="https://search.google.com/search-console/robots-txt?url={{ site_url|urlencode }}" target="_blank" style="background:#f1f3f4;color:#3c4043;border:none;border-radius:8px;padding:8px 14px;font-size:0.78rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                🔍 Tester dans Google
+              </a>
+            </div>
+          {% else %}
+            <div style="background:#fef2f2;border-radius:8px;padding:14px;font-size:0.82rem;color:#991b1b;">
+              <strong>Erreur :</strong> {{ robots.error }}
+            </div>
+            <div style="margin-top:10px;background:#fff8e7;border-radius:8px;padding:12px;font-size:0.8rem;color:#92400e;">
+              💡 <strong>Cause probable :</strong> Le site est hors ligne ou SITE_URL pointe vers un serveur inaccessible depuis Replit. Sur PythonAnywhere, vérifiez que l'app est active (Web → Reload).
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sitemap Check -->
+    <div class="col-12 col-lg-6">
+      <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;height:100%;">
+        <div style="background:{% if sitemap.ok %}linear-gradient(90deg,#0891b2,#06b6d4){% else %}linear-gradient(90deg,#dc2626,#ef4444){% endif %};padding:14px 20px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">🗺️</span>
+          <span style="color:white;font-weight:700;font-size:0.9rem;">sitemap.xml</span>
+          {% if sitemap.ok %}
+            <span style="margin-left:auto;background:rgba(255,255,255,0.25);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">✅ {{ sitemap_url_count }} URL{{ sitemap_url_count|pluralize:"s" }}</span>
+          {% else %}
+            <span style="margin-left:auto;background:rgba(0,0,0,0.2);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">❌ Inaccessible</span>
+          {% endif %}
+        </div>
+        <div style="padding:20px;">
+          <div style="margin-bottom:12px;">
+            <span style="font-size:0.75rem;color:#6c757d;font-weight:600;text-transform:uppercase;">URL vérifiée</span><br>
+            <a href="{{ sitemap_url }}" target="_blank" style="color:#0d6efd;font-size:0.82rem;word-break:break-all;">{{ sitemap_url|default:"—" }}</a>
+          </div>
+
+          {% if sitemap.ok %}
+            <div style="background:#e0f2fe;border-radius:8px;padding:14px;text-align:center;margin-bottom:14px;">
+              <div style="font-size:2rem;font-weight:800;color:#0369a1;">{{ sitemap_url_count }}</div>
+              <div style="font-size:0.8rem;color:#0891b2;font-weight:600;">URLs indexables dans le sitemap</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a href="{{ sitemap_url }}" target="_blank" style="background:#0891b2;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:0.78rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                <i class="bi bi-box-arrow-up-right"></i> Ouvrir
+              </a>
+              <a href="https://search.google.com/search-console/sitemaps" target="_blank" style="background:#f1f3f4;color:#3c4043;border:none;border-radius:8px;padding:8px 14px;font-size:0.78rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                📊 Google Search Console
+              </a>
+            </div>
+          {% else %}
+            <div style="background:#fef2f2;border-radius:8px;padding:14px;font-size:0.82rem;color:#991b1b;">
+              <strong>Erreur :</strong> {{ sitemap.error }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Ping Panel -->
+  <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;margin-top:20px;">
+    <div style="background:linear-gradient(90deg,#7c3aed,#8b5cf6);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.1rem;">📡</span>
+      <span style="color:white;font-weight:700;font-size:0.9rem;">Ping moteurs de recherche</span>
+      <span style="margin-left:auto;background:rgba(255,255,255,0.2);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;">Automatique à chaque publication · Manuel ci-dessous</span>
+    </div>
+    <div style="padding:24px;">
+
+      <p style="color:#6c757d;font-size:0.85rem;margin-top:0;">
+        Les moteurs de recherche sont <strong>pingés automatiquement</strong> dès qu'un article, projet ou astuce est publié.
+        Utilisez le bouton ci-dessous pour forcer un ping immédiat (utile après une mise à jour du sitemap).
+      </p>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;">
+
+        <!-- Google Engine -->
+        <div style="flex:1;min-width:200px;background:#f8f9fa;border-radius:12px;padding:18px;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+          <div style="font-weight:700;font-size:0.9rem;color:#212529;">Google</div>
+          <div style="font-size:0.75rem;color:#6c757d;margin-top:4px;">google.com/ping</div>
+          <div id="google-status" style="margin-top:10px;">
+            <span style="background:#e9ecef;color:#6c757d;padding:4px 12px;border-radius:20px;font-size:0.75rem;">En attente de ping…</span>
+          </div>
+        </div>
+
+        <!-- Bing Engine -->
+        <div style="flex:1;min-width:200px;background:#f8f9fa;border-radius:12px;padding:18px;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:8px;">🌐</div>
+          <div style="font-weight:700;font-size:0.9rem;color:#212529;">Bing</div>
+          <div style="font-size:0.75rem;color:#6c757d;margin-top:4px;">bing.com/ping</div>
+          <div id="bing-status" style="margin-top:10px;">
+            <span style="background:#e9ecef;color:#6c757d;padding:4px 12px;border-radius:20px;font-size:0.75rem;">En attente de ping…</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button id="pingBtn" onclick="sendPing()" {% if not site_url %}disabled{% endif %}
+          style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:white;border:none;border-radius:10px;padding:12px 24px;font-size:0.88rem;font-weight:700;cursor:{% if site_url %}pointer{% else %}not-allowed{% endif %};opacity:{% if site_url %}1{% else %}0.5{% endif %};display:flex;align-items:center;gap:8px;">
+          📡 Envoyer un ping maintenant
+        </button>
+        <div id="pingResult" style="font-size:0.82rem;color:#6c757d;display:none;"></div>
+      </div>
+
+      {% if not site_url %}
+        <div style="background:#fef2f2;border-radius:8px;padding:12px;margin-top:14px;font-size:0.82rem;color:#991b1b;">
+          ⚠️ Le ping est désactivé : configurez d'abord SITE_URL (voir guide ci-dessus).
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- SEO Checklist -->
+  <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;margin-top:20px;">
+    <div style="background:linear-gradient(90deg,#d97706,#f59e0b);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.1rem;">✅</span>
+      <span style="color:white;font-weight:700;font-size:0.9rem;">Checklist SEO — État général</span>
+    </div>
+    <div style="padding:20px;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.84rem;">
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:11px 0;color:#6c757d;width:50%;">🤖 robots.txt accessible</td>
+          <td>{% if robots.ok %}<span style="color:#198754;font-weight:700;">✅ OK</span>{% else %}<span style="color:#dc3545;font-weight:700;">❌ Inaccessible</span>{% endif %}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:11px 0;color:#6c757d;">🗺️ sitemap.xml accessible</td>
+          <td>{% if sitemap.ok %}<span style="color:#198754;font-weight:700;">✅ OK — {{ sitemap_url_count }} URLs</span>{% else %}<span style="color:#dc3545;font-weight:700;">❌ Inaccessible</span>{% endif %}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:11px 0;color:#6c757d;">🌐 SITE_URL configuré</td>
+          <td>{% if site_url %}<span style="color:#198754;font-weight:700;">✅ {{ site_url }}</span>{% else %}<span style="color:#dc3545;font-weight:700;">❌ Non défini</span>{% endif %}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:11px 0;color:#6c757d;">📡 Ping auto Google + Bing</td>
+          <td><span style="color:#198754;font-weight:700;">✅ Actif à chaque publication</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:11px 0;color:#6c757d;">🔒 Admin bloqué dans robots.txt</td>
+          <td>{% if robots.ok and 'Disallow: /admin' in robots.body %}<span style="color:#198754;font-weight:700;">✅ Protégé</span>{% elif robots.ok %}<span style="color:#dc3545;font-weight:700;">❌ Non protégé</span>{% else %}<span style="color:#6c757d;">— Impossible à vérifier</span>{% endif %}</td>
+        </tr>
+        <tr>
+          <td style="padding:11px 0;color:#6c757d;">📎 Sitemap dans robots.txt</td>
+          <td>{% if robots.ok and 'Sitemap:' in robots.body %}<span style="color:#198754;font-weight:700;">✅ Présent</span>{% elif robots.ok %}<span style="color:#dc3545;font-weight:700;">❌ Absent</span>{% else %}<span style="color:#6c757d;">— Impossible à vérifier</span>{% endif %}</td>
+        </tr>
+      </table>
+
+      {% if robots.ok and sitemap.ok and site_url %}
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-top:16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:1.4rem;">🎉</span>
+          <div>
+            <div style="font-weight:700;color:#166534;">Tout est en ordre !</div>
+            <div style="font-size:0.82rem;color:#15803d;margin-top:2px;">Votre site est correctement configuré pour l'indexation par Google et Bing.</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+function sendPing() {
+  var btn = document.getElementById('pingBtn');
+  var result = document.getElementById('pingResult');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Envoi en cours…';
+  result.style.display = 'none';
+
+  document.getElementById('google-status').innerHTML = '<span style="background:#fef9c3;color:#854d0e;padding:4px 12px;border-radius:20px;font-size:0.75rem;">⏳ Envoi…</span>';
+  document.getElementById('bing-status').innerHTML = '<span style="background:#fef9c3;color:#854d0e;padding:4px 12px;border-radius:20px;font-size:0.75rem;">⏳ Envoi…</span>';
+
+  fetch('/admin-ai/seo/ping/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCsrfToken()
+    },
+    credentials: 'same-origin'
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.disabled = false;
+    btn.innerHTML = '📡 Envoyer un ping maintenant';
+
+    if (data.success) {
+      data.results.forEach(function(r) {
+        var el = document.getElementById(r.engine.toLowerCase() + '-status');
+        if (el) {
+          if (r.ok) {
+            el.innerHTML = '<span style="background:#dcfce7;color:#166534;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">✅ Ping envoyé (HTTP ' + r.status + ')</span>';
+          } else {
+            el.innerHTML = '<span style="background:#fee2e2;color:#991b1b;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">❌ Échec</span>';
+          }
+        }
+      });
+      result.style.display = 'inline';
+      result.style.color = '#166534';
+      result.innerHTML = '✅ Ping envoyé — ' + data.pinged_at;
+    } else {
+      result.style.display = 'inline';
+      result.style.color = '#dc3545';
+      result.innerHTML = '❌ Erreur : ' + (data.error || 'Inconnue');
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.innerHTML = '📡 Envoyer un ping maintenant';
+    result.style.display = 'inline';
+    result.style.color = '#dc3545';
+    result.innerHTML = '❌ Erreur réseau';
+  });
+}
+
+function getCsrfToken() {
+  var name = 'csrftoken';
+  var cookies = document.cookie.split(';');
+  for (var i = 0; i < cookies.length; i++) {
+    var c = cookies[i].trim();
+    if (c.startsWith(name + '=')) return c.substring(name.length + 1);
+  }
+  return '';
+}
+</script>
+{% endblock %}
