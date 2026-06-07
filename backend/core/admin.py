@@ -64,6 +64,19 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         ('Réseaux sociaux', {
             'fields': ('github_url', 'linkedin_url', 'twitter_url', 'youtube_url', 'facebook_url', 'instagram_url')
         }),
+        ('📘 Facebook — Publication automatique', {
+            'fields': ('facebook_auto_post', 'facebook_page_id', 'facebook_page_token'),
+            'description': (
+                '<div style="background:#e7f3ff;border-left:4px solid #1877F2;border-radius:6px;padding:14px;margin-bottom:10px;">'
+                '<b style="color:#1877F2;">📘 Comment configurer la publication automatique Facebook</b><br><br>'
+                '<b>1.</b> Va sur <a href="https://developers.facebook.com/tools/explorer/" target="_blank">Meta for Developers → Graph API Explorer</a><br>'
+                '<b>2.</b> Clique <em>Generate Access Token</em> → choisis ta Page → coche <code>pages_manage_posts</code> + <code>pages_read_engagement</code><br>'
+                '<b>3.</b> Clique <em>Get Page Access Token</em> et copie le token<br>'
+                '<b>4.</b> L\'ID de la Page : va sur ta Page Facebook → <em>À propos</em> → tout en bas → "ID de la page"<br>'
+                '<b>5.</b> Colle ici, active la case, sauvegarde — tes prochaines publications seront partagées automatiquement !'
+                '</div>'
+            ),
+        }),
         ('Configuration Email Gmail', {
             'fields': ('email_host', 'email_port', 'email_use_tls', 'email_host_user', 'email_host_password', 'contact_email'),
             'description': 'Pour Gmail: host=smtp.gmail.com, port=587, TLS=Oui. Utilisez un mot de passe d\'application Google.',
