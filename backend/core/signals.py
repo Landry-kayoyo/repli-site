@@ -1,5 +1,5 @@
 """
-Signals: ping Google Sitemap + optimisation automatique des images.
+Signals: ping Google + Bing Sitemap, optimisation automatique des images.
 """
 import threading
 import urllib.request
@@ -11,23 +11,24 @@ logger = logging.getLogger(__name__)
 
 
 # ──────────────────────────────────────────────
-# Google Sitemap Ping
+# Sitemap Ping — Google + Bing
 # ──────────────────────────────────────────────
 
-def _ping_google(sitemap_url):
-    try:
-        req = urllib.request.Request(
-            f"https://www.google.com/ping?sitemap={sitemap_url}",
-            headers={'User-Agent': 'LandryNet-SitemapPing/1.0'}
-        )
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            logger.info(f"Google sitemap ping: {resp.status} for {sitemap_url}")
-    except Exception as e:
-        logger.warning(f"Google sitemap ping failed (non-critical): {e}")
-
-
-def ping_google_sitemap(sitemap_url):
-    threading.Thread(target=_ping_google, args=(sitemap_url,), daemon=True).start()
+def _ping_search_engines(sitemap_url):
+    engines = {
+        'Google': f'https://www.google.com/ping?sitemap={sitemap_url}',
+        'Bing':   f'https://www.bing.com/ping?sitemap={sitemap_url}',
+    }
+    for name, url in engines.items():
+        try:
+            req = urllib.request.Request(
+                url,
+                headers={'User-Agent': 'LandryNet-SitemapPing/1.0'}
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                logger.info(f"{name} sitemap ping: {resp.status} for {sitemap_url}")
+        except Exception as e:
+            logger.warning(f"{name} sitemap ping failed (non-critical): {e}")
 
 
 def _schedule_ping():
@@ -36,7 +37,10 @@ def _schedule_ping():
         site_url = getattr(settings, 'SITE_URL', None)
         if not site_url:
             return
-        ping_google_sitemap(f"{site_url.rstrip('/')}/sitemap.xml")
+        sitemap_url = f"{site_url.rstrip('/')}/sitemap.xml"
+        threading.Thread(
+            target=_ping_search_engines, args=(sitemap_url,), daemon=True
+        ).start()
     except Exception as e:
         logger.debug(f"Ping schedule failed: {e}")
 
@@ -53,7 +57,6 @@ def _optimize_model_images(instance):
         for field in instance._meta.get_fields():
             if isinstance(field, ImageField):
                 optimize_image_field(instance, field.name)
-        # Re-save only the image fields without triggering signals again
         image_fields = [
             f.name for f in instance._meta.get_fields()
             if isinstance(f, ImageField)
@@ -76,7 +79,6 @@ def register_content_signals():
         from articles.models import Article
         from projects.models import Project
         from tips.models import Tip
-        from portfolio.models import PortfolioItem
         from core.models import SiteSettings
 
         @receiver(post_save, sender=Article, weak=False)
@@ -101,13 +103,6 @@ def register_content_signals():
         def tip_saved(sender, instance, created, **kwargs):
             if instance.status == 'published':
                 _schedule_ping()
-            if created:
-                threading.Thread(
-                    target=_optimize_model_images, args=(instance,), daemon=True
-                ).start()
-
-        @receiver(post_save, sender=PortfolioItem, weak=False)
-        def portfolio_saved(sender, instance, created, **kwargs):
             if created:
                 threading.Thread(
                     target=_optimize_model_images, args=(instance,), daemon=True
