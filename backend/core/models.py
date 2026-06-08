@@ -78,6 +78,12 @@ class SiteSettings(models.Model):
         verbose_name='URL du Sitemap Google',
         help_text='Lien de votre sitemap à soumettre à Google Search Console. Ex: https://votresite.com/sitemap.xml'
     )
+    # ── IndexNow ────────────────────────────────────────────────────────
+    indexnow_key = models.CharField(
+        max_length=128, blank=True,
+        verbose_name='Clé IndexNow',
+        help_text='Clé auto-générée pour soumettre vos URLs à Bing/Google via IndexNow. Laissez vide pour en générer une automatiquement.'
+    )
     # ── Facebook auto-post ──────────────────────────────────────────────
     facebook_auto_post = models.BooleanField(
         default=False,

@@ -607,7 +607,7 @@ def facebook_test_post(request):
 
 @staff_member_required
 def seo_diagnostic(request):
-    """Page de diagnostic SEO : robots.txt, sitemap, pings moteurs."""
+    """Page de diagnostic SEO : robots.txt, sitemap, IndexNow, pings moteurs."""
     import urllib.request as ureq
     from django.conf import settings as django_settings
 
@@ -633,6 +633,20 @@ def seo_diagnostic(request):
     if sitemap_result['ok']:
         sitemap_url_count = sitemap_result['body'].count('<loc>')
 
+    # IndexNow key info
+    indexnow_key = None
+    indexnow_key_url = None
+    indexnow_key_ok = False
+    try:
+        from core.indexnow import get_or_create_indexnow_key
+        indexnow_key = get_or_create_indexnow_key()
+        if indexnow_key and site_url:
+            indexnow_key_url = f"{site_url}/{indexnow_key}.txt"
+            key_check = _fetch(indexnow_key_url)
+            indexnow_key_ok = key_check['ok'] and key_check['body'].strip() == indexnow_key
+    except Exception:
+        pass
+
     context = {
         'title': 'Diagnostic SEO',
         'site_url': site_url,
@@ -641,6 +655,9 @@ def seo_diagnostic(request):
         'robots': robots_result,
         'sitemap': sitemap_result,
         'sitemap_url_count': sitemap_url_count,
+        'indexnow_key': indexnow_key,
+        'indexnow_key_url': indexnow_key_url,
+        'indexnow_key_ok': indexnow_key_ok,
         'opts': {'app_label': 'core'},
     }
     return render(request, 'admin/seo_diagnostic.html', context)
@@ -650,14 +667,14 @@ def seo_diagnostic(request):
 @csrf_exempt
 @require_POST
 def seo_ping_now(request):
-    """Déclenche manuellement un ping Bing + IndexNow et retourne le résultat.
+    """Déclenche manuellement IndexNow + Bing sitemap ping.
     Note: Google a déprécié son endpoint /ping en janvier 2023 (retourne 410 Gone).
-    Utilisez Google Search Console pour soumettre votre sitemap manuellement.
+    On utilise maintenant IndexNow (Bing, Yandex, Seznam…).
     """
-    import urllib.request as ureq
-    import urllib.error
     from django.conf import settings as django_settings
     from django.utils import timezone
+    import urllib.request as ureq
+    import urllib.error
 
     site_url = getattr(django_settings, 'SITE_URL', '').rstrip('/')
     if not site_url:
@@ -666,68 +683,109 @@ def seo_ping_now(request):
     sitemap_url = f"{site_url}/sitemap.xml"
     results = []
 
-    # Google a déprécié /ping en janvier 2023 (retourne 410 Gone désormais)
-    # On l'inclut mais on indique clairement le statut
-    engines = [
-        {
-            'name': 'Google',
-            'url': f'https://www.google.com/ping?sitemap={sitemap_url}',
-            'deprecated': True,
-            'note': 'Déprécié par Google en 2023 — utilisez Google Search Console',
-        },
-        {
-            'name': 'Bing',
-            'url': f'https://www.bing.com/ping?sitemap={sitemap_url}',
-            'deprecated': False,
-            'note': '',
-        },
-    ]
-
-    for engine in engines:
-        name = engine['name']
-        url = engine['url']
-        deprecated = engine['deprecated']
-        note = engine['note']
-        try:
-            req = ureq.Request(url, headers={'User-Agent': 'LandryNet-SitemapPing/1.0'})
+    # 1. IndexNow (Bing + partenaires) — soumettre le sitemap
+    try:
+        from core.indexnow import get_or_create_indexnow_key
+        import json as _json
+        key = get_or_create_indexnow_key()
+        if key:
+            key_location = f"{site_url}/{key}.txt"
+            payload = _json.dumps({
+                'host': site_url.replace('https://', '').replace('http://', ''),
+                'key': key,
+                'keyLocation': key_location,
+                'urlList': [site_url + '/'],
+            }).encode('utf-8')
+            req = ureq.Request(
+                'https://api.indexnow.org/indexnow',
+                data=payload,
+                headers={
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'User-Agent': 'LandryNet-IndexNow/1.0',
+                },
+                method='POST',
+            )
             with ureq.urlopen(req, timeout=8) as r:
-                ok = r.status in (200, 204, 301, 302)
+                ok = r.status in (200, 202)
                 results.append({
-                    'engine': name,
+                    'engine': 'IndexNow',
                     'status': r.status,
                     'ok': ok,
-                    'deprecated': deprecated,
-                    'note': note,
+                    'deprecated': False,
+                    'note': 'Soumission aux moteurs partenaires (Bing, Yandex, Seznam…)',
                 })
-        except urllib.error.HTTPError as e:
-            # Google retourne 410 Gone (déprécié) — on l'affiche comme warning, pas erreur
-            if deprecated and e.code in (410, 404, 400):
-                results.append({
-                    'engine': name,
-                    'status': e.code,
-                    'ok': False,
-                    'deprecated': True,
-                    'note': note,
-                    'warning': True,
-                })
-            else:
-                results.append({
-                    'engine': name,
-                    'status': e.code,
-                    'ok': False,
-                    'deprecated': deprecated,
-                    'note': note,
-                    'error': f'HTTP {e.code}',
-                })
-        except Exception as e:
+        else:
             results.append({
-                'engine': name,
+                'engine': 'IndexNow',
                 'status': None,
                 'ok': False,
-                'deprecated': deprecated,
-                'note': note,
-                'error': str(e),
+                'deprecated': False,
+                'note': '',
+                'error': 'Clé IndexNow non disponible',
             })
+    except ureq.error.HTTPError as e:
+        err_map = {422: 'URL invalide', 429: 'Trop de requêtes', 403: 'Clé invalide ou key file inaccessible'}
+        results.append({
+            'engine': 'IndexNow',
+            'status': e.code,
+            'ok': False,
+            'deprecated': False,
+            'note': '',
+            'error': err_map.get(e.code, f'HTTP {e.code}'),
+        })
+    except Exception as e:
+        results.append({
+            'engine': 'IndexNow',
+            'status': None,
+            'ok': False,
+            'deprecated': False,
+            'note': '',
+            'error': str(e),
+        })
+
+    # 2. Bing sitemap ping (toujours actif)
+    try:
+        req = ureq.Request(
+            f'https://www.bing.com/ping?sitemap={sitemap_url}',
+            headers={'User-Agent': 'LandryNet-SitemapPing/1.0'}
+        )
+        with ureq.urlopen(req, timeout=8) as r:
+            ok = r.status in (200, 204, 301, 302)
+            results.append({
+                'engine': 'Bing',
+                'status': r.status,
+                'ok': ok,
+                'deprecated': False,
+                'note': 'Bing sitemap ping',
+            })
+    except ureq.error.HTTPError as e:
+        results.append({
+            'engine': 'Bing',
+            'status': e.code,
+            'ok': False,
+            'deprecated': False,
+            'note': '',
+            'error': f'HTTP {e.code}',
+        })
+    except Exception as e:
+        results.append({
+            'engine': 'Bing',
+            'status': None,
+            'ok': False,
+            'deprecated': False,
+            'note': '',
+            'error': str(e),
+        })
+
+    # 3. Google — déprécié, afficher uniquement comme info
+    results.append({
+        'engine': 'Google',
+        'status': 410,
+        'ok': False,
+        'deprecated': True,
+        'warning': True,
+        'note': 'Endpoint déprécié par Google en janvier 2023. Utilisez Google Search Console.',
+    })
 
     return JsonResponse({
         'success': True,

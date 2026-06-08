@@ -146,6 +146,58 @@
 
   </div>
 
+  <!-- IndexNow Status -->
+  <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;margin-top:20px;">
+    <div style="background:linear-gradient(90deg,#0369a1,#0ea5e9);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.1rem;">⚡</span>
+      <span style="color:white;font-weight:700;font-size:0.9rem;">IndexNow — Soumission instantanée</span>
+      {% if indexnow_key_ok %}
+        <span style="margin-left:auto;background:rgba(255,255,255,0.25);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">✅ Clé vérifiée</span>
+      {% elif indexnow_key %}
+        <span style="margin-left:auto;background:rgba(255,193,7,0.4);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">⚠️ Clé non vérifiable (SITE_URL externe ?)</span>
+      {% else %}
+        <span style="margin-left:auto;background:rgba(0,0,0,0.2);color:white;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;">❌ Clé non générée</span>
+      {% endif %}
+    </div>
+    <div style="padding:20px;">
+      <p style="color:#6c757d;font-size:0.85rem;margin:0 0 14px;">
+        <strong>IndexNow</strong> est un protocole moderne qui envoie vos URLs directement à <strong>Bing, Yandex, Seznam</strong> et d'autres moteurs partenaires dès la publication. Plus fiable que le /ping Google désormais déprécié.
+      </p>
+
+      {% if indexnow_key %}
+        <div style="display:flex;flex-wrap:wrap;gap:12px;">
+          <div style="flex:1;min-width:280px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;">
+            <div style="font-size:0.72rem;color:#0369a1;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Votre clé IndexNow</div>
+            <code style="font-size:0.88rem;font-weight:700;color:#0c4a6e;word-break:break-all;">{{ indexnow_key }}</code>
+          </div>
+          <div style="flex:1;min-width:280px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;">
+            <div style="font-size:0.72rem;color:#0369a1;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Fichier de vérification (key file)</div>
+            {% if indexnow_key_url %}
+              <a href="{{ indexnow_key_url }}" target="_blank" style="font-size:0.8rem;color:#0369a1;word-break:break-all;">{{ indexnow_key_url }}</a>
+              <div style="margin-top:8px;">
+                {% if indexnow_key_ok %}
+                  <span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">✅ Accessible et valide</span>
+                {% else %}
+                  <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">⚠️ Non vérifié depuis ce serveur</span>
+                {% endif %}
+              </div>
+            {% else %}
+              <span style="color:#6c757d;font-size:0.8rem;">Configurez SITE_URL pour obtenir le lien</span>
+            {% endif %}
+          </div>
+        </div>
+        <div style="background:#e0f2fe;border-radius:8px;padding:12px;margin-top:14px;font-size:0.82rem;color:#0369a1;">
+          💡 <strong>Automatique :</strong> dès qu'un article, projet ou astuce est publié, son URL est soumise automatiquement via IndexNow.
+          Vous pouvez aussi le déclencher manuellement ci-dessous.
+        </div>
+      {% else %}
+        <div style="background:#fef2f2;border-radius:8px;padding:12px;font-size:0.82rem;color:#991b1b;">
+          ❌ La clé IndexNow n'a pas pu être générée. Vérifiez la base de données.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
   <!-- Ping Panel -->
   <div style="background:white;border-radius:14px;border:1px solid #dee2e6;overflow:hidden;margin-top:20px;">
     <div style="background:linear-gradient(90deg,#7c3aed,#8b5cf6);padding:14px 20px;display:flex;align-items:center;gap:10px;">
@@ -156,29 +208,39 @@
     <div style="padding:24px;">
 
       <p style="color:#6c757d;font-size:0.85rem;margin-top:0;">
-        Les moteurs de recherche sont <strong>pingés automatiquement</strong> dès qu'un article, projet ou astuce est publié.
-        Utilisez le bouton ci-dessous pour forcer un ping immédiat (utile après une mise à jour du sitemap).
+        Les moteurs sont notifiés <strong>automatiquement</strong> dès qu'un contenu est publié (IndexNow + Bing).
+        Utilisez le bouton ci-dessous pour un envoi manuel immédiat.
       </p>
 
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;">
 
-        <!-- Google Engine -->
-        <div style="flex:1;min-width:200px;background:#f8f9fa;border-radius:12px;padding:18px;text-align:center;">
-          <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
-          <div style="font-weight:700;font-size:0.9rem;color:#212529;">Google</div>
-          <div style="font-size:0.75rem;color:#6c757d;margin-top:4px;">Search Console</div>
-          <div id="google-status" style="margin-top:10px;">
-            <span style="background:#fef9c3;color:#854d0e;padding:4px 10px;border-radius:20px;font-size:0.72rem;">⚠️ /ping déprécié (2023)</span>
+        <!-- IndexNow Engine -->
+        <div style="flex:1;min-width:160px;background:#f0f9ff;border-radius:12px;padding:18px;text-align:center;border:1px solid #bae6fd;">
+          <div style="font-size:2rem;margin-bottom:8px;">⚡</div>
+          <div style="font-weight:700;font-size:0.9rem;color:#212529;">IndexNow</div>
+          <div style="font-size:0.72rem;color:#6c757d;margin-top:4px;">Bing · Yandex · Seznam</div>
+          <div id="indexnow-status" style="margin-top:10px;">
+            <span style="background:#e9ecef;color:#6c757d;padding:4px 12px;border-radius:20px;font-size:0.75rem;">En attente…</span>
           </div>
         </div>
 
         <!-- Bing Engine -->
-        <div style="flex:1;min-width:200px;background:#f8f9fa;border-radius:12px;padding:18px;text-align:center;">
+        <div style="flex:1;min-width:160px;background:#f8f9fa;border-radius:12px;padding:18px;text-align:center;">
           <div style="font-size:2rem;margin-bottom:8px;">🌐</div>
           <div style="font-weight:700;font-size:0.9rem;color:#212529;">Bing</div>
-          <div style="font-size:0.75rem;color:#6c757d;margin-top:4px;">bing.com/ping</div>
+          <div style="font-size:0.72rem;color:#6c757d;margin-top:4px;">Sitemap ping</div>
           <div id="bing-status" style="margin-top:10px;">
-            <span style="background:#e9ecef;color:#6c757d;padding:4px 12px;border-radius:20px;font-size:0.75rem;">En attente de ping…</span>
+            <span style="background:#e9ecef;color:#6c757d;padding:4px 12px;border-radius:20px;font-size:0.75rem;">En attente…</span>
+          </div>
+        </div>
+
+        <!-- Google Engine -->
+        <div style="flex:1;min-width:160px;background:#f8f9fa;border-radius:12px;padding:18px;text-align:center;opacity:0.7;">
+          <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+          <div style="font-weight:700;font-size:0.9rem;color:#212529;">Google</div>
+          <div style="font-size:0.72rem;color:#6c757d;margin-top:4px;">Search Console</div>
+          <div id="google-status" style="margin-top:10px;">
+            <span style="background:#fef9c3;color:#854d0e;padding:4px 10px;border-radius:20px;font-size:0.72rem;">⚠️ /ping déprécié (2023)</span>
           </div>
         </div>
 
@@ -222,7 +284,11 @@
           <td>{% if site_url %}<span style="color:#198754;font-weight:700;">✅ {{ site_url }}</span>{% else %}<span style="color:#dc3545;font-weight:700;">❌ Non défini</span>{% endif %}</td>
         </tr>
         <tr style="border-bottom:1px solid #f0f0f0;">
-          <td style="padding:11px 0;color:#6c757d;">📡 Ping auto Google + Bing</td>
+          <td style="padding:11px 0;color:#6c757d;">⚡ IndexNow configuré</td>
+          <td>{% if indexnow_key %}<span style="color:#198754;font-weight:700;">✅ Clé active — {% if indexnow_key_ok %}vérifiée{% else %}générée{% endif %}</span>{% else %}<span style="color:#dc3545;font-weight:700;">❌ Non configuré</span>{% endif %}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:11px 0;color:#6c757d;">📡 Ping auto IndexNow + Bing</td>
           <td><span style="color:#198754;font-weight:700;">✅ Actif à chaque publication</span></td>
         </tr>
         <tr style="border-bottom:1px solid #f0f0f0;">
@@ -257,8 +323,11 @@ function sendPing() {
   btn.innerHTML = '⏳ Envoi en cours…';
   result.style.display = 'none';
 
-  document.getElementById('google-status').innerHTML = '<span style="background:#fef9c3;color:#854d0e;padding:4px 12px;border-radius:20px;font-size:0.75rem;">⏳ Envoi…</span>';
-  document.getElementById('bing-status').innerHTML = '<span style="background:#fef9c3;color:#854d0e;padding:4px 12px;border-radius:20px;font-size:0.75rem;">⏳ Envoi…</span>';
+  var loadingBadge = '<span style="background:#fef9c3;color:#854d0e;padding:4px 12px;border-radius:20px;font-size:0.75rem;">⏳ Envoi…</span>';
+  ['indexnow', 'bing', 'google'].forEach(function(e) {
+    var el = document.getElementById(e + '-status');
+    if (el) el.innerHTML = loadingBadge;
+  });
 
   fetch('/admin-ai/seo/ping/', {
     method: 'POST',
@@ -275,20 +344,22 @@ function sendPing() {
 
     if (data.success) {
       data.results.forEach(function(r) {
-        var el = document.getElementById(r.engine.toLowerCase() + '-status');
-        if (el) {
-          if (r.ok) {
-            el.innerHTML = '<span style="background:#dcfce7;color:#166534;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">✅ Ping envoyé (HTTP ' + r.status + ')</span>';
-          } else if (r.deprecated || r.warning) {
-            el.innerHTML = '<span style="background:#fef9c3;color:#854d0e;padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">⚠️ Déprécié — utilisez Search Console</span>';
-          } else {
-            el.innerHTML = '<span style="background:#fee2e2;color:#991b1b;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">❌ Échec</span>';
-          }
+        var key = r.engine.toLowerCase().replace(/[^a-z]/g, '');
+        var el = document.getElementById(key + '-status');
+        if (!el) return;
+        if (r.ok) {
+          el.innerHTML = '<span style="background:#dcfce7;color:#166534;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">✅ Soumis (HTTP ' + r.status + ')</span>';
+        } else if (r.deprecated || r.warning) {
+          el.innerHTML = '<span style="background:#fef9c3;color:#854d0e;padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;">⚠️ Déprécié — Search Console</span>';
+        } else if (r.error) {
+          el.innerHTML = '<span style="background:#fee2e2;color:#991b1b;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">❌ ' + r.error + '</span>';
+        } else {
+          el.innerHTML = '<span style="background:#fee2e2;color:#991b1b;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">❌ Échec</span>';
         }
       });
       result.style.display = 'inline';
       result.style.color = '#166534';
-      result.innerHTML = '✅ Ping envoyé — ' + data.pinged_at;
+      result.innerHTML = '✅ Terminé — ' + data.pinged_at;
     } else {
       result.style.display = 'inline';
       result.style.color = '#dc3545';

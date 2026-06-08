@@ -336,3 +336,16 @@ Disallow: /ckeditor/
 Sitemap: {site_url}/sitemap.xml
 """
     return HttpResponse(content, content_type='text/plain; charset=utf-8')
+
+
+def indexnow_key_file(request, key):
+    """Sert le fichier de vérification IndexNow à /{key}.txt."""
+    try:
+        from core.indexnow import get_or_create_indexnow_key
+        stored_key = get_or_create_indexnow_key()
+        if stored_key and stored_key == key:
+            return HttpResponse(key, content_type='text/plain; charset=utf-8')
+    except Exception:
+        pass
+    from django.http import Http404
+    raise Http404

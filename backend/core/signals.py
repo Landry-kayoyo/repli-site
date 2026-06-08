@@ -1,8 +1,11 @@
 """
-Signals: ping Google + Bing Sitemap, Facebook auto-post, optimisation images.
+Signals: IndexNow + Bing Sitemap ping, Facebook auto-post, optimisation images.
+Note: Google a déprécié son /ping endpoint en janvier 2023.
+On utilise maintenant IndexNow (supporté par Bing, Yandex, Seznam…).
 """
 import threading
 import urllib.request
+import urllib.error
 import urllib.parse
 import logging
 from django.db.models.signals import post_save, pre_save
@@ -15,43 +18,69 @@ _pre_save_status = {}
 
 
 # ──────────────────────────────────────────────
-# Sitemap Ping — Google + Bing
+# IndexNow + Bing Sitemap Ping
 # ──────────────────────────────────────────────
 
-def _ping_search_engines(sitemap_url):
-    # Google a déprécié son /ping endpoint en janvier 2023 (retourne 410 Gone)
-    # On tente quand même mais on ignore l'erreur 410
-    engines = {
-        'Google': f'https://www.google.com/ping?sitemap={sitemap_url}',
-        'Bing':   f'https://www.bing.com/ping?sitemap={sitemap_url}',
-    }
-    for name, url in engines.items():
-        try:
-            req = urllib.request.Request(
-                url,
-                headers={'User-Agent': 'LandryNet-SitemapPing/1.0'}
-            )
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                logger.info(f"{name} sitemap ping: {resp.status} for {sitemap_url}")
-        except urllib.error.HTTPError as e:
-            if e.code in (410, 404, 400) and name == 'Google':
-                logger.info(f"Google sitemap ping endpoint deprecated (HTTP {e.code}) — normal depuis 2023")
-            else:
-                logger.warning(f"{name} sitemap ping failed (non-critical): HTTP {e.code}")
-        except Exception as e:
-            logger.warning(f"{name} sitemap ping failed (non-critical): {e}")
+def _submit_via_indexnow(page_url, site_url):
+    """Soumet l'URL publiée via IndexNow à Bing (et partenaires)."""
+    try:
+        from core.indexnow import submit_url_indexnow
+        result = submit_url_indexnow(page_url, site_url)
+        if result['success']:
+            logger.info(f"IndexNow OK: {page_url} → HTTP {result.get('status')}")
+        else:
+            logger.warning(f"IndexNow failed (non-critical): {result.get('message')}")
+    except Exception as e:
+        logger.warning(f"IndexNow error (non-critical): {e}")
 
 
-def _schedule_ping():
+def _ping_bing_sitemap(sitemap_url):
+    """Ping Bing avec l'URL du sitemap (encore supporté par Bing)."""
+    try:
+        req = urllib.request.Request(
+            f'https://www.bing.com/ping?sitemap={sitemap_url}',
+            headers={'User-Agent': 'LandryNet-SitemapPing/1.0'}
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            logger.info(f"Bing sitemap ping: HTTP {resp.status}")
+    except urllib.error.HTTPError as e:
+        logger.warning(f"Bing sitemap ping failed (non-critical): HTTP {e.code}")
+    except Exception as e:
+        logger.warning(f"Bing sitemap ping failed (non-critical): {e}")
+
+
+def _schedule_ping(instance=None, content_type=None):
+    """Lance IndexNow + Bing sitemap ping en arrière-plan."""
     try:
         from django.conf import settings
-        site_url = getattr(settings, 'SITE_URL', None)
+        site_url = getattr(settings, 'SITE_URL', '').rstrip('/')
         if not site_url:
             return
-        sitemap_url = f"{site_url.rstrip('/')}/sitemap.xml"
-        threading.Thread(
-            target=_ping_search_engines, args=(sitemap_url,), daemon=True
-        ).start()
+
+        sitemap_url = f"{site_url}/sitemap.xml"
+
+        # Construire l'URL de la page publiée pour IndexNow
+        page_url = None
+        if instance and content_type:
+            slug = getattr(instance, 'slug', None)
+            if slug:
+                path_map = {
+                    'article': f'/articles/{slug}/',
+                    'project': f'/projets/{slug}/',
+                    'tip': f'/astuces/{slug}/',
+                }
+                path = path_map.get(content_type)
+                if path:
+                    page_url = f"{site_url}{path}"
+
+        def _run():
+            # 1. IndexNow pour l'URL spécifique (si disponible)
+            if page_url:
+                _submit_via_indexnow(page_url, site_url)
+            # 2. Bing sitemap ping (encore actif)
+            _ping_bing_sitemap(sitemap_url)
+
+        threading.Thread(target=_run, daemon=True).start()
     except Exception as e:
         logger.debug(f"Ping schedule failed: {e}")
 
@@ -221,7 +250,7 @@ def register_content_signals():
         @receiver(post_save, sender=Article, weak=False)
         def article_saved(sender, instance, created, **kwargs):
             if instance.status == 'published':
-                _schedule_ping()
+                _schedule_ping(instance=instance, content_type='article')
             if _was_just_published(instance):
                 _schedule_facebook_post(instance, 'article')
             if created:
@@ -232,7 +261,7 @@ def register_content_signals():
         @receiver(post_save, sender=Project, weak=False)
         def project_saved(sender, instance, created, **kwargs):
             if instance.status == 'published':
-                _schedule_ping()
+                _schedule_ping(instance=instance, content_type='project')
             if _was_just_published(instance):
                 _schedule_facebook_post(instance, 'projet')
             if created:
@@ -243,7 +272,7 @@ def register_content_signals():
         @receiver(post_save, sender=Tip, weak=False)
         def tip_saved(sender, instance, created, **kwargs):
             if instance.status == 'published':
-                _schedule_ping()
+                _schedule_ping(instance=instance, content_type='tip')
             if _was_just_published(instance):
                 _schedule_facebook_post(instance, 'astuce')
             if created:

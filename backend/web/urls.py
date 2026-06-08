@@ -1,9 +1,10 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('robots.txt', views.robots_txt, name='robots_txt'),
+    re_path(r'^(?P<key>[a-f0-9]{32})\.txt$', views.indexnow_key_file, name='indexnow_key'),
     path('articles/', views.articles_list, name='articles_list'),
     path('articles/<slug:slug>/', views.article_detail, name='article_detail'),
     path('projets/', views.projects_list, name='projects_list'),
