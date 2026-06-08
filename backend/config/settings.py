@@ -11,7 +11,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-landrynet-dev-key-cha
 # ========== AJOUT POUR PYTHONANYWHERE ==========
 # On garde la variable DEBUG mais on force à False pour PythonAnywhere
 # Si tu veux utiliser une variable d'environnement, crée DEBUG=False dans PythonAnywhere
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'  # Changé: default 'False' au lieu de 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # On garde ALLOWED_HOSTS = ['*'] mais on ajoute explicitement PythonAnywhere
 ALLOWED_HOSTS = ['*', 'LandryIT.pythonanywhere.com']

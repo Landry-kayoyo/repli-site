@@ -464,7 +464,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "django", specifier = ">=5.2.14" },
+    { name = "django", specifier = ">=5.2" },
     { name = "django-ckeditor", specifier = ">=6.7.3" },
     { name = "django-cors-headers", specifier = ">=4.9.0" },
     { name = "django-filter", specifier = ">=25.2" },
