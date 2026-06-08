@@ -607,43 +607,49 @@ def facebook_test_post(request):
 
 @staff_member_required
 def seo_diagnostic(request):
-    """Page de diagnostic SEO : robots.txt, sitemap, IndexNow, pings moteurs."""
-    import urllib.request as ureq
+    """Page de diagnostic SEO : robots.txt, sitemap, IndexNow, pings moteurs.
+    Utilise le client Django interne pour éviter les restrictions réseau
+    (PythonAnywhere bloque les auto-requêtes HTTP sortantes).
+    """
     from django.conf import settings as django_settings
+    from django.test import Client as DjangoClient
 
     site_url = getattr(django_settings, 'SITE_URL', '').rstrip('/')
 
-    def _fetch(url):
+    def _fetch_internal(path):
+        """Appel interne via le client Django — pas de requête réseau, fonctionne partout."""
         try:
-            req = ureq.Request(url, headers={'User-Agent': 'LandryNet-SEO-Check/1.0'})
-            with ureq.urlopen(req, timeout=8) as r:
-                body = r.read().decode('utf-8', errors='replace')
-                return {'ok': True, 'status': r.status, 'body': body, 'error': None}
+            c = DjangoClient(SERVER_NAME='localhost')
+            resp = c.get(path, HTTP_USER_AGENT='LandryNet-SEO-Check/1.0')
+            body = resp.content.decode('utf-8', errors='replace')
+            ok = resp.status_code in (200, 301, 302)
+            return {'ok': ok, 'status': resp.status_code, 'body': body, 'error': None}
         except Exception as e:
             return {'ok': False, 'status': None, 'body': '', 'error': str(e)}
 
-    robots_url = f"{site_url}/robots.txt" if site_url else ''
+    robots_url  = f"{site_url}/robots.txt"  if site_url else ''
     sitemap_url = f"{site_url}/sitemap.xml" if site_url else ''
 
-    robots_result = _fetch(robots_url) if robots_url else {'ok': False, 'status': None, 'body': '', 'error': 'SITE_URL non configuré'}
-    sitemap_result = _fetch(sitemap_url) if sitemap_url else {'ok': False, 'status': None, 'body': '', 'error': 'SITE_URL non configuré'}
+    robots_result  = _fetch_internal('/robots.txt')  if site_url else {'ok': False, 'status': None, 'body': '', 'error': 'SITE_URL non configuré'}
+    sitemap_result = _fetch_internal('/sitemap.xml') if site_url else {'ok': False, 'status': None, 'body': '', 'error': 'SITE_URL non configuré'}
 
-    # Count URLs in sitemap
+    # Nombre d'URLs dans le sitemap
     sitemap_url_count = 0
     if sitemap_result['ok']:
         sitemap_url_count = sitemap_result['body'].count('<loc>')
 
-    # IndexNow key info
-    indexnow_key = None
+    # IndexNow — vérification locale (pas de requête réseau)
+    indexnow_key     = None
     indexnow_key_url = None
-    indexnow_key_ok = False
+    indexnow_key_ok  = False
     try:
         from core.indexnow import get_or_create_indexnow_key
         indexnow_key = get_or_create_indexnow_key()
         if indexnow_key and site_url:
             indexnow_key_url = f"{site_url}/{indexnow_key}.txt"
-            key_check = _fetch(indexnow_key_url)
-            indexnow_key_ok = key_check['ok'] and key_check['body'].strip() == indexnow_key
+            # Vérification interne sans requête réseau
+            key_resp = _fetch_internal(f'/{indexnow_key}.txt')
+            indexnow_key_ok = key_resp['ok'] and key_resp['body'].strip() == indexnow_key
     except Exception:
         pass
 
