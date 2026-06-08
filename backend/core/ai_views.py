@@ -1281,3 +1281,199 @@ def smart_notifications(request):
         'count': len(notifications),
         'notifications': notifications,
     })
+
+
+@_staff_json_required
+def ai_content_suggestions(request):
+    """
+    Analyse les lacunes de contenu et retourne des suggestions d'articles/astuces/projets.
+    Utilise l'IA si configurée, sinon analyse heuristique simple.
+    """
+    import json as _json
+    from articles.models import Article
+    from projects.models import Project
+    from tips.models import Tip
+    from django.db.models import Count, Sum
+
+    # ── 1. Analyse heuristique des lacunes ──────────────────────────────
+    try:
+        from articles.models import Category
+        # Catégories avec peu d'articles
+        cats = list(Category.objects.annotate(cnt=Count('articles')).order_by('cnt'))
+        thin_cats = [c.name for c in cats if c.cnt < 2]
+
+        # Difficultés manquantes pour les astuces
+        tip_levels = set(Tip.objects.values_list('difficulty', flat=True))
+        all_levels = {'beginner', 'intermediate', 'advanced'}
+        missing_levels = all_levels - tip_levels
+        level_labels = {'beginner': 'débutant', 'intermediate': 'intermédiaire', 'advanced': 'avancé'}
+
+        # Tags populaires sans article récent (30 jours)
+        from django.utils import timezone
+        from datetime import timedelta
+        from taggit.models import Tag
+        recent_tags = set(
+            Tag.objects.filter(
+                taggit_taggeditem_items__content_type__app_label='articles'
+            )
+            .filter(
+                taggit_taggeditem_items__object_id__in=Article.objects.filter(
+                    published_at__gte=timezone.now() - timedelta(days=60)
+                ).values_list('id', flat=True)
+            )
+            .values_list('name', flat=True)
+        )
+        all_popular_tags = list(
+            Tag.objects.annotate(cnt=Count('taggit_taggeditem_items'))
+            .order_by('-cnt')
+            .values_list('name', flat=True)[:15]
+        )
+        stale_tags = [t for t in all_popular_tags if t not in recent_tags][:5]
+
+        articles_count = Article.objects.filter(status='published').count()
+        projects_count = Project.objects.filter(status='published').count()
+        tips_count = Tip.objects.filter(status='published').count()
+
+        existing_titles = list(
+            Article.objects.values_list('title', flat=True)[:20]
+        ) + list(Project.objects.values_list('title', flat=True)[:10]) + list(
+            Tip.objects.values_list('title', flat=True)[:20]
+        )
+    except Exception as e:
+        logger.warning(f"Content gap analysis error: {e}")
+        thin_cats, missing_levels, stale_tags = [], set(), []
+        articles_count = projects_count = tips_count = 0
+        existing_titles = []
+
+    # ── 2. Essayer l'IA pour des suggestions enrichies ──────────────────
+    api_key, base_url, model, ai_enabled = _get_ai_credentials()
+    ai_used = False
+    suggestions = []
+
+    if ai_enabled and api_key:
+        try:
+            context_parts = []
+            if thin_cats:
+                context_parts.append(f"Catégories manquant de contenu : {', '.join(thin_cats[:5])}")
+            if missing_levels:
+                context_parts.append(f"Niveaux d'astuces absents : {', '.join(level_labels.get(l, l) for l in missing_levels)}")
+            if stale_tags:
+                context_parts.append(f"Tags populaires sans articles récents : {', '.join(stale_tags)}")
+            context_parts.append(f"Contenu existant : {articles_count} articles, {tips_count} astuces, {projects_count} projets")
+
+            context_str = '\n'.join(context_parts) if context_parts else 'Propose des idées générales de contenu tech/dev.'
+
+            prompt = f"""Analyse ces lacunes de contenu et propose exactement 5 idées de contenu pertinentes.
+{context_str}
+
+Réponds en JSON valide uniquement, sans Markdown, sans commentaires :
+[
+  {{"type": "article", "title": "Titre de l'article", "reason": "Pourquoi écrire ça (1 phrase)", "tag": "tag"}},
+  {{"type": "tip", "title": "Titre de l'astuce", "reason": "Pourquoi écrire ça (1 phrase)", "difficulty": "beginner"}},
+  {{"type": "project", "title": "Titre du projet", "reason": "Pourquoi documenter ça (1 phrase)", "tag": "tag"}},
+  ...
+]
+Règles :
+- type = article, tip, ou project uniquement
+- title en français, concis (max 70 chars)
+- reason en français, max 90 chars
+- Pour tip: difficulty = beginner, intermediate, ou advanced
+- Varie les types (pas que des articles)
+- Évite de proposer un titre trop proche de : {', '.join(existing_titles[:10])}"""
+
+            payload = _json.dumps({
+                'model': model or 'gpt-3.5-turbo',
+                'messages': [
+                    {'role': 'system', 'content': 'Tu es un expert en stratégie de contenu web. Réponds uniquement en JSON valide, sans aucune explication.'},
+                    {'role': 'user', 'content': prompt},
+                ],
+                'max_tokens': 700,
+                'temperature': 0.8,
+            }).encode('utf-8')
+
+            url = (base_url or 'https://api.chatanywhere.tech/v1').rstrip('/') + '/chat/completions'
+            req = urllib.request.Request(
+                url, data=payload,
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {api_key}',
+                },
+                method='POST',
+            )
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = _json.loads(resp.read().decode())
+                text = data['choices'][0]['message']['content'].strip()
+                # Strip possible markdown code fences
+                if text.startswith('```'):
+                    text = text.split('```')[1]
+                    if text.startswith('json'):
+                        text = text[4:]
+                ai_items = _json.loads(text.strip())
+                for item in ai_items[:5]:
+                    t = item.get('type', 'article')
+                    suggestions.append({
+                        'type': t,
+                        'title': item.get('title', 'Idée sans titre'),
+                        'reason': item.get('reason', ''),
+                        'difficulty': item.get('difficulty', '') if t == 'tip' else '',
+                        'tag': item.get('tag', ''),
+                        'create_url': {
+                            'article': '/admin/articles/article/add/',
+                            'tip': '/admin/tips/tip/add/',
+                            'project': '/admin/projects/project/add/',
+                        }.get(t, '/admin/articles/article/add/'),
+                        'ai_prompt': f'Génère un {t} complet intitulé "{item.get("title", "")}"',
+                    })
+                ai_used = True
+        except Exception as e:
+            logger.warning(f"AI content suggestions failed (falling back to heuristic): {e}")
+
+    # ── 3. Fallback heuristique si IA non dispo ou en erreur ────────────
+    if not suggestions:
+        if thin_cats:
+            for cat in thin_cats[:2]:
+                suggestions.append({
+                    'type': 'article',
+                    'title': f'Article sur : {cat}',
+                    'reason': f'La catégorie "{cat}" manque de contenu',
+                    'difficulty': '',
+                    'tag': cat.lower(),
+                    'create_url': '/admin/articles/article/add/',
+                    'ai_prompt': f'Génère un article complet sur le sujet : {cat}',
+                })
+        for lvl in list(missing_levels)[:2]:
+            suggestions.append({
+                'type': 'tip',
+                'title': f'Astuce {level_labels.get(lvl, lvl)} à ajouter',
+                'reason': f'Aucune astuce de niveau {level_labels.get(lvl, lvl)} encore',
+                'difficulty': lvl,
+                'tag': '',
+                'create_url': '/admin/tips/tip/add/',
+                'ai_prompt': f'Génère une astuce de niveau {level_labels.get(lvl, lvl)}',
+            })
+        if stale_tags:
+            suggestions.append({
+                'type': 'article',
+                'title': f'Article sur : {stale_tags[0]}',
+                'reason': f'Tag populaire "{stale_tags[0]}" sans contenu récent',
+                'difficulty': '',
+                'tag': stale_tags[0],
+                'create_url': '/admin/articles/article/add/',
+                'ai_prompt': f'Génère un article sur le sujet : {stale_tags[0]}',
+            })
+        if not suggestions:
+            suggestions = [
+                {'type': 'article', 'title': 'Votre prochain article', 'reason': 'Continuez à enrichir votre blog', 'difficulty': '', 'tag': '', 'create_url': '/admin/articles/article/add/', 'ai_prompt': 'Propose des idées d\'articles pour mon site'},
+                {'type': 'tip', 'title': 'Une nouvelle astuce', 'reason': 'Les astuces sont très appréciées', 'difficulty': 'beginner', 'tag': '', 'create_url': '/admin/tips/tip/add/', 'ai_prompt': 'Génère une astuce débutant utile'},
+                {'type': 'project', 'title': 'Documenter un projet', 'reason': 'Montrez vos réalisations techniques', 'difficulty': '', 'tag': '', 'create_url': '/admin/projects/project/add/', 'ai_prompt': 'Aide-moi à documenter un de mes projets'},
+            ]
+
+    return JsonResponse({
+        'suggestions': suggestions[:5],
+        'ai_used': ai_used,
+        'stats': {
+            'articles': articles_count,
+            'tips': tips_count,
+            'projects': projects_count,
+        }
+    })

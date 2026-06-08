@@ -53,6 +53,7 @@ urlpatterns = [
     path('admin-ai/facebook/', __import__('core.diagnostic_views', fromlist=['facebook_diagnostic']).facebook_diagnostic, name='admin-ai-facebook'),
     path('admin-ai/facebook/test-connection/', __import__('core.diagnostic_views', fromlist=['facebook_test_connection']).facebook_test_connection, name='admin-ai-facebook-test-connection'),
     path('admin-ai/facebook/test-post/', __import__('core.diagnostic_views', fromlist=['facebook_test_post']).facebook_test_post, name='admin-ai-facebook-test-post'),
+    path('admin-ai/content-suggestions/', __import__('core.ai_views', fromlist=['ai_content_suggestions']).ai_content_suggestions, name='admin-ai-content-suggestions'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('rss/', include('core.feeds_urls')),
 
