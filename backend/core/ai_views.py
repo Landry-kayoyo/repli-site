@@ -13,6 +13,20 @@ from django.contrib.admin.views.decorators import staff_member_required
 logger = logging.getLogger(__name__)
 
 
+def _staff_json_required(view_func):
+    """Décorateur : retourne JSON 403 si non authentifié staff (au lieu de rediriger vers login HTML)."""
+    from functools import wraps
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return JsonResponse(
+                {'error': 'Session expirée. Veuillez vous reconnecter à l\'admin (/admin/).'},
+                status=403
+            )
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
 def _get_ai_credentials():
     """Return (api_key, base_url, model, ai_enabled) — checks AIConfig first, then SiteSettings."""
     from core.models import AIConfig, SiteSettings
@@ -372,7 +386,7 @@ def _call_ai(api_key, base_url, model, messages, max_tokens=2000):
         return data['choices'][0]['message']['content']
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_chat(request):
@@ -438,7 +452,7 @@ def ai_chat(request):
         return JsonResponse({'error': f'Erreur inattendue: {str(e)}'}, status=200)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_suggest(request):
@@ -517,7 +531,7 @@ def ai_suggest(request):
         return JsonResponse({'error': str(e)}, status=200)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_generate_content(request):
@@ -593,7 +607,7 @@ def ai_generate_content(request):
         return JsonResponse({'error': str(e)}, status=200)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_optimize_content(request):
@@ -663,7 +677,7 @@ def ai_optimize_content(request):
         return JsonResponse({'error': str(e)}, status=200)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_internal_links(request):
@@ -741,7 +755,7 @@ def ai_internal_links(request):
         return JsonResponse({'error': str(e)}, status=200)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_check_duplicate(request):
@@ -781,7 +795,7 @@ def ai_check_duplicate(request):
         return JsonResponse({'error': str(e)}, status=200)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_inline_suggest(request):
@@ -895,7 +909,7 @@ def ai_inline_suggest(request):
         return JsonResponse({'error': str(e)}, status=200)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_analyze(request):
@@ -1016,7 +1030,7 @@ Plan détaillé:
         return JsonResponse({'error': str(e)}, status=200)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def ai_publish(request):
@@ -1115,7 +1129,7 @@ def ai_publish(request):
         return JsonResponse({'error': f'Erreur lors de la publication: {str(e)}'}, status=500)
 
 
-@staff_member_required
+@_staff_json_required
 def get_admin_users(request):
     """Return list of staff users for author selector."""
     from django.contrib.auth.models import User
@@ -1128,7 +1142,7 @@ def get_admin_users(request):
     return JsonResponse({'users': users})
 
 
-@staff_member_required
+@_staff_json_required
 def smart_notifications(request):
     """Rule-based + AI smart notifications for admin bell."""
     from django.contrib.auth.models import User

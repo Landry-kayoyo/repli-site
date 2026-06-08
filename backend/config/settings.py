@@ -161,7 +161,9 @@ TAGGIT_CASE_INSENSITIVE = True
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://landryit.pythonanywhere.com')
 
 # URL publique du site (pour le ping Google Sitemap)
-SITE_URL = os.environ.get('SITE_URL', FRONTEND_URL)
+# Sur Replit, on utilise le domaine de dev auto si SITE_URL n'est pas defini manuellement
+_replit_dev = os.environ.get('REPLIT_DEV_DOMAIN', '')
+SITE_URL = os.environ.get('SITE_URL', f'https://{_replit_dev}' if _replit_dev else FRONTEND_URL)
 
 # Admin customization
 ADMIN_SITE_HEADER = "Landry Net — Administration"

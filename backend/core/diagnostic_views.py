@@ -12,6 +12,21 @@ from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
 
+
+def _staff_json_required(view_func):
+    """Retourne JSON 403 pour les endpoints AJAX si non authentifié staff."""
+    from functools import wraps
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return JsonResponse(
+                {"error": "Session expirée. Veuillez vous reconnecter à l'admin (/admin/)."},
+                status=403
+            )
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -115,7 +130,7 @@ def diagnostic_page(request):
     return render(request, 'admin/email_diagnostic.html', context)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def test_smtp_connection(request):
@@ -218,7 +233,7 @@ def test_smtp_connection(request):
     return JsonResponse({'success': True, 'steps': steps})
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def send_test_email(request):
@@ -454,7 +469,7 @@ def facebook_diagnostic(request):
     })
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def facebook_test_connection(request):
@@ -536,7 +551,7 @@ def facebook_test_connection(request):
     return JsonResponse({'success': all_ok, 'steps': steps})
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def facebook_test_post(request):
@@ -631,12 +646,16 @@ def seo_diagnostic(request):
     return render(request, 'admin/seo_diagnostic.html', context)
 
 
-@staff_member_required
+@_staff_json_required
 @csrf_exempt
 @require_POST
 def seo_ping_now(request):
-    """Déclenche manuellement un ping Google + Bing et retourne le résultat."""
+    """Déclenche manuellement un ping Bing + IndexNow et retourne le résultat.
+    Note: Google a déprécié son endpoint /ping en janvier 2023 (retourne 410 Gone).
+    Utilisez Google Search Console pour soumettre votre sitemap manuellement.
+    """
     import urllib.request as ureq
+    import urllib.error
     from django.conf import settings as django_settings
     from django.utils import timezone
 
@@ -647,17 +666,68 @@ def seo_ping_now(request):
     sitemap_url = f"{site_url}/sitemap.xml"
     results = []
 
-    engines = {
-        'Google': f'https://www.google.com/ping?sitemap={sitemap_url}',
-        'Bing':   f'https://www.bing.com/ping?sitemap={sitemap_url}',
-    }
-    for name, url in engines.items():
+    # Google a déprécié /ping en janvier 2023 (retourne 410 Gone désormais)
+    # On l'inclut mais on indique clairement le statut
+    engines = [
+        {
+            'name': 'Google',
+            'url': f'https://www.google.com/ping?sitemap={sitemap_url}',
+            'deprecated': True,
+            'note': 'Déprécié par Google en 2023 — utilisez Google Search Console',
+        },
+        {
+            'name': 'Bing',
+            'url': f'https://www.bing.com/ping?sitemap={sitemap_url}',
+            'deprecated': False,
+            'note': '',
+        },
+    ]
+
+    for engine in engines:
+        name = engine['name']
+        url = engine['url']
+        deprecated = engine['deprecated']
+        note = engine['note']
         try:
             req = ureq.Request(url, headers={'User-Agent': 'LandryNet-SitemapPing/1.0'})
             with ureq.urlopen(req, timeout=8) as r:
-                results.append({'engine': name, 'status': r.status, 'ok': r.status in (200, 204)})
+                ok = r.status in (200, 204, 301, 302)
+                results.append({
+                    'engine': name,
+                    'status': r.status,
+                    'ok': ok,
+                    'deprecated': deprecated,
+                    'note': note,
+                })
+        except urllib.error.HTTPError as e:
+            # Google retourne 410 Gone (déprécié) — on l'affiche comme warning, pas erreur
+            if deprecated and e.code in (410, 404, 400):
+                results.append({
+                    'engine': name,
+                    'status': e.code,
+                    'ok': False,
+                    'deprecated': True,
+                    'note': note,
+                    'warning': True,
+                })
+            else:
+                results.append({
+                    'engine': name,
+                    'status': e.code,
+                    'ok': False,
+                    'deprecated': deprecated,
+                    'note': note,
+                    'error': f'HTTP {e.code}',
+                })
         except Exception as e:
-            results.append({'engine': name, 'status': None, 'ok': False, 'error': str(e)})
+            results.append({
+                'engine': name,
+                'status': None,
+                'ok': False,
+                'deprecated': deprecated,
+                'note': note,
+                'error': str(e),
+            })
 
     return JsonResponse({
         'success': True,

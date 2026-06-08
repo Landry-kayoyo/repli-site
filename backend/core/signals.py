@@ -19,6 +19,8 @@ _pre_save_status = {}
 # ──────────────────────────────────────────────
 
 def _ping_search_engines(sitemap_url):
+    # Google a déprécié son /ping endpoint en janvier 2023 (retourne 410 Gone)
+    # On tente quand même mais on ignore l'erreur 410
     engines = {
         'Google': f'https://www.google.com/ping?sitemap={sitemap_url}',
         'Bing':   f'https://www.bing.com/ping?sitemap={sitemap_url}',
@@ -31,6 +33,11 @@ def _ping_search_engines(sitemap_url):
             )
             with urllib.request.urlopen(req, timeout=5) as resp:
                 logger.info(f"{name} sitemap ping: {resp.status} for {sitemap_url}")
+        except urllib.error.HTTPError as e:
+            if e.code in (410, 404, 400) and name == 'Google':
+                logger.info(f"Google sitemap ping endpoint deprecated (HTTP {e.code}) — normal depuis 2023")
+            else:
+                logger.warning(f"{name} sitemap ping failed (non-critical): HTTP {e.code}")
         except Exception as e:
             logger.warning(f"{name} sitemap ping failed (non-critical): {e}")
 
