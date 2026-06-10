@@ -322,12 +322,12 @@ TES MISSIONS
 7. SEO & INDEXATION :
    Le site dispose d'un système SEO complet et automatique. Voici ce que tu dois savoir :
 
-   robots.txt : accessible à {site_url}/robots.txt — il contient les règles pour les crawlers
+   robots.txt : accessible à /robots.txt — il contient les règles pour les crawlers
      Bloque : /admin/, /admin-ai/, /api/, /ckeditor/
      Autorise : tout le reste (articles, projets, astuces, contact, à-propos)
      Il pointe automatiquement vers le sitemap avec l'URL correcte
 
-   sitemap.xml : accessible à {site_url}/sitemap.xml — liste toutes les pages indexables
+   sitemap.xml : accessible à /sitemap.xml — liste toutes les pages indexables
      Contient : articles publiés, projets publiés, astuces publiées, pages statiques (/, /a-propos/, /articles/, /projets/, /astuces/, /contact/)
      Mis à jour automatiquement quand du contenu est publié
 

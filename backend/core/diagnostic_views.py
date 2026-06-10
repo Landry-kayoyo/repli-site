@@ -729,7 +729,7 @@ def seo_ping_now(request):
                 'note': '',
                 'error': 'Clé IndexNow non disponible',
             })
-    except ureq.error.HTTPError as e:
+    except urllib.error.HTTPError as e:
         err_map = {422: 'URL invalide', 429: 'Trop de requêtes', 403: 'Clé invalide ou key file inaccessible'}
         results.append({
             'engine': 'IndexNow',
@@ -767,7 +767,7 @@ def seo_ping_now(request):
                 'deprecated': False,
                 'note': 'Bing sitemap ping',
             })
-    except ureq.error.HTTPError as e:
+    except urllib.error.HTTPError as e:
         results.append({
             'engine': 'Bing',
             'status': e.code,
