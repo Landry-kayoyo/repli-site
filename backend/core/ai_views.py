@@ -390,7 +390,7 @@ def _call_ai(api_key, base_url, model, messages, max_tokens=2000):
 @csrf_exempt
 @require_POST
 def ai_chat(request):
-    """General AI chat endpoint."""
+    """General AI chat endpoint — toutes les exceptions retournent JSON."""
     try:
         body = json.loads(request.body)
         user_message = body.get('message', '').strip()
@@ -403,30 +403,30 @@ def ai_chat(request):
     if not user_message:
         return JsonResponse({'error': 'Message vide'}, status=400)
 
-    api_key, base_url, model, ai_enabled = _get_ai_credentials()
-
-    if not ai_enabled:
-        return JsonResponse({'error': "L'assistant IA n'est pas activé. Configurez-le dans Admin → Paramètres du site → Configuration IA."}, status=403)
-    if not api_key:
-        return JsonResponse({'error': "Clé API manquante. Allez dans Admin → Paramètres du site → Configuration IA pour ajouter votre clé API."}, status=403)
-
-    settings = _get_ai_settings()
-    system_prompt = _get_site_context(settings)
-
-    if context_type and context_type != 'general' and context_data:
-        context_msg = f"\n\nFORMULAIRE EN COURS ({context_type.upper()})\n"
-        for k, v in context_data.items():
-            if v:
-                context_msg += f"• {k}: {str(v)[:300]}\n"
-        system_prompt += context_msg
-
-    messages = [{"role": "system", "content": system_prompt}]
-    for msg in history[-20:]:
-        if msg.get('role') in ('user', 'assistant') and msg.get('content'):
-            messages.append({"role": msg['role'], "content": msg['content']})
-    messages.append({"role": "user", "content": user_message})
-
     try:
+        api_key, base_url, model, ai_enabled = _get_ai_credentials()
+
+        if not ai_enabled:
+            return JsonResponse({'error': "L'assistant IA n'est pas activé. Configurez-le dans Admin → Paramètres du site → Configuration IA."}, status=200)
+        if not api_key:
+            return JsonResponse({'error': "Clé API manquante. Allez dans Admin → Paramètres du site → Configuration IA pour ajouter votre clé API."}, status=200)
+
+        settings = _get_ai_settings()
+        system_prompt = _get_site_context(settings)
+
+        if context_type and context_type != 'general' and context_data:
+            context_msg = f"\n\nFORMULAIRE EN COURS ({context_type.upper()})\n"
+            for k, v in context_data.items():
+                if v:
+                    context_msg += f"• {k}: {str(v)[:300]}\n"
+            system_prompt += context_msg
+
+        messages = [{"role": "system", "content": system_prompt}]
+        for msg in history[-20:]:
+            if msg.get('role') in ('user', 'assistant') and msg.get('content'):
+                messages.append({"role": msg['role'], "content": msg['content']})
+        messages.append({"role": "user", "content": user_message})
+
         reply = _call_ai(
             api_key=api_key,
             base_url=base_url or 'https://api.chatanywhere.tech/v1',
@@ -435,21 +435,23 @@ def ai_chat(request):
             max_tokens=2000,
         )
         return JsonResponse({'reply': reply, 'ok': True})
+
     except urllib.error.HTTPError as e:
         error_body = e.read().decode('utf-8', errors='ignore')
         logger.error(f"AI API HTTP error: {e.code} — {error_body}")
         if e.code == 401:
-            return JsonResponse({'error': 'Clé API invalide. Vérifiez votre clé dans Paramètres ou Configurations IA.'}, status=200)
+            msg = 'Clé API invalide. Vérifiez votre clé dans Admin → Paramètres du site → Configuration IA.'
         elif e.code == 429:
-            return JsonResponse({'error': 'Quota API dépassé. Réessayez plus tard ou activez une autre configuration IA.'}, status=200)
+            msg = 'Quota API dépassé. Réessayez plus tard ou changez de configuration IA.'
         else:
-            return JsonResponse({'error': f'Erreur API ({e.code}). Vérifiez l\'URL de base et la clé API.'}, status=200)
+            msg = f'Erreur API ({e.code}). Vérifiez l\'URL de base et la clé API dans les paramètres.'
+        return JsonResponse({'error': msg}, status=200)
     except urllib.error.URLError as e:
         logger.error(f"AI API URL error: {e}")
-        return JsonResponse({'error': "Impossible de contacter l'API. Vérifiez l'URL de base dans les paramètres."}, status=200)
+        return JsonResponse({'error': "Impossible de contacter l'API IA. Vérifiez l'URL de base dans les paramètres et que votre hébergeur autorise les connexions sortantes."}, status=200)
     except Exception as e:
-        logger.error(f"AI unexpected error: {e}")
-        return JsonResponse({'error': f'Erreur inattendue: {str(e)}'}, status=200)
+        logger.error(f"AI unexpected error: {e}", exc_info=True)
+        return JsonResponse({'error': f'Erreur serveur: {str(e)}'}, status=200)
 
 
 @_staff_json_required

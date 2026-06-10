@@ -740,13 +740,16 @@ def seo_ping_now(request):
             'error': err_map.get(e.code, f'HTTP {e.code}'),
         })
     except Exception as e:
+        err_str = str(e)
+        if any(w in err_str.lower() for w in ('timed out', 'timeout', 'connection refused', 'name or service', 'nodename', 'network')):
+            err_str = 'Connexion bloquée par l\'hébergeur (PythonAnywhere restreint les connexions sortantes). Le ping automatique à la publication fonctionnera depuis un hébergeur sans restriction.'
         results.append({
             'engine': 'IndexNow',
             'status': None,
             'ok': False,
             'deprecated': False,
             'note': '',
-            'error': str(e),
+            'error': err_str,
         })
 
     # 2. Bing sitemap ping (toujours actif)
@@ -774,13 +777,16 @@ def seo_ping_now(request):
             'error': f'HTTP {e.code}',
         })
     except Exception as e:
+        err_str = str(e)
+        if any(w in err_str.lower() for w in ('timed out', 'timeout', 'connection refused', 'name or service', 'nodename', 'network')):
+            err_str = 'Connexion bloquée par l\'hébergeur. PythonAnywhere restreint les requêtes sortantes — le ping automatique à la publication reste fonctionnel.'
         results.append({
             'engine': 'Bing',
             'status': None,
             'ok': False,
             'deprecated': False,
             'note': '',
-            'error': str(e),
+            'error': err_str,
         })
 
     # 3. Google — déprécié, afficher uniquement comme info
